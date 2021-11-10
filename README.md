@@ -7,7 +7,7 @@ PySynthMRI can be installed using pip:
 
 1. Clone the repo
   ```
-   git clone https://gitlab.com/-/ide/project/Hoenikker/synthetic-modifier-mrf
+   git clone https://github.com/FiRMLAB-Pisa/pySynthMRI.git
    ```
 2. Install required python packages
   ```
