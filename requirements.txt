@@ -1,5 +1,6 @@
+nibabel
 numpy
 opencv-python
-nibabel
+pydicom
 PyQt5
 pyqtgraph
