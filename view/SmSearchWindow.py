@@ -237,7 +237,10 @@ class SmSearchWindow(SmPageWindow):
             btn.setStyleSheet("")
 
     def on_click_map_path(self, map_type, label, mouse_event):
-        path = self.load_single_map_path_dialog(map_type)
+        if self.model.is_input_niftii():
+            path = self.load_single_map_niftii_path_dialog(map_type)
+        else:
+            path = self.load_single_map_dicom_path_dialog(map_type)
         if path:
             pi = self.model.get_mri_image_by_name(map_type)
             pi.is_found = True
@@ -248,8 +251,10 @@ class SmSearchWindow(SmPageWindow):
             if pi.type_image == "S":
                 (btn, lbl) = self.get_button_by_name(pi.name)
                 btn.setEnabled(True)
-            if self.model.are_quantitative_maps_set() and self.model.map_type is not None:
-                self.modify_synthetic_image_button.setEnabled(True)
+            # if self.model.are_quantitative_maps_set() and self.model.map_type is not None:
+            #     self.modify_synthetic_image_button.setEnabled(True)
+            if self.model.are_quantitative_maps_set():
+                self.generate_synthetic_image_button.setEnabled(True)
 
     @waiting_effects
     def on_clicked_dcm_button(self, btn, label, flag):
@@ -376,12 +381,19 @@ class SmSearchWindow(SmPageWindow):
     #         self.model.set_root_dcm_folder(folderpath)
     #         self.model.load_dicom_folder_infos_nosub()
 
-    def load_single_map_path_dialog(self, map_type):
+    def load_single_map_dicom_path_dialog(self, map_type):
         options = QFileDialog.Options()
         options |= QFileDialog.DontUseNativeDialog
 
         folderpath = QFileDialog.getExistingDirectory(self, 'Select {}:'.format(map_type))
         return os.path.normpath(folderpath)
+
+    def load_single_map_niftii_path_dialog(self, map_type):
+        options = QFileDialog.Options()
+        options |= QFileDialog.DontUseNativeDialog
+
+        filepath = QFileDialog.getOpenFileName(self, 'Select {}:'.format(map_type), filter="Niftii (*.nii)")
+        return filepath[0]
 
     def on_click_file_type_handler(self, type):
         self.model.set_input_images_type(type)

@@ -83,6 +83,12 @@ class SmModel:
     def set_input_images_type(self, input_images_type):
         self.input_images_type = input_images_type
 
+    def get_input_images_type(self):
+        return self.input_images_type
+
+    def is_input_niftii(self):
+        return self.input_images_type == "Niftii"
+
     def set_mri_images_from_config(self):
         for qm_name in self.quantitative_maps:
             self.mri_images.append(MRIImage(type_image="Q", name=qm_name))
