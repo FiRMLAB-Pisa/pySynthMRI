@@ -17,5 +17,4 @@ PySynthMRI can be installed using pip:
   ```
    python pySynthMRI.py
    ```
-## GUI demo
-![Alt text](../pySynthMRI/docs/gui_example.png?raw=true "GUI")
+
