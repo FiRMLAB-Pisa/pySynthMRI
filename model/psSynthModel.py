@@ -48,7 +48,7 @@ class GenericModel:
         return:
             Synthesized image
         """
-        # params: (value, equation)
+
         img = None
         mask = None
         used_map = None

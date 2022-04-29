@@ -5,20 +5,27 @@ Created on Sat Apr 24 10:01:10 2021
 @author: Luca
 """
 import sys
+import logging
 
 from PyQt5.QtGui import QPalette, QColor
 from PyQt5.QtWidgets import QApplication
 
-from model.SmModel import SmModel
-from view.SmWindows import SmWindows
+from controller.psCanvasController import PsCanvasController
+from controller.psController import PsController
+from model.psModel import PsModel
+from view.psMainWindow import PsMainWindow
+
+DEBUG = False
+
+logging.basicConfig(level=logging.DEBUG)
 
 if __name__ == '__main__':
+
     # Create an instance of QApplication
     app = QApplication(sys.argv)
     # dark style
     # Force the style to be the same on all OSs:
     app.setStyle("Fusion")
-
     palette = QPalette()
     # palette.setColor(QPalette.Window, QColor(53, 53, 53))
     palette.setColor(QPalette.Window, QColor("black"))
@@ -35,22 +42,28 @@ if __name__ == '__main__':
     # palette.setColor(QPalette.ButtonText, QColor("white"))
     palette.setColor(QPalette.ButtonText, QColor("black"))
     palette.setColor(QPalette.BrightText, QColor("red"))
-    palette.setColor(QPalette.Link, QColor(42, 130, 218))
-    palette.setColor(QPalette.Highlight, QColor(42, 130, 218))
+    palette.setColor(QPalette.Link, QColor("red")) # QColor(42, 130, 218)
+    palette.setColor(QPalette.Highlight, QColor("red")) # QColor(42, 130, 218)
     palette.setColor(QPalette.HighlightedText, QColor("black"))
     app.setPalette(palette)
 
-    model = SmModel(app)
-    # controller = SmController()
-    view = SmWindows(model)
+    model = PsModel(app)
 
-    model.view = view
-    # controller.view = view
-    # controller.model = model
+    view = PsMainWindow(model)
+    general_controller = PsController(model, view)
+    canvas_controller = PsCanvasController(model, view)  ## TODO rimettere
+    view.showMaximized()
+    if DEBUG:
+        model.update_qmap_path("T1", 'C:/Users/Luca/OneDrive - University of Pisa/dicom_mrf_example/newTree/niftii/T1_subMRF3D007_ex12724_qmap_T1.nii', "niftii")
+        model.update_qmap_path("T2", 'C:/Users/Luca/OneDrive - University of Pisa/dicom_mrf_example/newTree/niftii/T2_subMRF3D007_ex12724_qmap_T2.nii', "niftii")
+        model.update_qmap_path("PD", 'C:/Users/Luca/OneDrive - University of Pisa/dicom_mrf_example/newTree/niftii/PD_subMRF3D007_ex12724_qmap_pd.nii', "niftii")
 
-    view.show()
+        # model.update_qmap_path("T1", "C:/Users/Luca/OneDrive - University of Pisa/dicom_mrf_example/newTree/T1", "dicom")
+        # model.update_qmap_path("T2", "C:/Users/Luca/OneDrive - University of Pisa/dicom_mrf_example/newTree/T2", "dicom")
+        # model.update_qmap_path("PD", "C:/Users/Luca/OneDrive - University of Pisa/dicom_mrf_example/newTree/PD", "dicom")
 
-    # Execute calculator's main loop
+        view.tool_bar.synth_images_buttons["GRE"].clicked.emit()
+        view.tool_bar.synth_images_buttons["GRE"].setChecked(True)
     sys.exit(app.exec_())
 
     app.exec_()

@@ -1,0 +1,87 @@
+{
+    "synthetic_images": {
+        "FSE": {
+            "title": "T2w - Fast Spin Echo",
+            "equation": "PD*exp(-TE/T2)",
+            "parameters": {
+                "TE": {
+                    "label": "TE [ms]",
+                    "value": 82,
+                    "min": 1,
+                    "max": 100,
+                    "step": 1}}},
+        "GRE": {
+            "title": "T1w - Gradient Echo ",
+            "equation": "1 - exp(-TR/T1)",
+            "parameters": {
+                "TR": {
+                    "label": "TR [ms]",
+                    "value": 220,
+                    "min": 100,
+                    "max": 500,
+                    "step": 5,
+                    "weight": 2}}},
+        "FLAIR": {
+            "title": "T2w - Fluid Attenuated Inversion Recover",
+            "equation": "abs(PD)*exp(-TSAT/T1)*exp(-TE/T2)*(1-2*exp(-TI/T1))",
+            "parameters": {
+                "TE": {
+                    "label": "TE [ms]",
+                    "value": 82,
+                    "min": 1,
+                    "max": 100,
+                    "step": 1},
+                "TI": {
+                    "label": "TI [ms]",
+                    "value": 2500,
+                    "min": 1000,
+                    "max": 3500,
+                    "step": 10,
+                    "weight": 3},
+                "TSAT": {
+                    "label": "T1SAT [ms]",
+                    "value": 500,
+                    "min": 400,
+                    "max": 10000,
+                    "step": 10,
+                    "weight": 4}}},
+        "MP2RAGE": {
+            "title": "T1w - Magnetization-Prepared 2 RApid Gradient Echoes",
+            "equation": "1-2*exp(-TI/T1)",
+            "parameters": {
+                "TI": {
+                    "label": "TI [ms]",
+                    "value": 1300,
+                    "min": 1000,
+                    "max": 3500,
+                    "step": 10}}},
+        "PSIF": {
+            "title": "Time-reversed FISP",
+            "equation": "tan((Pi/180)*alpha/2) * exp(-TE/T2) * (1 - (1-exp(-TR/T1)*cos((Pi/180)*alpha)) * (sqrt((1-exp(-2*TR/T2)) / ((1-exp(-TR/T1))**2 - exp(-2*TR/T2)*(exp(-TR/T1)-cos((Pi/180)*alpha))**2))))",
+            "parameters": {
+                "TR": {
+                    "label": "TR [ms]",
+                    "value": 20,
+                    "min": 1,
+                    "max": 100,
+                    "step": 1},
+                "TE": {
+                    "label": "TE [ms]",
+                    "value": 82,
+                    "min": 1,
+                    "max": 100,
+                    "step": 1},
+                "alpha": {
+                    "label": "alpha [deg]",
+                    "value": 90,
+                    "min": 0,
+                    "max": 180,
+                    "step": 1}}}
+        },
+    "quantitative_maps": ["T1", "T2", "PD"],
+    "scanner_parameters": ["TE", "TR", "TI", "TSAT"],
+    "image_interpolation": {
+        "interpolation_type": "linear",
+        "scale": 4
+    }
+}

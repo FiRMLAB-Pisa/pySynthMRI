@@ -1,0 +1,24 @@
+<!DOCTYPE RCC><RCC version="1.0">
+<qresource prefix="icons">
+    <file alias="search_40.png">icons/search_40.png</file>
+    <file alias="default_24.png">icons/default_24.png</file>
+    <file alias="zoom2_40.png">icons/zoom2_40.png</file>
+    <file alias="zoom_icon.png">icons/zoom_icon.png</file>
+    <file alias="zoom2_24.png">icons/zoom2_24.png</file>
+    <file alias="zoom_cursor.png">icons/zoom2_24.png</file>
+    <file alias="zoom_refresh_40.png">icons/zoom_refresh_40.png</file>
+    <file alias="gradient_linear_40.png">icons/gradient_linear_40.png</file>
+    <file alias="gradient_linear_24.png">icons/gradient_linear_24.png</file>
+    <file alias="gradient_linear_refresh.png">icons/gradient_linear_refresh.png</file>
+    <file alias="three_layers.png">icons/three_layers.png</file>
+    <file alias="translate_icon.png">icons/translate_icon.png</file>
+    <file alias="gear_plus_24.png">icons/gear_plus_24.png</file>
+    <file alias="save_niftii.png">icons/save_niftii.png</file>
+    <file alias="save_dicom.png">icons/save_dicom.png</file>
+    <file alias="move_icon.png">icons/move_icon.png</file>
+</qresource>
+<qresource prefix="cursors">
+        <file alias="zoom_cursor_w.png">cursors/zoom_cursor_w.png</file>
+</qresource>
+
+</RCC>
