@@ -11,11 +11,11 @@ PySynthMRI can be installed using pip:
    ```
 2. Install required python packages
   ```
-   pip install -r requirements.txt
+   pip install -e requirements.txt
    ```
 3. Execute PySynthMRI
   ```
    python pySynthMRI.py
    ```
 ## GUI demo
-![Alt text](docs/gui_example.png?raw=true "GUI")
+![Alt text](../pySynthMRI/docs/gui_example.png?raw=true "GUI")

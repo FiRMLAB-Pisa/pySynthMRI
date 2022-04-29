@@ -3,4 +3,3 @@ numpy
 opencv-python
 pydicom
 PyQt5
-pyqtgraph
