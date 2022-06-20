@@ -13,9 +13,9 @@ class ValidateConfig:
         self.qmap_types = config["quantitative_maps"]
         self.image_interpolation = config["image_interpolation"]
 
-        for syth_type in self.synth_types:
-            self.validate_equation(self.synth_types[syth_type])
-            self.validate_scanner_parameters(self.synth_types[syth_type])
+        for synth_type in self.synth_types:
+            self.validate_equation(self.synth_types[synth_type], synth_type)
+            self.validate_scanner_parameters(self.synth_types[synth_type])
         # interpolation
         self.validate_interpolation(self.image_interpolation)
 
@@ -43,9 +43,14 @@ class ValidateConfig:
         for k in scanner_parameters:
             scanner_parameters[k]["default"] = scanner_parameters[k]["value"]
 
-    def validate_equation(self, synth_type):
+    def validate_equation(self, synth_type, synth_type_label):
         symbols = ["exp", "abs", "sqrt", "cos", "sin", "tan"]
         synth_type["equation_string"] = synth_type["equation"]
+
+        # check parenthesis
+        if synth_type["equation"].count("(") != synth_type["equation"].count(")"):
+            raise TypeError("Check parenthesis in {} equation.".format(synth_type_label))
+
         for s in symbols:
             symbol = s + "("
             synth_type["equation"] = synth_type["equation"].replace(symbol, "np." + symbol)

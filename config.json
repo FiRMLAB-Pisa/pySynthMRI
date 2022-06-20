@@ -76,8 +76,69 @@
                     "value": 90,
                     "min": 0,
                     "max": 180,
-                    "step": 1}}}
-        },
+                    "step": 1}}},
+        "DIR": {
+            "title": "3D Double Inversion Revovery",
+            "equation": "PD * ( 1 - 2*exp(-TI_2/T1) + 2*exp(-(TI_1+TI_2)/T1) -  exp(-TR/T1) * (2/exp(-(TE/2)/T1)-1)  )",
+            "parameters": {
+                "TR": {
+                    "label": "TR [ms]",
+                    "value": 10,
+                    "min": 10,
+                    "max": 10000,
+                    "step": 1
+                },
+                "TE": {
+                    "label": "TE [ms]",
+                    "value": 82,
+                    "min": 1,
+                    "max": 100,
+                    "step": 1
+                },
+                "TI_1": {
+                    "label": "TI_1 [ms]",
+                    "value": 2500,
+                    "min": 1000,
+                    "max": 3500,
+                    "step": 10,
+                    "weight": 3
+                },
+                "TI_2": {
+                    "label": "TI_2 [ms]",
+                    "value": 300,
+                    "min": 1,
+                    "max": 600,
+                    "step": 10,
+                    "weight": 3}}},
+        "TBE": {
+            "title": "Tissue Border Enhancement by inversion recovery",
+            "equation": "PD * (1-2*exp(-TI/T1)) * (1-exp(-TR/T1)) * exp(-TE/T2)",
+            "parameters": {
+                "TR": {
+                    "label": "TR [ms]",
+                    "value": 20,
+                    "min": 1,
+                    "max": 100,
+                    "step": 1
+                },
+                "TE": {
+                    "label": "TE [ms]",
+                    "value": 82,
+                    "min": 1,
+                    "max": 100,
+                    "step": 1
+                },
+                "TI": {
+                    "label": "TI [ms]",
+                    "value": 2500,
+                    "min": 1000,
+                    "max": 3500,
+                    "step": 10,
+                    "weight": 3
+                }
+            }
+        }
+    },
     "quantitative_maps": ["T1", "T2", "PD"],
     "scanner_parameters": ["TE", "TR", "TI", "TSAT"],
     "image_interpolation": {
