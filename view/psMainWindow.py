@@ -20,6 +20,7 @@ log = logging.getLogger(__name__)
 class MainWindowCommunicate(QObject):
     signal_resize_window = pyqtSignal()
     signal_update_qmap_path = pyqtSignal(str, str, str)
+    signal_update_batch_qmap_path = pyqtSignal(str, str)
     signal_saving_smap = pyqtSignal(str, str)
     # signal_custom_smap_added_to_navbar = pyqtSignal(str)
 
@@ -168,6 +169,24 @@ class PsMainWindow(QMainWindow):
         self.tool_bar.add_new_synthetic_map_button(map_type)
         self.tool_bar.activate_unique_smap_button(map_type)
         # self.c.signal_custom_smap_added_to_navbar.emit(map_type)
+
+    def open_dicom_batch_load_dialog(self):
+        options = QFileDialog.Options()
+        options |= QFileDialog.DontUseNativeDialog
+
+        folderpath = QFileDialog.getExistingDirectory(self, 'Select Folder that contains DICOM map')
+        if folderpath:
+            log.debug("open_dicom_batch_load_dialog: {}".format(folderpath))
+            self.c.signal_update_batch_qmap_path.emit(folderpath, psFileType.DICOM)
+
+    def open_niftii_batch_load_dialog(self):
+        options = QFileDialog.Options()
+        options |= QFileDialog.DontUseNativeDialog
+
+        folderpath = QFileDialog.getExistingDirectory(self, 'Select Folder that contains NIFTII map')
+        if folderpath:
+            log.debug("open_niftii_batch_load_dialog: {}".format(folderpath))
+            self.c.signal_update_batch_qmap_path.emit(folderpath, psFileType.NIFTII)
 
     def open_dicom_load_dialog(self, qmap):
         options = QFileDialog.Options()

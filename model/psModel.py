@@ -1,5 +1,6 @@
 import logging
 import math
+import os
 from enum import Enum
 
 from PyQt5.QtCore import QObject, pyqtSignal, QPoint
@@ -89,6 +90,15 @@ class PsModel:
         # current synthetic map type
         # return self.properties["curr_smap_type"]
         return self._smap.get_map_type()
+
+    def update_qmap_batch_path(self, root_path, file_type):
+        # foreach qmap defined in config.json
+        for qmap_type in self._qmaps:
+            file_regex_basename = self.config.qmap_types[qmap_type]["file_name"]
+            for file_complete_basename in os.listdir(root_path):
+                if file_regex_basename.lower() in file_complete_basename.lower():
+                    path = os.path.join(root_path, file_complete_basename)
+                    self.update_qmap_path(qmap_type, path, file_type)
 
     def update_qmap_path(self, qmap_type, path, file_type):
         # crate new map only if exist [TODO singleton]

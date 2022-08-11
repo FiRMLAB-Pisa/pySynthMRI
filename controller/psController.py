@@ -28,7 +28,12 @@ class PsController:
     def connect_handlers(self):
         # MENU BAR
         # File
-        # load dicom folder
+        # load dicom image
+        self.view.menu_bar.batch_load_dicom_action.triggered.connect(self.on_clicked_batch_load_dicom_button)
+        self.view.c.signal_update_batch_qmap_path.connect(self.on_selected_path_batch_dialog_upload)
+        # load niftii image
+        self.view.menu_bar.batch_load_niftii_action.triggered.connect(self.on_clicked_batch_load_niftii_button)
+
         self.view.c.signal_update_qmap_path.connect(self.on_selected_path_dialog_upload)
         open_dicom_dir_actions = self.view.menu_bar.open_dicom_dir_actions
         for k_action in open_dicom_dir_actions:
@@ -50,7 +55,7 @@ class PsController:
         # self.view.menu_bar.back_action.triggered.connect(self.on_clicked_back_button)
         self.view.menu_bar.exit_action.triggered.connect(self.on_clicked_exit_button)
 
-        self.view.menu_bar.settings_custom_param_action.triggered.connect(self.on_clicked_custom_param_button)
+        # self.view.menu_bar.settings_custom_param_action.triggered.connect(self.on_clicked_custom_param_button)
 
         # Synthetic map change
         for smap_key in self.view.menu_bar.synth_images_action:
@@ -125,6 +130,13 @@ class PsController:
                 log.debug("Drop NIFTII file: {}".format(path))
                 self.model.update_qmap_path(qmap_name, path, psFileType.NIFTII)
 
+    def on_clicked_batch_load_dicom_button(self):
+        log.debug("on_clicked_batch_load_dicom_button.")
+        self.view.open_dicom_batch_load_dialog()
+
+    def on_clicked_batch_load_niftii_button(self):
+        log.debug("on_clicked_batch_load_niftii_button.")
+        self.view.open_niftii_batch_load_dialog()
 
     def on_clicked_open_dicom_button(self, qmap):
         log.debug("on_clicked_open_dicom_button: " + qmap)
@@ -133,6 +145,11 @@ class PsController:
     def on_clicked_open_niftii_button(self, qmap):
         log.debug("on_clicked_open_niftii_button: " + qmap)
         self.view.open_niftii_load_dialog(qmap)
+
+    def on_selected_path_batch_dialog_upload(self, path, file_type):
+        log.debug("on_selected_path_batch_dialog_upload: " + path + " - Type: " + file_type)
+        # look into directory and search predefined file names of the quantitatives
+        self.model.update_qmap_batch_path(path, file_type)
 
     def on_selected_path_dialog_upload(self, qmap, path, file_type):
         log.debug("on_selected_path_dialog_upload: " + qmap + " - " + path + " - Type: " + file_type)
