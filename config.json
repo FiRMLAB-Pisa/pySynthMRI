@@ -139,8 +139,17 @@
             }
         }
     },
-    "quantitative_maps": ["T1", "T2", "PD"],
-    "scanner_parameters": ["TE", "TR", "TI", "TSAT"],
+    "quantitative_maps": {
+        "T1": {
+            "file_name": "qmap_t1"
+        },
+        "T2": {
+            "file_name": "qmap_t2"
+        },
+        "PD": {
+            "file_name": "qmap_pd"
+        }
+    },
     "image_interpolation": {
         "interpolation_type": "linear",
         "scale": 4

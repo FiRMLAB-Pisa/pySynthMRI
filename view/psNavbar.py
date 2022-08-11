@@ -10,9 +10,6 @@ from model.psFileType import psFileType
 log = logging.getLogger("psNavbar")
 
 
-
-
-
 class PsNavbar(QMenuBar):
     """
     Navbar used in Visual Page.
@@ -56,10 +53,17 @@ class PsNavbar(QMenuBar):
         self.addMenu(fileMenu)
 
         # FILE -> OPEN DIR
+        file_batch_load_menu = QMenu("&Load All QMAPs...", self)
+        self.batch_load_dicom_action = QAction("&DICOM QMAP...", self)
+        file_batch_load_menu.addAction(self.batch_load_dicom_action)
+        self.batch_load_niftii_action = QAction("&NIFTII QMAP...", self)
+        file_batch_load_menu.addAction(self.batch_load_niftii_action)
+
+        # FILE -> OPEN FILE
         file_load_dicom_menu = QMenu("&Load Dicom QMAP...", self)
         self.open_dicom_dir_actions = dict()
         for qmap in model.get_qmap_types():
-            self.open_dicom_dir_actions[qmap] = QAction("&"+qmap + " Quantitative Map", self)
+            self.open_dicom_dir_actions[qmap] = QAction("&" + qmap + " Quantitative Map", self)
             file_load_dicom_menu.addAction(self.open_dicom_dir_actions[qmap])
 
         file_load_niftii_menu = QMenu("&Load Niftii QMAP...", self)
@@ -69,9 +73,6 @@ class PsNavbar(QMenuBar):
             file_load_niftii_menu.addAction(self.open_niftii_dir_actions[qmap])
 
         # FILE -> SAVE IMAGES
-        # self.save_synth_img_action = QAction("&Save synthetic image", self)
-        # self.save_synth_img_action.setEnabled(True)
-        # self.save_synth_img_action.triggered.connect(viz_window.on_clicked_save_dicom_button)
         file_save_menu = QMenu("&Save synthetic image...", self)
         file_save_menu_action_group = QActionGroup(file_save_menu)
         file_save_menu_action_group.setExclusive(True)
@@ -83,10 +84,9 @@ class PsNavbar(QMenuBar):
         file_save_menu_action_group.addAction(self.file_save_niftii_action)
 
         # FILE -> SAVE BACK
-        # self.back_action = QAction("&Back", self)
-
         self.exit_action = QAction("&Exit", self)
 
+        fileMenu.addMenu(file_batch_load_menu)
         fileMenu.addMenu(file_load_dicom_menu)
         fileMenu.addMenu(file_load_niftii_menu)
         fileMenu.addSeparator()
@@ -94,9 +94,6 @@ class PsNavbar(QMenuBar):
         fileMenu.addMenu(file_save_menu)
         fileMenu.addSeparator()
         fileMenu.addAction(self.exit_action)
-
-        # FILE -> OPEN
-        # self.open_dicom_dir_action.triggered.connect(self.load_root_directory_dialog)
 
         # IMAGE
         image_menu = QMenu("&Image", self)
@@ -110,8 +107,6 @@ class PsNavbar(QMenuBar):
         self.synth_images_action = dict()
         for synth_map in model.get_smap_list():
             action = QAction("&" + synth_map, self, checkable=True)
-            # if synth_map == self.model.get_current_map_type():
-            #     action.setChecked(True)
             self.select_synthimages_menu.addAction(action)
             self.synth_images_action_group.addAction(action)
             self.synth_images_action[synth_map] = action
@@ -171,11 +166,8 @@ class PsNavbar(QMenuBar):
         image_interpolation_menu.addAction(self.interpolation_nn_action)
         self.interpolation_action_group.addAction(self.interpolation_nn_action)
 
-
         # SETTINGS
         settings_menu = self.addMenu("&Settings")
-
-
 
         # SETTINGS -> SHOW DICOM HEADER
         # TODO
@@ -185,88 +177,13 @@ class PsNavbar(QMenuBar):
         settings_menu.addAction(self.settings_custom_smap_action)
 
         # SETTINGS -> ADD CUSTOM PARAMETER
-        self.settings_custom_param_action = QAction("&Add custom parameter", self)
-        settings_menu.addAction(self.settings_custom_param_action)
-
-
-
-        # # TOOLS
-        # tools_menu = self.addMenu("&Tools")
-        # mouse_behaviour_menu = QMenu("&Mouse behaviour", self)
-        # tools_menu.addMenu(mouse_behaviour_menu)
-        # self.mouse_behaviour_action_group = QActionGroup(mouse_behaviour_menu)
-        # self.mouse_behaviour_action_group.setExclusive(True)
-        # window_scale_action = QAction("&Window scale", self, checkable=True)
-        # self.mouse_behaviour_action_group.addAction(window_scale_action)
-        # mouse_behaviour_menu.addAction(window_scale_action)
-        # zoom_action = QAction("&Zoom", self, checkable=True)
-        # self.mouse_behaviour_action_group.addAction(zoom_action)
-        # mouse_behaviour_menu.addAction(zoom_action)
+        # self.settings_custom_param_action = QAction("&Add custom parameter", self)
+        # settings_menu.addAction(self.settings_custom_param_action)
 
         # HELP MENU
         helpMenu = self.addMenu("&Help")
         self.about_action = QAction("&About", self)
         helpMenu.addAction(self.about_action)
-
-
-    # def add_custom_smap(self, map_type):
-    #     action = QAction("&" + map_type, self, checkable=True)
-    #     for other_action in self.synth_images_action:
-    #         self.synth_images_action[other_action].setChecked(False)
-    #     action.setChecked(True)
-    #     # action.triggered.connect(functools.partial(viz_window.synth_image_menu_handler, synth_map))
-    #     self.select_synthimages_menu.addAction(action)
-    #     self.synth_images_action_group.addAction(action)
-    #     self.synth_images_action[map_type] = action
-    #
-    #     # self.c.signal_custom_smap_added_to_navbar.emit(map_type)
-    #
-    # def open_dicom_load_dialog(self, qmap):
-    #     options = QFileDialog.Options()
-    #     options |= QFileDialog.DontUseNativeDialog
-    #
-    #     folderpath = QFileDialog.getExistingDirectory(self, 'Select Folder that contains {} map'.format(qmap))
-    #     if folderpath:
-    #         log.debug("open_dicom_load_dialog: {}".format(folderpath))
-    #         self.c.signal_update_qmap_path.emit(qmap, folderpath, psFileType.DICOM)
-    #         # self.directoryLabel.setText(folderpath)
-    #         #
-    #         # self.model.set_root_dcm_folder(folderpath)
-    #         # self.model.load_dicom_folder_infos_nosub()
-    #
-    # def open_niftii_load_dialog(self, qmap):
-    #     options = QFileDialog.Options()
-    #     options |= QFileDialog.DontUseNativeDialog
-    #
-    #     folderpath, filter = QFileDialog.getOpenFileName(self, 'Select Image that contains {} map'.format(qmap), filter="Niftii files (*.nii)")
-    #     if folderpath:
-    #         log.debug("open_niftii_load_dialog: {}".format(folderpath))
-    #         self.c.signal_update_qmap_path.emit(qmap, folderpath, psFileType.NIFTII)
-    #
-    # def open_dicom_save_dialog(self):
-    #     options = QFileDialog.Options()
-    #     options |= QFileDialog.DontUseNativeDialog
-    #     scanner_params = self.model.get_smap().get_scanner_parameters()
-    #     for sp in scanner_params:
-    #         default_file_name = self.model.get_smap().get_map_type() + "_" + sp + "_" + str(scanner_params[sp]["value"])
-    #
-    #     path = QFileDialog.getSaveFileName(self, 'Save File', default_file_name)
-    #
-    #     if path != ('', ''):
-    #         dir_path = os.path.dirname(path[0])
-    #         filename = os.path.basename(path[0])
-    #
-    #         log.debug("Saving dicoms to: " + path[0])
-    #         self.c.signal_saving_smap.emit(path[0], psFileType.DICOM)
-    #
-    # def open_niftii_save_dialog(self):
-    #     options = QFileDialog.Options()
-    #     options |= QFileDialog.DontUseNativeDialog
-    #     default_file_name = self.model.get_smap().get_map_type() + "_mod.nii"
-    #     path, _ = QFileDialog.getSaveFileName(self, 'Save File', default_file_name, filter="Niftii files (*.nii)")
-    #
-    #     if path != '':
-    #         self.c.signal_saving_smap.emit(path, psFileType.NIFTII)
 
     def activate_unique_smap_action(self, smap):
         self.synth_images_action[smap].setChecked(True)
