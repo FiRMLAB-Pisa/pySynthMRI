@@ -7,7 +7,7 @@ import nibabel as nib
 import numpy as np
 import pydicom
 
-from model.psExceptions import NotLoadedMapError
+from model.psExceptions import NotLoadedMapError, NotSelectedMapError
 from model.psFileType import psFileType
 
 log = logging.getLogger(__name__)
@@ -133,6 +133,8 @@ class MRIImage:
         return self._window_center
 
     def reset_widow_scale(self):
+        if self.np_matrix is None:
+            raise NotSelectedMapError("Synthetic image not selected!")
         maxval = np.abs(self.np_matrix).max()
         self._window_width = np.floor(maxval)
         self._window_center = np.floor(maxval / 2)
@@ -360,6 +362,8 @@ class Smap(MRIImage):
         # check if all needed quantitative maps are loaded
         if self.get_missing_qmaps():
             raise NotLoadedMapError("{} map not laoded!".format(', '.join(self.get_missing_qmaps())))
+        if not self._equation:
+            raise NotSelectedMapError("Synthetic image not selected!")
 
         img = eval(self._equation)
 

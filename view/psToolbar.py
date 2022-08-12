@@ -1,7 +1,7 @@
 from PyQt5 import QtCore
 from PyQt5.QtCore import Qt, QSize
-from PyQt5.QtGui import QPixmap, QIcon, QCursor
-from PyQt5.QtWidgets import QToolBar, QLabel, QPushButton, QButtonGroup, QComboBox
+from PyQt5.QtGui import QPixmap, QIcon, QCursor, QFont
+from PyQt5.QtWidgets import QToolBar, QLabel, QPushButton, QButtonGroup, QComboBox, QWidget, QSizePolicy
 import resources.resources
 
 
@@ -61,6 +61,7 @@ class PsToolbar(QToolBar):
         icon_window_grayscale.addPixmap(QPixmap(":/icons/gradient_linear_40.png"), QIcon.Normal, QIcon.On)
         self.button_window_grayscale.setIcon(icon_window_grayscale)
         self.button_window_grayscale.setToolTip("Use mouse to change:\n    window width  (\u2194)\n    window center (\u2195)")
+
         # WINDOW SCALE DEFAULT
         self.button_window_grayscale_default = QPushButton()
         self.button_window_grayscale_default.setIconSize(self.BUTTON_SIZE)
@@ -114,6 +115,14 @@ class PsToolbar(QToolBar):
         self.label_parameters = QLabel(" Parameters: ")
         self.label_parameters.setStyleSheet("QLabel {color : #999; }")
 
+        # SAVE PARAMS
+        self.button_save_param = QPushButton()
+        self.button_save_param.setIconSize(self.BUTTON_SIZE)
+        icon_save_params = QIcon()
+        icon_save_params.addPixmap(QPixmap(":/icons/save_file.png"), QIcon.Normal, QIcon.On)
+        self.button_save_param.setIcon(icon_save_params)
+        self.button_save_param.setToolTip("Save scanner parameters \ndefault values")
+
         # DEFAULT PARAMS
         self.button_default_param = QPushButton()
         self.button_default_param.setIconSize(self.BUTTON_SIZE)
@@ -131,26 +140,54 @@ class PsToolbar(QToolBar):
         # self.combo_orientation.addItem(QIcon(":icons/translate_icon.png"), "Sagittal")
         # self.combo_orientation.addItem(QIcon(":icons/gradient_linear_refresh.png"), "Coronal")
 
+        # PRESETS
+        # self.presets_buttons = dict()
+        # presets = self.model.get_preset_list()
+        # self.presets_group_buttons = QButtonGroup(self, exclusive=True)
+        #
+        # for preset in presets:
+        #     preset_button = QPushButton(preset)
+        #     preset_button.setFixedHeight(self.BUTTON_SIZE.height())
+        #     preset_button.setIconSize(self.BUTTON_SIZE)
+        #     preset_button.setStyleSheet("QPushButton:pressed { background-color: red }"
+        #                               "QPushButton:checked { background-color: red }")
+        #     preset_button.setCheckable(True)
+        #     preset_button.setToolTip(f"Click to use preset: {preset}")
+        #
+        #     self.presets_buttons[preset] = preset_button
+        #     self.presets_group_buttons.addButton(preset_button)
+
+        # PRESET LABEL
+        self.preset_label = QLabel("1.5T")
+        self.preset_label.setStyleSheet("color: rgb(170, 172, 191); "
+                                        "font-weight: bold;"
+                                        "font-size: 16pt")
+        # self.preset_label.setFixedHeight(self.BUTTON_SIZE.height())
+
         # SYNTH IMAGES
         self.synth_images_buttons = dict()
+        self.synth_images_actions = dict()
         smaps = self.model.get_smap_list()
-        # self.smap_group_buttons = QButtonGroup(self)
         self.smap_group_buttons = QButtonGroup(self, exclusive=True)
 
-        for synth_map in smaps:
-            smap_button = QPushButton(synth_map)
+        for smap_key in smaps:
+            smap = smaps[smap_key]
+            smap_button = QPushButton(smap_key)
             smap_button.setFixedHeight(self.BUTTON_SIZE.height())
             smap_button.setIconSize(self.BUTTON_SIZE)
             smap_button.setStyleSheet("QPushButton:pressed { background-color: red }"
                               "QPushButton:checked { background-color: red }")
             smap_button.setCheckable(True)
-            smap_button.setToolTip("{} ({})\nModel: {}".format(synth_map,
-                                                               smaps[synth_map]["title"],
-                                                               smaps[synth_map]["equation_string"]))
+            smap_button.setToolTip("{} ({})\nModel: {}".format(smap_key,
+                                                               smap["title"],
+                                                               smap["equation_string"]))
 
-            self.synth_images_buttons[synth_map] = smap_button
+            # show only buttons of choosen preset
+            if smap["preset"] != self.model.get_current_preset():
+                smap_button.hide()
+
+            self.synth_images_buttons[smap_key] = smap_button
             self.smap_group_buttons.addButton(smap_button)
-
         # SAVE NIFTII
         self.button_save_niftii = QPushButton()
         self.button_save_niftii.setIconSize(self.BUTTON_SIZE)
@@ -186,20 +223,36 @@ class PsToolbar(QToolBar):
         self.addWidget(self.button_slicer)
         self.addSeparator()
         # self.addWidget(self.label_parameters)
+        self.addWidget(self.button_save_param)
         self.addWidget(self.button_default_param)
 
         # self.addSeparator()
-        # self.addWidget(self.combo_orientation)
+        # for pb in self.presets_buttons:
+        #     self.addWidget(self.presets_buttons[pb])
 
         self.addSeparator()
         for sib in self.synth_images_buttons:
-            self.addWidget(self.synth_images_buttons[sib])
+            button_action = self.addWidget(self.synth_images_buttons[sib])
+            self.synth_images_actions[sib] = button_action
+
+        self.addSeparator()
+        spacer = QWidget()
+        spacer.setSizePolicy(QSizePolicy.Expanding, QSizePolicy.Expanding)
+        self.addWidget(spacer)
+        self.addWidget(self.preset_label)
 
     def activate_unique_smap_button(self, smap):
         self.synth_images_buttons[smap].setChecked(True)
         # for s in self.synth_images_buttons:
         #     self.synth_images_buttons[s].setChecked(False)
         # self.synth_images_buttons[smap].setChecked(True)
+
+    def hide_synth_images_btns_on_preset(self, preset):
+        for smap_button_k in self.synth_images_buttons:
+            if preset == self.model.get_smap_list()[smap_button_k]["preset"]:
+                self.synth_images_actions[smap_button_k].setVisible(True)
+            else:
+                self.synth_images_actions[smap_button_k].setVisible(False)
 
     def add_new_synthetic_map_button(self, smap_type):
         smap = self.model.get_smap_list()[smap_type]
@@ -217,3 +270,7 @@ class PsToolbar(QToolBar):
         self.synth_images_buttons[smap_type] = smap_button
         self.smap_group_buttons.addButton(smap_button)
         self.addWidget(smap_button)
+
+    def set_preset_label(self, preset):
+        self.preset_label.setText(preset)
+

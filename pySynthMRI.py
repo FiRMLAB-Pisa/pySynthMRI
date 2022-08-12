@@ -37,7 +37,7 @@ if __name__ == '__main__':
     palette.setColor(QPalette.Text, QColor(170, 172, 191))
     # palette.setColor(QPalette.Button, QColor(53, 53, 53))
     palette.setColor(QPalette.Button, QColor(224, 224, 224))
-    palette.setColor(QPalette.Disabled, QPalette.Button, QColor("#1F1B24"))
+    palette.setColor(QPalette.Disabled, QPalette.Button, QColor("#1F1B24")) #Very dark (mostly black) violet.
     # palette.setColor(QPalette.Disabled, QPalette.Button, QColor("white"))
     # palette.setColor(QPalette.ButtonText, QColor("white"))
     palette.setColor(QPalette.ButtonText, QColor("black"))

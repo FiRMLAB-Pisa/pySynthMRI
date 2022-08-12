@@ -15,6 +15,7 @@
     <file alias="gear_plus_24.png">icons/gear_plus_24.png</file>
     <file alias="save_niftii.png">icons/save_niftii.png</file>
     <file alias="save_dicom.png">icons/save_dicom.png</file>
+    <file alias="save_file.png">icons/save_file.png</file>
     <file alias="move_icon.png">icons/move_icon.png</file>
 </qresource>
 <qresource prefix="cursors">

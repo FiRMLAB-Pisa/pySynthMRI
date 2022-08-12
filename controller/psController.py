@@ -9,6 +9,7 @@ from PyQt5 import QtCore, QtGui
 from PyQt5.QtCore import QUrl
 from PyQt5.QtGui import QCursor
 
+from model.psExceptions import NotSelectedMapError
 from model.psFileType import psFileType
 from model.psModel import Qmap, PsModel
 from model.MRIImage import Orientation, Interpolation
@@ -57,6 +58,12 @@ class PsController:
 
         # self.view.menu_bar.settings_custom_param_action.triggered.connect(self.on_clicked_custom_param_button)
 
+        # Preset change
+
+        for preset_key in self.view.menu_bar.presets_actions:
+            preset_action = self.view.menu_bar.presets_actions[preset_key]
+            preset_action.triggered.connect(functools.partial(self.on_clicked_preset_menu, preset_key))
+
         # Synthetic map change
         for smap_key in self.view.menu_bar.synth_images_action:
             smap_action = self.view.menu_bar.synth_images_action[smap_key]
@@ -95,14 +102,19 @@ class PsController:
         self.view.tool_bar.button_window_grayscale.clicked.connect(self.on_clicked_window_grayscale)
         self.view.tool_bar.button_window_grayscale_default.clicked.connect(self.on_clicked_window_grayscale_default)
         self.view.tool_bar.button_zoom.clicked.connect(self.on_clicked_zoom)
+        self.view.tool_bar.button_save_param.clicked.connect(self.on_clicked_save_param)
         self.view.tool_bar.button_default_param.clicked.connect(self.on_clicked_default_param)
         self.view.tool_bar.button_default_zoom.clicked.connect(self.on_clicked_default_zoom_and_translation)
         self.view.tool_bar.button_slicer.clicked.connect(self.on_clicked_slice)
         self.view.tool_bar.button_translate.clicked.connect(self.on_clicked_translate)
-        # self.view.tool_bar.
+        # presets buttons
+        # for preset_key in self.view.tool_bar.presets_buttons:
+        #     preset_button = self.view.tool_bar.presets_buttons[preset_key]
+        #     preset_button.clicked.connect(functools.partial(self.on_clicked_preset_button, preset_key))
+        # synth images buttons
         for smap_key in self.view.tool_bar.synth_images_buttons:
-            smap_action = self.view.tool_bar.synth_images_buttons[smap_key]
-            smap_action.clicked.connect(functools.partial(self.on_clicked_synth_image_button, smap_key))
+            smap_button = self.view.tool_bar.synth_images_buttons[smap_key]
+            smap_button.clicked.connect(functools.partial(self.on_clicked_synth_image_button, smap_key))
 
         # resize view
         self.view.c.signal_resize_window.connect(self.on_resize_window_handler)
@@ -113,6 +125,9 @@ class PsController:
         qmaps = self.view.qmap_view
         for qmap_name in qmaps:
             qmaps[qmap_name].c.drop_event.connect(functools.partial(self.drag_event_handler, qmap_name))
+
+        # preset changed from menubar image selection
+        self.model.c.signal_preset_changed.connect(self.on_clicked_preset_menu)
 
     def drag_event_handler(self, qmap_name, event):
         path = event.mimeData().text()
@@ -126,7 +141,6 @@ class PsController:
 
         elif os.path.isfile(path):
             if path.endswith(".nii"):
-
                 log.debug("Drop NIFTII file: {}".format(path))
                 self.model.update_qmap_path(qmap_name, path, psFileType.NIFTII)
 
@@ -204,11 +218,21 @@ class PsController:
     def on_clicked_custom_param_button(self):
         log.debug("on_clicked_custom_param_button")
 
+    def on_clicked_preset_menu(self, preset):
+        log.debug(f"on_clicked_preset_menu: {preset}")
+        self.model.set_current_preset(preset)
+        self.view.tool_bar.hide_synth_images_btns_on_preset(preset)
+        self.view.tool_bar.set_preset_label(preset)
+
     def on_clicked_synth_image_menu(self, map_type):
         log.debug("on_clicked_synth_image_menu")
         self.model.set_smap_type(map_type)
         self.model.reload_smap()
         self.view.tool_bar.activate_unique_smap_button(map_type)
+
+    def on_clicked_preset_button(self, preset):
+        log.debug(f"on_clicked_preset_button: {preset}")
+        # TODO
 
     def on_clicked_synth_image_button(self, map_type):
         log.debug("on_clicked_synth_image_button")
@@ -320,9 +344,12 @@ class PsController:
             self.view.tool_bar.button_translate.setChecked(True)  # stay checked
 
     def on_clicked_window_grayscale_default(self):
-        self.model.get_smap().reset_widow_scale()
-        self.model.reload_smap()
-        self.model.c.signal_update_status_bar.emit("Window grayscale reset.")
+        try:
+            self.model.get_smap().reset_widow_scale()
+            self.model.reload_smap()
+            self.model.c.signal_update_status_bar.emit("Window grayscale reset.")
+        except NotSelectedMapError as e:
+            self.model.c.signal_update_status_bar.emit(e.message)
 
     def on_clicked_zoom(self):
         if self.view.tool_bar.button_zoom.isChecked():
@@ -338,10 +365,19 @@ class PsController:
         else:
             self.view.tool_bar.button_zoom.setChecked(True)  # stay checked
 
-    def on_clicked_default_param(self):
-        self.model.set_default_parameters()
-        self.model.c.signal_update_status_bar.emit("Scanner parameter set to default values.")
+    def on_clicked_save_param(self):
+        if self.model.save_parameters():
+            self.model.c.signal_update_status_bar.emit("Scanner parameter saved.")
+        else:
+            self.model.c.signal_update_status_bar.emit("Select a synthetic map before saving.")
 
+    def on_clicked_default_param(self):
+        try:
+            self.model.set_default_parameters()
+            self.model.c.signal_update_status_bar.emit("Scanner parameter set to default values.")
+        except NotSelectedMapError as e:
+            self.model.c.signal_update_status_bar.emit(e.message)
+            
     def on_clicked_default_zoom_and_translation(self):
         self.model.translation_reset()
         self.model.zoom_reset()
