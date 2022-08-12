@@ -3,7 +3,7 @@ only controller has write privileges over the model
 """
 import logging
 
-from model.psExceptions import NotLoadedMapError
+from model.psExceptions import NotLoadedMapError, NotSelectedMapError
 from model.psModel import PsModel
 
 log = logging.getLogger(__name__)
@@ -66,6 +66,9 @@ class PsCanvasController:
         try:
             self.model.recompute_smap()
         except NotLoadedMapError as e:
+            self.model.c.signal_update_status_bar.emit(e.message)
+            return
+        except NotSelectedMapError as e:
             self.model.c.signal_update_status_bar.emit(e.message)
             return
         self.model.reload_all_images()
@@ -149,10 +152,13 @@ class PsCanvasController:
 
             slice_slider.textQ.setText(str(new_slice + 1))
             slice_slider.value = new_slice
-            self.model.recompute_smap()
-            self.model.reload_all_images()
+            try:
+                self.model.recompute_smap()
+                self.model.reload_all_images()
 
-            self.last_pos_slice = curr_pos
+                self.last_pos_slice = curr_pos
+            except NotSelectedMapError as e:
+                self.model.c.signal_update_status_bar.emit(e.message)
 
         elif mouse_behaviour == PsModel.MouseBehaviour.TRANSLATE:
             if self.last_pos is None:

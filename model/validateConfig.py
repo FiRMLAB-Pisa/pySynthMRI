@@ -1,15 +1,18 @@
-import re
-
-from model.MRIImage import Interpolation
+import copy
 import json
 
+from model.MRIImage import Interpolation
 
+CONFIG_FILE_NAME = "config.json"
 class ValidateConfig:
     def __init__(self):
-        fd = open('config.json')
+        fd = open(CONFIG_FILE_NAME)
         config = json.load(fd)
 
-        self.synth_types = config["synthetic_images"]
+        self.presets = config["presets"]
+        self.default_preset_idx = 0
+        self.default_preset = self.presets[self.default_preset_idx]
+        self.synth_types = self._parse_synthetic_maps(config)
         self.qmap_types = config["quantitative_maps"]
         self.image_interpolation = config["image_interpolation"]
 
@@ -19,14 +22,17 @@ class ValidateConfig:
         # interpolation
         self.validate_interpolation(self.image_interpolation)
 
-        # self.synth_types = Config.synth_types
-        # for syth_type in self.synth_types:
-        #     validate_equation(self.synth_types[syth_type])
-        #     validate_scanner_parameters(self.synth_types[syth_type])
-        # # interpolation
-        # self.image_interpolation = Config.image_interpolation
-        # validate_interpolation(self.image_interpolation)
-        # self.qmap_types = Config.qmap_types
+    def _parse_synthetic_maps(self, config):
+        # check all available presets
+        synth_maps = dict()
+        for preset_idx, preset_key in enumerate(self.presets):
+            for smap_key in config["synthetic_images"]:
+                new_name = smap_key + " - " + preset_key
+                synth_maps[new_name] = copy.deepcopy(config["synthetic_images"][smap_key])
+                synth_maps[new_name]["preset"] = preset_key
+                synth_maps[new_name]["preset_idx"] = preset_idx
+                # synth_maps[new_name]["label"] = smap_key + " - " + preset_key
+        return synth_maps
 
     def validate_interpolation(self, image_interpolation):
         if image_interpolation["interpolation_type"] == "linear":
@@ -40,7 +46,10 @@ class ValidateConfig:
 
     def validate_scanner_parameters(self, synth_type):
         scanner_parameters = synth_type["parameters"]
+
         for k in scanner_parameters:
+            if len(scanner_parameters[k]["value"]) != 1:
+                scanner_parameters[k]["value"] = scanner_parameters[k]["value"][synth_type["preset_idx"]]
             scanner_parameters[k]["default"] = scanner_parameters[k]["value"]
 
     def validate_equation(self, synth_type, synth_type_label):
@@ -71,3 +80,29 @@ class ValidateConfig:
         for qmap in self.qmap_types:
             synth_type["equation"] = synth_type["equation"].replace(qmap,
                                                                     'self._qmaps["' + qmap + '"].get_matrix(dim=dims)')
+
+    def update_file(self, preset, map_type, parameters):
+        try:
+            with open(CONFIG_FILE_NAME, "r+") as fd:
+                config = json.load(fd)
+                # remove preset from name
+                clean_map_type = map_type[:-len(" - " + preset)]
+                # compute preset_idx
+                preset_idx = self.get_preset_idx(preset)
+
+                # update config struct
+                for parameter in parameters:
+                    p_name = parameter
+                    p_value = parameters[parameter]["value"]
+                    config['synthetic_images'][clean_map_type]['parameters'][p_name]['value'][preset_idx] = p_value
+
+                # rewrite file
+                fd.seek(0)
+                json.dump(config, fd, indent=4)
+                fd.truncate()
+                return True
+        except:
+            return False
+
+    def get_preset_idx(self, preset):
+        return self.presets.index(preset)

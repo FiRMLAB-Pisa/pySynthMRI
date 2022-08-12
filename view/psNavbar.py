@@ -99,6 +99,18 @@ class PsNavbar(QMenuBar):
         image_menu = QMenu("&Image", self)
         self.addMenu(image_menu)
 
+        # SETTINGS -> SELECT PRESETS
+        self.select_preset_menu = QMenu("&Select Preset", self)
+        image_menu.addMenu(self.select_preset_menu)
+        self.preset_action_group = QActionGroup(self.select_preset_menu)
+        self.preset_action_group.setExclusive(True)
+        self.presets_actions = dict()
+        for preset in model.get_preset_list():
+            action = QAction("&" + preset, self, checkable=True)
+            self.select_preset_menu.addAction(action)
+            self.preset_action_group.addAction(action)
+            self.presets_actions[preset] = action
+
         # SETTINGS -> SELECT SYNTHETIC IMAGES
         self.select_synthimages_menu = QMenu("&Select Synth image", self)
         image_menu.addMenu(self.select_synthimages_menu)

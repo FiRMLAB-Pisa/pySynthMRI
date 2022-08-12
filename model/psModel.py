@@ -5,7 +5,7 @@ from enum import Enum
 
 from PyQt5.QtCore import QObject, pyqtSignal, QPoint
 
-from model.psExceptions import NotLoadedMapError
+from model.psExceptions import NotLoadedMapError, NotSelectedMapError
 from model.psFileType import psFileType
 from model.validateConfig import ValidateConfig
 from model.MRIImage import Qmap, Smap, Orientation
@@ -25,6 +25,8 @@ class ModelCommunicate(QObject):
     signal_custom_smap_added = pyqtSignal(str)
     signal_parameters_updated = pyqtSignal()
     signal_slice_slider_oriented = pyqtSignal(str)
+    signal_preset_changed = pyqtSignal(str)
+
     signal_parameter_sliders_initialized = pyqtSignal()
     signal_parameter_sliders_init_handlers = pyqtSignal()
 
@@ -51,7 +53,7 @@ class PsModel:
         # list of possible synthetic maps
         self.config = ValidateConfig()
         self._default_smaps = self.config.synth_types
-
+        self._current_preset = self.config.default_preset
         self.generate_parameter_sliders()
 
         # self._default_smaps = [t for t in self.config.synth_types]
@@ -129,6 +131,15 @@ class PsModel:
 
     def get_qmap(self, qmap_type):
         return self._qmaps[qmap_type]
+
+    def get_current_preset(self):
+        return self._current_preset
+
+    def set_current_preset(self, preset):
+        self._current_preset = preset
+
+    def get_preset_list(self):
+        return self.config.presets
 
     def get_qmap_types(self):
         return self.config.qmap_types
@@ -249,6 +260,10 @@ class PsModel:
         self._smap.set_scanner_parameters(self._default_smaps[smap_type]["parameters"])
         self._smap.set_equation(self._default_smaps[smap_type]["equation"])
         self._smap.set_equation_string(self._default_smaps[smap_type]["equation_string"])
+        # update preset
+        self._current_preset = self._default_smaps[smap_type]['preset']
+        self.c.signal_preset_changed.emit(self._current_preset)
+
 
         try:
             self.recompute_smap()
@@ -262,6 +277,25 @@ class PsModel:
         self.c.signal_slice_slider_oriented.emit(str(self.get_orientation()))
         self.c.signal_update_status_bar.emit(" {} image synthesized.".format(smap_type))
         # self.c.signal_smap_updated.emit(smap_type)
+
+    def save_parameters(self):
+        map = self.get_smap()
+        if map.get_map_type() != "":
+            parameters = map.get_scanner_parameters()
+            # update model
+            self.update_config_strunct(parameters)
+            # update config file
+            return self.update_config_file(self._current_preset, map.get_map_type(), parameters) # TODO use a database for configurations (see trello)
+        else:
+            return False
+
+    def update_config_strunct(self, parameters):
+        for p_name in parameters:
+            p_value = parameters[p_name]["value"]
+            parameters[p_name]['default'] = p_value
+
+    def update_config_file(self, preset, map_type, parameters):
+        return self.config.update_file(preset, map_type, parameters)
 
     def set_default_parameters(self):
         self._smap.set_default_scanner_parameters()
