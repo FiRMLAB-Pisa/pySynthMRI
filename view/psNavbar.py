@@ -192,6 +192,14 @@ class PsNavbar(QMenuBar):
         # self.settings_custom_param_action = QAction("&Add custom parameter", self)
         # settings_menu.addAction(self.settings_custom_param_action)
 
+        # PROCESS
+        process_menu = self.addMenu("&Process")
+
+        # PROCESS -> BATCH PROCESS
+        self.batch_process_action = QAction("&Process all subjects", self)
+        process_menu.addAction(self.batch_process_action)
+
+
         # HELP MENU
         helpMenu = self.addMenu("&Help")
         self.about_action = QAction("&About", self)

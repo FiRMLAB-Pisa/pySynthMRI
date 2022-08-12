@@ -4,6 +4,7 @@ import os
 from enum import Enum
 
 from PyQt5.QtCore import QObject, pyqtSignal, QPoint
+from PyQt5.QtWidgets import QApplication
 
 from model.psExceptions import NotLoadedMapError, NotSelectedMapError
 from model.psFileType import psFileType
@@ -29,6 +30,7 @@ class ModelCommunicate(QObject):
 
     signal_parameter_sliders_initialized = pyqtSignal()
     signal_parameter_sliders_init_handlers = pyqtSignal()
+
 
 # counter_reload = 0
 
@@ -75,8 +77,6 @@ class PsModel:
 
         # interpolation
         self.interpolation = self.config.image_interpolation
-
-
 
         # slice slider
         self.slice_slider = None
@@ -264,7 +264,6 @@ class PsModel:
         self._current_preset = self._default_smaps[smap_type]['preset']
         self.c.signal_preset_changed.emit(self._current_preset)
 
-
         try:
             self.recompute_smap()
         except NotLoadedMapError as e:
@@ -285,7 +284,8 @@ class PsModel:
             # update model
             self.update_config_strunct(parameters)
             # update config file
-            return self.update_config_file(self._current_preset, map.get_map_type(), parameters) # TODO use a database for configurations (see trello)
+            return self.update_config_file(self._current_preset, map.get_map_type(),
+                                           parameters)  # TODO use a database for configurations (see trello)
         else:
             return False
 
@@ -384,8 +384,8 @@ class PsModel:
         return self._scaling_factor
 
     def translate(self, x, y):
-        self._translated_point.setX(self._translated_point.x()+x)
-        self._translated_point.setY(self._translated_point.y()+y)
+        self._translated_point.setX(self._translated_point.x() + x)
+        self._translated_point.setY(self._translated_point.y() + y)
         # self.reload_smap()
         self.reload_all_images()
 
@@ -393,4 +393,47 @@ class PsModel:
         return self._translated_point
 
     def translation_reset(self):
-        self._translated_point = QPoint(0,0)
+        self._translated_point = QPoint(0, 0)
+
+    def execute_batch_process(self, root_path):
+        # iteratively select subject and synthesize images
+        suject_paths = get_subdirs(root_path)
+        for subject_path in suject_paths:
+            # TODO this is not general
+            qmaps_path = os.path.join(get_subdirs(get_subdirs(get_subdirs(os.path.join(subject_path, "nifti"))[0])[0])[0], 'qmap')
+            qmaps_path = os.path.normpath(qmaps_path)
+            smaps_path = os.path.join(get_subdirs(get_subdirs(get_subdirs(os.path.join(subject_path, "nifti"))[0])[0])[0], 'smap')
+            smaps_path = os.path.normpath(smaps_path)
+            if not os.path.exists(smaps_path):
+                os .makedirs(smaps_path)
+
+            # load qmaps, compute all smaps, save smaps
+            # 1 load qmaps
+            self.update_qmap_batch_path(qmaps_path, file_type=psFileType.NIFTII)
+            # 2 compute all smaps
+            # get only preset
+            smaps = {k: v for k, v in self._default_smaps.items() if v["preset"] == self._current_preset}
+
+            for smap_k in smaps:
+                self.c.signal_update_status_bar.emit(f"Processing subject: {os.path.basename(subject_path)} - map: {smap_k}")
+                QApplication.processEvents()
+                self._smap.set_map_type(smap_k)
+                self._smap.set_title(self._default_smaps[smap_k]["title"])
+                self._smap.set_init_slices_num(self._qmaps[list(self._qmaps.keys())[0]])
+                # self._smap.set_total_slice_num(self._qmaps[list(self._qmaps.keys())[0]].get_total_slice_num())
+                self._smap.set_qmaps_needed(self._default_smaps[smap_k]["qmaps_needed"])
+                self._smap.set_scanner_parameters(self._default_smaps[smap_k]["parameters"])
+                self._smap.set_equation(self._default_smaps[smap_k]["equation"])
+                self._smap.set_equation_string(self._default_smaps[smap_k]["equation_string"])
+
+
+
+                self.recompute_smap()
+                self.save_smap(os.path.join(smaps_path, smap_k[:-len(" - " + self._current_preset)] + ".nii"), psFileType.NIFTII)
+            self.c.signal_update_status_bar.emit("All Subjects processed.")
+
+        pass
+
+
+def get_subdirs(path):
+    return [d.path for d in os.scandir(path) if d.is_dir()]

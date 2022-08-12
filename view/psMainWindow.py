@@ -22,6 +22,7 @@ class MainWindowCommunicate(QObject):
     signal_update_qmap_path = pyqtSignal(str, str, str)
     signal_update_batch_qmap_path = pyqtSignal(str, str)
     signal_saving_smap = pyqtSignal(str, str)
+    signal_batch_progress_path = pyqtSignal(str)
     # signal_custom_smap_added_to_navbar = pyqtSignal(str)
 
 
@@ -237,3 +238,12 @@ class PsMainWindow(QMainWindow):
 
         if path != '':
             self.c.signal_saving_smap.emit(path, psFileType.NIFTII)
+
+    def open_batch_process_dialog(self):
+        options = QFileDialog.Options()
+        options |= QFileDialog.DontUseNativeDialog
+
+        folderpath = QFileDialog.getExistingDirectory(self, 'Select Folder that contains subjects subdirectories')
+        if folderpath:
+            log.debug("open_batch_process_dialog: {}".format(folderpath))
+            self.c.signal_batch_progress_path.emit(folderpath)
