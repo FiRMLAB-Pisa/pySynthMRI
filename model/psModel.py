@@ -4,6 +4,7 @@ import os
 from enum import Enum
 
 from PyQt5.QtCore import QObject, pyqtSignal, QPoint
+from PyQt5.QtWidgets import QApplication
 
 from model.psExceptions import NotLoadedMapError, NotSelectedMapError
 from model.psFileType import psFileType
@@ -413,11 +414,23 @@ class PsModel:
             # get only preset
             smaps = {k: v for k, v in self._default_smaps.items() if v["preset"] == self._current_preset}
 
-            for smap in smaps:
-                self.set_smap_type(smap)
+            for smap_k in smaps:
+                self.c.signal_update_status_bar.emit(f"Processing subject: {os.path.basename(subject_path)} - map: {smap_k}")
+                QApplication.processEvents()
+                self._smap.set_map_type(smap_k)
+                self._smap.set_title(self._default_smaps[smap_k]["title"])
+                self._smap.set_init_slices_num(self._qmaps[list(self._qmaps.keys())[0]])
+                # self._smap.set_total_slice_num(self._qmaps[list(self._qmaps.keys())[0]].get_total_slice_num())
+                self._smap.set_qmaps_needed(self._default_smaps[smap_k]["qmaps_needed"])
+                self._smap.set_scanner_parameters(self._default_smaps[smap_k]["parameters"])
+                self._smap.set_equation(self._default_smaps[smap_k]["equation"])
+                self._smap.set_equation_string(self._default_smaps[smap_k]["equation_string"])
+
+
+
                 self.recompute_smap()
-                self.save_smap(os.path.join(smaps_path, smap + ".nii"), psFileType.NIFTII)
-            self.c.signal_update_status_bar.emit("Complete path: ".format(qmaps_path))
+                self.save_smap(os.path.join(smaps_path, smap_k[:-len(" - " + self._current_preset)] + ".nii"), psFileType.NIFTII)
+            self.c.signal_update_status_bar.emit("All Subjects processed.")
 
         pass
 
