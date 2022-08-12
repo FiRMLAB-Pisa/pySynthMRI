@@ -11,7 +11,7 @@ PySynthMRI can be installed using pip:
    ```
 2. Install required python packages
   ```
-   pip install -e requirements.txt
+   pip install -r requirements.txt
    ```
 3. Execute PySynthMRI
   ```
