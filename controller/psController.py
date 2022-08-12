@@ -32,6 +32,7 @@ class PsController:
         # load dicom image
         self.view.menu_bar.batch_load_dicom_action.triggered.connect(self.on_clicked_batch_load_dicom_button)
         self.view.c.signal_update_batch_qmap_path.connect(self.on_selected_path_batch_dialog_upload)
+
         # load niftii image
         self.view.menu_bar.batch_load_niftii_action.triggered.connect(self.on_clicked_batch_load_niftii_button)
 
@@ -91,6 +92,11 @@ class PsController:
 
         # custom smap
         self.view.menu_bar.settings_custom_smap_action.triggered.connect(self.on_clicked_custom_smap_button)
+
+        # batch process
+        self.view.menu_bar.batch_process_action.triggered.connect(self.on_clicked_batch_process_button)
+        # batch progress path selected
+        self.view.c.signal_batch_progress_path.connect(self.on_selected_path_batch_process_dialog)
 
         # about
         self.view.menu_bar.about_action.triggered.connect(self.on_clicked_help_button)
@@ -165,6 +171,7 @@ class PsController:
         # look into directory and search predefined file names of the quantitatives
         self.model.update_qmap_batch_path(path, file_type)
 
+
     def on_selected_path_dialog_upload(self, qmap, path, file_type):
         log.debug("on_selected_path_dialog_upload: " + qmap + " - " + path + " - Type: " + file_type)
         self.model.update_qmap_path(qmap, path, file_type)
@@ -210,6 +217,8 @@ class PsController:
         else:
             log.debug("on_clicked_custom_smap_button: cancel operation")
 
+    def on_clicked_batch_process_button(self):
+        self.view.open_batch_process_dialog()
     # def on_custom_smap_added(self, map_type):
     #     # self.view.menu_bar.add_custom_smap(map_type)
     #     smap_action = self.view.menu_bar.synth_images_action[map_type]
@@ -377,8 +386,12 @@ class PsController:
             self.model.c.signal_update_status_bar.emit("Scanner parameter set to default values.")
         except NotSelectedMapError as e:
             self.model.c.signal_update_status_bar.emit(e.message)
-            
+
     def on_clicked_default_zoom_and_translation(self):
         self.model.translation_reset()
         self.model.zoom_reset()
         self.model.c.signal_update_status_bar.emit("Image position and zoom reset.")
+
+    def on_selected_path_batch_process_dialog(self, path):
+        log.debug(f"on_selected_path_batch_progress_dialog: {path}")
+        self.model.execute_batch_process(path)
