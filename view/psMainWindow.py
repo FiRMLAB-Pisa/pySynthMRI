@@ -140,6 +140,7 @@ class PsMainWindow(QMainWindow):
         self.info_widget.update()
 
     def smap_updated_handler(self):
+
         # log.debug("smap_updated_handler")
         if self.model.get_smap().is_loaded():
             self.smap_view.set_image(self.model.get_smap())  # TODO rimettere
@@ -148,8 +149,8 @@ class PsMainWindow(QMainWindow):
         # self.map_type_text.setText(
         #      "<h2>" + self.model.get_map_type() + "<br>" + self.model.get_map_type(long_name=True) + "</h2>")
 
-    def draw_smap(self, qmap_type):
-        self.qmap_view[qmap_type].update()
+    # def draw_smap(self, qmap_type):
+    #     self.qmap_view[qmap_type].update()
 
     def resizeEvent(self, event):
         """Override built-in event"""

@@ -99,7 +99,7 @@ class PsNavbar(QMenuBar):
         image_menu = QMenu("&Image", self)
         self.addMenu(image_menu)
 
-        # SETTINGS -> SELECT PRESETS
+        # IMAGE -> SELECT PRESETS
         self.select_preset_menu = QMenu("&Select Preset", self)
         image_menu.addMenu(self.select_preset_menu)
         self.preset_action_group = QActionGroup(self.select_preset_menu)
@@ -111,7 +111,7 @@ class PsNavbar(QMenuBar):
             self.preset_action_group.addAction(action)
             self.presets_actions[preset] = action
 
-        # SETTINGS -> SELECT SYNTHETIC IMAGES
+        # IMAGE -> SELECT SYNTHETIC IMAGES
         self.select_synthimages_menu = QMenu("&Select Synth image", self)
         image_menu.addMenu(self.select_synthimages_menu)
         self.synth_images_action_group = QActionGroup(self.select_synthimages_menu)
@@ -149,6 +149,11 @@ class PsNavbar(QMenuBar):
 
         image_orientation_menu.addAction(self.orientation_coronal_action)
         self.orientation_action_group.addAction(self.orientation_coronal_action)
+
+        # IMAGE -> DRAW ORIENTATION LABELS
+        self.orientation_labels_action = QAction("&Show orientation labels", self, checkable=True)
+        self.orientation_labels_action.setChecked(True)
+        image_menu.addAction(self.orientation_labels_action)
 
         # IMAGE -> INTERPOLATION
         image_interpolation_menu = QMenu("&Interpolation", self)
