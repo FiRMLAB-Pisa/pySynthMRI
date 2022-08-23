@@ -1,10 +1,10 @@
 import cv2
 import numpy as np
 from PyQt5.QtCore import Qt, QPoint
-from PyQt5.QtGui import QImage, QPixmap
-from PyQt5.QtWidgets import QVBoxLayout, QWidget
+from PyQt5.QtGui import QImage, QPixmap, QPainter, QFont, QPen, QFontMetrics
+from PyQt5.QtWidgets import QVBoxLayout, QWidget, QApplication, QLabel
 
-from model.MRIImage import Interpolation
+from model.MRIImage import Interpolation, Orientation
 from view.psSyntheticCanvas import PsSyntheticCanvas
 
 
@@ -18,6 +18,17 @@ class PsSyntheticImageWidget(QWidget):
 
         vbox = QVBoxLayout()
         vbox.addWidget(self.canvas)
+
+        # self.direction_l = QLabel(parent=self.canvas)
+        # self.direction_l.setText("LASDASDASDADSDASDASdAD")
+        # self.direction_l.setStyleSheet("""
+        #                         background-color: rgba(31, 27, 36, .7);
+        #                         padding: 4px;
+        #                         border-radius: 4px;
+        #                         margin: 1px;
+        #                         font-weight: bold;
+        #         """)
+        # self.direction_l.move(self.direction_l.geometry().bottom() + 10, self.direction_l.geometry().right() + 0 )
         self.setLayout(vbox)
 
     def set_image(self, smap):
@@ -44,6 +55,7 @@ class PsSyntheticImageWidget(QWidget):
         # interpolate
         interpolation = self.model.interpolation["interpolation_type"]
         scale = self.model.interpolation["scale"]
+        orientation = smap.get_orientation()
 
         if interpolation == Interpolation.LINEAR:
             img_2d_cp = cv2.resize(img_2d_cp,
@@ -93,8 +105,46 @@ class PsSyntheticImageWidget(QWidget):
         height, width = cv_image.shape
 
         qImg = QImage(cv_image.data, width, height, QImage.Format.Format_Grayscale16)
+
+        if smap.get_orientation_labels_flag():
+            self.draw_positions(qImg, orientation)
+
         qPixMap = QPixmap(qImg)
         qPixMap = qPixMap.scaled(self.canvas.size() * self.model.get_zoom(), Qt.KeepAspectRatio)
 
         self.canvas.setAlignment(Qt.AlignCenter)
         self.canvas.setPixmap(qPixMap)
+        # QApplication.processEvents()
+
+    def draw_positions(self, image, orientation):
+        # add text
+        positions = dict()
+        if orientation == Orientation.AXIAL:
+            positions["R"] = (0, image.height() / 2)
+            positions["L"] = (image.width() - 15, image.height() / 2)
+            positions["A"] = (image.width() / 2 - 6,  15)
+            positions["P"] = (image.width() / 2 - 6, image.height() - 15)
+        elif orientation == Orientation.SAGITTAL:
+            positions["A"] = (0, image.height() / 2)
+            positions["P"] = (image.width() - 15, image.height() / 2)
+            positions["S"] = (image.width() / 2 - 6,  15)
+            positions["I"] = (image.width() / 2 - 6, image.height() - 15)
+        elif orientation == Orientation.CORONAL:
+            positions["R"] = (0, image.height() / 2)
+            positions["L"] = (image.width() - 15, image.height() / 2)
+            positions["S"] = (image.width() / 2 - 6,  15)
+            positions["I"] = (image.width() / 2 - 6, image.height() - 15)
+
+        qp = QPainter()
+        qp.begin(image)
+        pen = QPen(Qt.gray)
+        pen.setWidth(2)
+        qp.setPen(pen)
+        font = QFont()
+        font.setFamily('Times')
+        font.setBold(False)
+        font.setPointSize(14)
+        qp.setFont(font)
+        for p in positions:
+            qp.drawText(positions[p][0], positions[p][1], p)
+        qp.end()

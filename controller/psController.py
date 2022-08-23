@@ -4,6 +4,7 @@ only controller has write privileges over the model
 import functools
 import logging
 import os
+import time
 
 from PyQt5 import QtCore, QtGui
 from PyQt5.QtCore import QUrl
@@ -79,6 +80,11 @@ class PsController:
             functools.partial(self.on_clicked_orientation_button, Orientation.SAGITTAL))
         self.view.menu_bar.orientation_coronal_action.triggered.connect(
             functools.partial(self.on_clicked_orientation_button, Orientation.CORONAL))
+
+        # orientation labels flag
+        self.view.menu_bar.orientation_labels_action.triggered.connect(
+            self.on_clicked_orientation_labels_button
+        )
 
         # interpolation
         self.view.menu_bar.interpolation_none_action.triggered.connect(
@@ -254,6 +260,10 @@ class PsController:
         log.debug("on_clicked_orientation_button - passed {}".format(orientation))
         self.model.set_orientation(orientation)
 
+    def on_clicked_orientation_labels_button(self, value):
+        self.model.set_orientation_labels_flag(value)
+        self.model.reload_smap()
+
     def on_clicked_interpolation_button(self, interpolation):
         log.debug("on_clicked_interpolation_button - passed {}".format(interpolation))
         self.model.set_interpolation_type(interpolation)
@@ -292,6 +302,7 @@ class PsController:
     def on_change_parameter_slider(self, smap_type, parameter_type, value):
         # get correct sider
         if isinstance(parameter_type, Orientation):
+            # TODO FIX BUG SLOW
             slice_slider = self.model.slice_slider[parameter_type]
             slice_slider.textQ.setText(str(value))
             slice_slider.value = value

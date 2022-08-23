@@ -142,3 +142,4 @@ cython_debug/
 ../pySynthMRI/.idea
 pySynthMRI.spec
 pySynthMRI.spec.default
+pySynthMRI-shared/

@@ -100,11 +100,11 @@ class MRIImage:
 
         if dim == 2:
             if self._orientation == Orientation.AXIAL:
-                return np.rot90(np_matrix_3d[:, :, self.slices_num[Orientation.AXIAL]])
+                return np.fliplr(np.rot90(np_matrix_3d[:, :, self.slices_num[Orientation.AXIAL]]))
             elif self._orientation == Orientation.SAGITTAL:
                 return np.fliplr(np.rot90(np_matrix_3d[self.slices_num[Orientation.SAGITTAL], :, :]))
             elif self._orientation == Orientation.CORONAL:
-                return np.rot90(np_matrix_3d[:, -self.slices_num[Orientation.CORONAL], :])
+                return np.fliplr(np.rot90(np_matrix_3d[:, -self.slices_num[Orientation.CORONAL], :]))
         else:
             return np_matrix_3d
 
@@ -310,6 +310,7 @@ class Smap(MRIImage):
         self._parameters = dict()
         self._title = ""
         self._equation_string = ""
+        self._orientation_labels_flag = True
 
     def set_map_type(self, map_type):
         super(Smap, self).set_map_type(map_type)
@@ -344,6 +345,12 @@ class Smap(MRIImage):
 
     def get_title(self):
         return self._title
+
+    def get_orientation_labels_flag(self):
+        return self._orientation_labels_flag
+
+    def set_orientation_labels_flag(self, orientation_labels_flag):
+        self._orientation_labels_flag = orientation_labels_flag
 
     def get_missing_qmaps(self):
         missing_qmaps = []

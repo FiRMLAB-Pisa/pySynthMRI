@@ -14,7 +14,11 @@ from view.psSliderParam import PsSliderParam
 
 log = logging.getLogger(__name__)
 
-
+# PROFILELP
+# import cProfile as profile
+# pr = profile.Profile()
+# pr.disable()
+# PROFILEPL
 # log.setLevel(LOGGING_LVL)
 
 
@@ -189,6 +193,9 @@ class PsModel:
         #     if self._qmaps[qmap].is_loaded:
         #         return self._qmaps[qmap].get_orientation()
 
+    def set_orientation_labels_flag(self, orientation_labels_flag):
+        self._smap.set_orientation_labels_flag(orientation_labels_flag)
+
     def set_interpolation_type(self, interpolation_type):
         self.interpolation["interpolation_type"] = interpolation_type
         self.reload_smap()
@@ -243,7 +250,12 @@ class PsModel:
         self.c.signal_smap_updated.emit(self._smap.get_map_type())
 
     def recompute_smap(self):
+        # PROFILELP
+        # pr.enable()
         self._smap.recompute_smap()
+        # pr.disable()
+        # PROFILEPL
+
         # self.c.signal_smap_updated.emit(self._smap.get_map_type())
 
     def set_smap_type(self, smap_type):
