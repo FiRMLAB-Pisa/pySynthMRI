@@ -131,6 +131,14 @@ class PsToolbar(QToolBar):
         self.button_default_param.setIcon(icon_default_params)
         self.button_default_param.setToolTip("Set scanner parameters \nto default values")
 
+        # RELOAD CONFIG FILE
+        self.button_reload_config = QPushButton()
+        self.button_reload_config.setIconSize(self.BUTTON_SIZE)
+        icon_reload_config = QIcon()
+        icon_reload_config.addPixmap(QPixmap(":/icons/default_24.png"), QIcon.Normal, QIcon.On)
+        self.button_reload_config.setIcon(icon_reload_config)
+        self.button_reload_config.setToolTip("Reload configuration file")
+
         # ORIENTATION
         # self.combo_orientation = QComboBox()
         # self.combo_orientation.setIconSize(self.BUTTON_SIZE)
@@ -188,6 +196,7 @@ class PsToolbar(QToolBar):
 
             self.synth_images_buttons[smap_key] = smap_button
             self.smap_group_buttons.addButton(smap_button)
+
         # SAVE NIFTII
         self.button_save_niftii = QPushButton()
         self.button_save_niftii.setIconSize(self.BUTTON_SIZE)
@@ -225,6 +234,7 @@ class PsToolbar(QToolBar):
         # self.addWidget(self.label_parameters)
         self.addWidget(self.button_save_param)
         self.addWidget(self.button_default_param)
+        self.addWidget(self.button_reload_config)
 
         # self.addSeparator()
         # for pb in self.presets_buttons:
