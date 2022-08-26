@@ -99,19 +99,20 @@ class PsCanvasController:
             self.last_pos = None
 
     def mouse_move_handler(self, event):
-        DELTA_RATIO_WW_WC = .3
+        DELTA_RATIO_WW_WC = 8
         mouse_behaviour = self.model.get_mouse_behaviour()
         if mouse_behaviour == PsModel.MouseBehaviour.WINDOW_SCALE:
             curr_pos = event.pos()
             delta_pos = curr_pos - self.last_pos
 
-            delta_ww = delta_pos.x()
+            delta_ww = -1*delta_pos.x()
             delta_wc = delta_pos.y()
+            print(delta_ww, delta_wc)
             if delta_ww != 0:
-                self.model.get_smap().add_delta_window_width(int(delta_ww / DELTA_RATIO_WW_WC))
+                self.model.get_smap().add_delta_window_width(int(delta_ww * DELTA_RATIO_WW_WC))
                 self.model.reload_smap()
             if delta_wc != 0:
-                self.model.get_smap().add_delta_window_center(int(delta_wc / DELTA_RATIO_WW_WC))
+                self.model.get_smap().add_delta_window_center(int(delta_wc * DELTA_RATIO_WW_WC))
                 self.model.reload_smap()
             self.last_pos = curr_pos
 
