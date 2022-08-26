@@ -17,6 +17,7 @@
     <file alias="save_dicom.png">icons/save_dicom.png</file>
     <file alias="save_file.png">icons/save_file.png</file>
     <file alias="move_icon.png">icons/move_icon.png</file>
+    <file alias="reload_config.png">icons/reload_config.png</file>
 </qresource>
 <qresource prefix="cursors">
         <file alias="zoom_cursor_w.png">cursors/zoom_cursor_w.png</file>

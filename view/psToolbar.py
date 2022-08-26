@@ -135,7 +135,7 @@ class PsToolbar(QToolBar):
         self.button_reload_config = QPushButton()
         self.button_reload_config.setIconSize(self.BUTTON_SIZE)
         icon_reload_config = QIcon()
-        icon_reload_config.addPixmap(QPixmap(":/icons/default_24.png"), QIcon.Normal, QIcon.On)
+        icon_reload_config.addPixmap(QPixmap(":/icons/reload_config.png"), QIcon.Normal, QIcon.On)
         self.button_reload_config.setIcon(icon_reload_config)
         self.button_reload_config.setToolTip("Reload configuration file")
 
