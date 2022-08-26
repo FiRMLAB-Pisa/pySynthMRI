@@ -116,6 +116,8 @@ class PsController:
         self.view.tool_bar.button_zoom.clicked.connect(self.on_clicked_zoom)
         self.view.tool_bar.button_save_param.clicked.connect(self.on_clicked_save_param)
         self.view.tool_bar.button_default_param.clicked.connect(self.on_clicked_default_param)
+        self.view.tool_bar.button_reload_config.clicked.connect(self.on_clicked_reload_config)
+
         self.view.tool_bar.button_default_zoom.clicked.connect(self.on_clicked_default_zoom_and_translation)
         self.view.tool_bar.button_slicer.clicked.connect(self.on_clicked_slice)
         self.view.tool_bar.button_translate.clicked.connect(self.on_clicked_translate)
@@ -396,6 +398,13 @@ class PsController:
             self.model.set_default_parameters()
             self.model.c.signal_update_status_bar.emit("Scanner parameter set to default values.")
         except NotSelectedMapError as e:
+            self.model.c.signal_update_status_bar.emit(e.message)
+
+    def on_clicked_reload_config(self):
+        try:
+            self.model.reload_configuration_file()
+            self.model.c.signal_update_status_bar.emit("Configuration file correctly reloaded.")
+        except Exception as e:
             self.model.c.signal_update_status_bar.emit(e.message)
 
     def on_clicked_default_zoom_and_translation(self):

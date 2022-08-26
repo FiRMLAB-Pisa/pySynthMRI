@@ -316,6 +316,33 @@ class PsModel:
 
         # self.c.signal_parameter_sliders_init_handlers.emit()
 
+    def reload_configuration_file(self):
+        self.config = ValidateConfig()
+        for smap_k in self._default_smaps:
+            smap = self._default_smaps[smap_k]
+            smap["title"] = self.config.synth_types[smap_k]["title"]
+            smap["equation"] = self.config.synth_types[smap_k]["equation"]
+            smap["preset"] = self.config.synth_types[smap_k]["preset"]
+            smap["preset_idx"] = self.config.synth_types[smap_k]["preset_idx"]
+            smap["equation_string"] = self.config.synth_types[smap_k]["equation_string"]
+            smap["qmaps_needed"] = self.config.synth_types[smap_k]["qmaps_needed"]
+            for param_k in smap["parameters"]:
+                # all stored smap
+                param = smap["parameters"][param_k]
+                param["label"] = self.config.synth_types[smap_k]["parameters"][param_k]["label"]
+                param["value"] = self.config.synth_types[smap_k]["parameters"][param_k]["value"]
+                param["min"] = self.config.synth_types[smap_k]["parameters"][param_k]["min"]
+                param["max"] = self.config.synth_types[smap_k]["parameters"][param_k]["max"]
+                param["step"] = self.config.synth_types[smap_k]["parameters"][param_k]["step"]
+                param["default"] = self.config.synth_types[smap_k]["parameters"][param_k]["default"]
+                # current loaded smap
+        self.set_smap_type(self._smap.get_map_type())
+        self._smap.set_default_scanner_parameters()
+        self.recompute_smap()
+        self.c.signal_parameters_updated.emit()
+        self.reload_smap()
+
+
     def set_slice_num(self, slice_num, coordinate=None):
         self._smap.set_slice_num(slice_num, coordinate)
         # for k_qmap in self._qmaps:
