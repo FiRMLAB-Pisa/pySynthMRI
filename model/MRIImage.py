@@ -206,6 +206,7 @@ class Qmap(MRIImage):
         self.is_loaded = is_loaded
         self.header = None
         self.original_template = None
+        self.slice_spacing = 0.
 
     def load_from_dicom(self):
         path = Path(self.path)
@@ -229,6 +230,7 @@ class Qmap(MRIImage):
 
         # create 3D array
         img_shape = list(slices[0].pixel_array.shape)
+        slice_spacing = slices[0].PixelSpacing
         dcm_header = slices[0]
         img_shape.append(len(slices))
         self.np_matrix = np.zeros(img_shape)
@@ -242,6 +244,7 @@ class Qmap(MRIImage):
         self.file_type = psFileType.DICOM
         self.original_template = slices
         self.update_min_max()
+        self.slice_spacing = slice_spacing
 
     def check_orientation(self, niftii, img):
         """
@@ -271,6 +274,7 @@ class Qmap(MRIImage):
         self.file_type = psFileType.NIFTII
         self.set_init_slices_num()
         self.update_min_max()
+        self.slice_spacing = self.header['pixdim'][1:3]
 
     def get_dicom(self):
         if self.file_type == psFileType.DICOM:
@@ -426,13 +430,30 @@ class Smap(MRIImage):
             os.mkdir(save_dir_path)
 
         template = self.get_dicom_template_from_qmap()
+        # NB: This is ok for axial images.
+        slice_spacing = self._qmaps[list(self._qmaps.keys())[0]].slice_spacing[1]
+
+        sym_central_location = 0.
         for s in range(len(template)):
+            s_relative_idx = s - len(template) / 2.
             # change series description
             template[s].PixelData = tmp[:, :, s].tobytes()
             save_path = os.path.join(save_dir_path, "series_" + str(s + 1) + ".dcm")
             template[s].WindowCenter = self.get_window_center()
             template[s].WindowWidth = self.get_window_width()
             template[s].SeriesDescription = self.get_series_description()
+            # location centered on the central slice
+            sym_location = (slice_spacing / 2.) + s_relative_idx * slice_spacing
+            template[s].ImagePositionPatient = [0., 0., sym_location]
+            # add Parameters informations
+            if "TE" in self._parameters:
+                template[s].EchoTime = self._parameters["TE"]["value"]
+            if "TI" in self._parameters:
+                template[s].InversionTime = self._parameters["TI"]["value"]
+            if "TR" in self._parameters:
+                template[s].RepetitionTime = self._parameters["TR"]["value"]
+            # Add magnetic field
+
             template[s].save_as(save_path)
 
     def import_header_from_qmap(self, header, file_type):
