@@ -18,7 +18,9 @@
                     "max": 100,
                     "step": 1
                 }
-            }
+            },
+            "window_center": 664,
+            "window_width": 1784
         },
         "GRE": {
             "title": "T1w - Gradient Echo ",
@@ -32,10 +34,11 @@
                     ],
                     "min": 100,
                     "max": 500,
-                    "step": 5,
-                    "weight": 2
+                    "step": 5
                 }
-            }
+            },
+            "window_center": 1900,
+            "window_width": 500
         },
         "FLAIR": {
             "title": "T2w - Fluid Attenuated Inversion Recover",
@@ -59,8 +62,7 @@
                     ],
                     "min": 1000,
                     "max": 3500,
-                    "step": 10,
-                    "weight": 3
+                    "step": 10
                 },
                 "TSAT": {
                     "label": "T1SAT [ms]",
@@ -70,8 +72,7 @@
                     ],
                     "min": 400,
                     "max": 10000,
-                    "step": 10,
-                    "weight": 4
+                    "step": 10
                 }
             }
         },
@@ -159,8 +160,7 @@
                     ],
                     "min": 1000,
                     "max": 3500,
-                    "step": 10,
-                    "weight": 3
+                    "step": 10
                 },
                 "TI_2": {
                     "label": "TI_2 [ms]",
@@ -170,8 +170,7 @@
                     ],
                     "min": 1,
                     "max": 600,
-                    "step": 10,
-                    "weight": 3
+                    "step": 10
                 }
             }
         },
@@ -207,10 +206,11 @@
                     ],
                     "min": 1000,
                     "max": 3500,
-                    "step": 10,
-                    "weight": 3
+                    "step": 10
                 }
-            }
+            },
+            "window_width": 5537.0,
+            "window_center": -196.0
         }
     },
     "quantitative_maps": {

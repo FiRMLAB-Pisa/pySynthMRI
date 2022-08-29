@@ -19,6 +19,7 @@ class ValidateConfig:
         for synth_type in self.synth_types:
             self.validate_equation(self.synth_types[synth_type], synth_type)
             self.validate_scanner_parameters(self.synth_types[synth_type])
+            self.validate_window_scale(self.synth_types[synth_type])
         # interpolation
         self.validate_interpolation(self.image_interpolation)
 
@@ -81,7 +82,20 @@ class ValidateConfig:
             synth_type["equation"] = synth_type["equation"].replace(qmap,
                                                                     'self._qmaps["' + qmap + '"].get_matrix(dim=dims)')
 
-    def update_file(self, preset, map_type, parameters):
+    def validate_window_scale(self, synth_struct):
+        if "window_center" not in synth_struct:
+            synth_struct["window_center"] = None
+            synth_struct["default_window_center"] = None
+        else:
+            synth_struct["default_window_center"] = synth_struct["window_center"]
+
+        if "window_width" not in synth_struct:
+            synth_struct["window_width"] = None
+            synth_struct["default_window_width"] = None
+        else:
+            synth_struct["default_window_width"] = synth_struct["window_width"]
+
+    def update_file(self, preset, map_type, parameters, ww=None, wc=None):
         try:
             with open(CONFIG_FILE_NAME, "r+") as fd:
                 config = json.load(fd)
@@ -96,6 +110,10 @@ class ValidateConfig:
                     p_value = parameters[parameter]["value"]
                     config['synthetic_images'][clean_map_type]['parameters'][p_name]['value'][preset_idx] = p_value
 
+                # update ww wc
+                if ww is not None and wc is not None:
+                    config['synthetic_images'][clean_map_type]['window_width'] = ww
+                    config['synthetic_images'][clean_map_type]['window_center'] = wc
                 # rewrite file
                 fd.seek(0)
                 json.dump(config, fd, indent=4)

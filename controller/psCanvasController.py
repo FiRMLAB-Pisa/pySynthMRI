@@ -108,12 +108,9 @@ class PsCanvasController:
             delta_ww = -1*delta_pos.x()
             delta_wc = delta_pos.y()
             print(delta_ww, delta_wc)
-            if delta_ww != 0:
-                self.model.get_smap().add_delta_window_width(int(delta_ww * DELTA_RATIO_WW_WC))
-                self.model.reload_smap()
-            if delta_wc != 0:
-                self.model.get_smap().add_delta_window_center(int(delta_wc * DELTA_RATIO_WW_WC))
-                self.model.reload_smap()
+            if delta_ww != 0 or delta_wc != 0:
+                self.model.add_delta_window_scale(delta_ww=int(delta_ww * DELTA_RATIO_WW_WC), delta_wc=int(delta_wc * DELTA_RATIO_WW_WC))
+
             self.last_pos = curr_pos
 
         elif mouse_behaviour == PsModel.MouseBehaviour.ZOOM:

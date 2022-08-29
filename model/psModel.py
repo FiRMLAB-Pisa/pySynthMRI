@@ -272,6 +272,10 @@ class PsModel:
         self._smap.set_scanner_parameters(self._default_smaps[smap_type]["parameters"])
         self._smap.set_equation(self._default_smaps[smap_type]["equation"])
         self._smap.set_equation_string(self._default_smaps[smap_type]["equation_string"])
+        self._smap.set_window_center(self._default_smaps[smap_type]["window_center"])
+        self._smap.set_window_width(self._default_smaps[smap_type]["window_width"])
+        self._smap.set_default_window_center(self._default_smaps[smap_type]["default_window_center"])
+        self._smap.set_default_window_width(self._default_smaps[smap_type]["default_window_width"])
         # update preset
         self._current_preset = self._default_smaps[smap_type]['preset']
         self.c.signal_preset_changed.emit(self._current_preset)
@@ -306,8 +310,10 @@ class PsModel:
             p_value = parameters[p_name]["value"]
             parameters[p_name]['default'] = p_value
 
-    def update_config_file(self, preset, map_type, parameters):
-        return self.config.update_file(preset, map_type, parameters)
+    def update_config_file(self, preset, map_type, parameters, ww=None, wc=None):
+        ww = self._smap.get_window_width()
+        wc = self._smap.get_window_center()
+        return self.config.update_file(preset, map_type, parameters, ww, wc)
 
     def set_default_parameters(self):
         self._smap.set_default_scanner_parameters()
@@ -326,6 +332,8 @@ class PsModel:
             smap["preset_idx"] = self.config.synth_types[smap_k]["preset_idx"]
             smap["equation_string"] = self.config.synth_types[smap_k]["equation_string"]
             smap["qmaps_needed"] = self.config.synth_types[smap_k]["qmaps_needed"]
+            smap["window_width"] = self.config.synth_types[smap_k]["window_width"]
+            smap["window_center"] = self.config.synth_types[smap_k]["window_center"]
             for param_k in smap["parameters"]:
                 # all stored smap
                 param = smap["parameters"][param_k]
@@ -342,6 +350,25 @@ class PsModel:
         self.c.signal_parameters_updated.emit()
         self.reload_smap()
 
+    def set_manual_window_width(self, window_width):
+        if isinstance(window_width, int):
+            self._smap.set_window_width(window_width)
+            self._default_smaps[self._smap.get_map_type()]["window_width"] = window_width
+
+    def set_manual_window_center(self, window_center):
+        if isinstance(window_center, int):
+            self._smap.set_window_center(window_center)
+            self._default_smaps[self._smap.get_map_type()]["window_center"] = window_center
+
+    def add_delta_window_scale(self, delta_ww, delta_wc):
+        if delta_ww != 0:
+            ww = self._smap.add_delta_window_width(delta_ww)
+            self._default_smaps[self._smap.get_map_type()]["window_width"] = ww
+
+        if delta_wc != 0:
+            wc = self._smap.add_delta_window_center(delta_wc)
+            self._default_smaps[self._smap.get_map_type()]["window_center"] = wc
+        self.reload_smap()
 
     def set_slice_num(self, slice_num, coordinate=None):
         self._smap.set_slice_num(slice_num, coordinate)
