@@ -1,6 +1,6 @@
 import logging
 
-from PyQt5.QtWidgets import QVBoxLayout, QLabel, QGroupBox, QHBoxLayout, QWidget
+from PyQt5.QtWidgets import QVBoxLayout, QLabel, QGroupBox, QHBoxLayout, QWidget, QLineEdit
 
 log = logging.getLogger(__name__)
 
@@ -52,10 +52,10 @@ class PsInfoWidget(QGroupBox):
         self.desc_smap = QLabel("")
         right_labels_layout.addWidget(self.desc_smap)
 
-        self.ww_label = QLabel("")
+        self.ww_label = QLineEdit("")
         right_labels_layout.addWidget(self.ww_label)
 
-        self.wc_label = QLabel("")
+        self.wc_label = QLineEdit("")
         right_labels_layout.addWidget(self.wc_label)
 
         self.dims_label = QLabel("")

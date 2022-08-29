@@ -40,8 +40,8 @@ class MRIImage:
     # window scale
     maxWindowWidth = 2 ** 18 - 1 # 4000
     maxWindowCenter = 2 ** 18 - 1 # 4000
-    minWindowWidth = 0
-    minWindowCenter = 0
+    minWindowWidth = -7000
+    minWindowCenter = -7000
     _window_width = -1
     _window_center = -1
     slices_num = {Orientation.AXIAL: -1,
@@ -126,6 +126,19 @@ class MRIImage:
             raise ValueError
         return self._window_width
 
+    def set_window_width(self, window_width):
+        self._window_width = window_width
+
+    def set_window_center(self, window_center):
+        self._window_center = window_center
+
+
+    def set_default_window_width(self, default_window_width):
+        self._default_window_width = default_window_width
+
+    def set_default_window_center(self, default_window_center):
+        self._default_window_center = default_window_center
+
     def get_window_center(self):
         if self._window_center == -1:
             #     self.init_window()
@@ -133,11 +146,22 @@ class MRIImage:
         return self._window_center
 
     def reset_widow_scale(self):
+        """
+        reset ww, wc to config values if present, otherwise compute them using min max
+        """
         if self.np_matrix is None:
             raise NotSelectedMapError("Synthetic image not selected!")
-        maxval = np.abs(self.np_matrix).max()
-        self._window_width = np.floor(maxval)
-        self._window_center = np.floor(maxval / 2)
+
+        max_val = np.abs(self.np_matrix).max()
+        if self._default_window_center is not None:
+            self._window_center = self._default_window_center
+        else:
+            self._window_center = np.floor(max_val / 2)
+        if self._default_window_width is not None:
+            self._window_width = self._default_window_width
+        else:
+            self._window_width = np.floor(max_val)
+
 
     def add_delta_window_width(self, delta):
         self._window_width -= delta
@@ -146,6 +170,7 @@ class MRIImage:
         elif self._window_width <= self.minWindowWidth:
             self._window_width = self.minWindowWidth
         log.debug("ww: {}".format(self._window_width))
+        return self._window_width
 
     def add_delta_window_center(self, delta):
         self._window_center -= delta
@@ -154,6 +179,7 @@ class MRIImage:
         elif self._window_center <= self.minWindowCenter:
             self._window_center = self.minWindowCenter
         log.debug("wc: {}".format(self._window_center))
+        return self._window_center
 
     def set_orientation(self, orientation):
         self._orientation = orientation
@@ -379,7 +405,7 @@ class Smap(MRIImage):
         img = eval(self._equation)
 
         img = np.nan_to_num(img)
-        # automask
+        # automask TODO
         mask = self.get_mask(dims=dims)
         img[~mask] = 0
 

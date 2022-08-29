@@ -81,6 +81,10 @@ class PsSyntheticImageWidget(QWidget):
         try:
             ww = self.model.get_smap().get_window_width()
             wc = self.model.get_smap().get_window_center()
+            if ww is None or wc is None:
+                self.model.get_smap().reset_widow_scale()
+                ww = self.model.get_smap().get_window_width()
+                wc = self.model.get_smap().get_window_center()
         except ValueError:
             self.model.get_smap().reset_widow_scale()
             ww = self.model.get_smap().get_window_width()

@@ -143,6 +143,12 @@ class PsController:
         # preset changed from menubar image selection
         self.model.c.signal_preset_changed.connect(self.on_clicked_preset_menu)
 
+        # INFO WIDGET
+        self.view.info_widget.wc_label.editingFinished.connect(self.on_editing_finished_window_center)
+        self.view.info_widget.ww_label.editingFinished.connect(self.on_editing_finished_window_width)
+
+
+
     def drag_event_handler(self, qmap_name, event):
         path = event.mimeData().text()
         print(path)
@@ -406,6 +412,30 @@ class PsController:
             self.model.c.signal_update_status_bar.emit("Configuration file correctly reloaded.")
         except Exception as e:
             self.model.c.signal_update_status_bar.emit(e.message)
+
+    def on_editing_finished_window_center(self):
+        log.debug(f"on_editing_finished_window_center")
+        try:
+            value = int(self.view.info_widget.wc_label.text())
+            self.model.set_manual_window_center(value)
+            self.model.reload_smap()
+            # self.model.c.signal_update_status_bar.emit("Window grayscale reset.")
+        except NotSelectedMapError as e:
+            self.model.c.signal_update_status_bar.emit(e.message)
+        except ValueError as e:
+            self.model.c.signal_update_status_bar.emit(str(e))
+
+    def on_editing_finished_window_width(self):
+        log.debug(f"on_editing_finished_window_width")
+        try:
+            value = int(self.view.info_widget.ww_label.text())
+            self.model.set_manual_window_width(value)
+            self.model.reload_smap()
+            # self.model.c.signal_update_status_bar.emit("Window grayscale reset.")
+        except NotSelectedMapError as e:
+            self.model.c.signal_update_status_bar.emit(e.message)
+        except ValueError as e:
+            self.model.c.signal_update_status_bar.emit(str(e))
 
     def on_clicked_default_zoom_and_translation(self):
         self.model.translation_reset()
