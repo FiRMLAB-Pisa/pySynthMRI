@@ -19,8 +19,8 @@
                     "step": 1
                 }
             },
-            "window_center": 664,
-            "window_width": 1784
+            "window_center": 800,
+            "window_width": 2600
         },
         "GRE": {
             "title": "T1w - Gradient Echo ",

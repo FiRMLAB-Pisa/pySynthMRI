@@ -2,6 +2,7 @@
 only controller has write privileges over the model
 """
 import logging
+from math import ceil
 
 from model.psExceptions import NotLoadedMapError, NotSelectedMapError
 from model.psModel import PsModel
@@ -40,6 +41,9 @@ class PsCanvasController:
 
     # CANVAS EVENTS
     def mouse_wheel_handler(self, event):
+        if not self.model.is_sythetic_loaded():
+            self.model.c.signal_update_status_bar.emit(e.message)
+            return
         scroll = event.angleDelta().y()
         if scroll > 0:
             # scrolling forward -> +1 slice
@@ -75,8 +79,12 @@ class PsCanvasController:
 
     def mouse_press_handler(self, event):
         mouse_behaviour = self.model.get_mouse_behaviour()
+        if not self.model.is_sythetic_loaded():
+            self.model.c.signal_update_status_bar.emit("Synthetic image not selected!")
+            return
         if mouse_behaviour == PsModel.MouseBehaviour.WINDOW_SCALE:
             self.last_pos = event.pos()
+            self.start_pos = self.last_pos
         elif mouse_behaviour == PsModel.MouseBehaviour.ZOOM:
             # self.last_pos = event.pos()
             self.model.set_anchor_point(event.pos())
@@ -89,8 +97,12 @@ class PsCanvasController:
 
     def mouse_release_handler(self, event):
         mouse_behaviour = self.model.get_mouse_behaviour()
+        if not self.model.is_sythetic_loaded():
+            self.model.c.signal_update_status_bar.emit("Synthetic image not selected!")
+            return
         if mouse_behaviour == PsModel.MouseBehaviour.WINDOW_SCALE:
             self.last_pos = None
+            self.start_pos = None
         elif mouse_behaviour == PsModel.MouseBehaviour.ZOOM:
             self.last_pos = None
         elif mouse_behaviour == PsModel.MouseBehaviour.SLICE:
@@ -99,19 +111,38 @@ class PsCanvasController:
             self.last_pos = None
 
     def mouse_move_handler(self, event):
-        DELTA_RATIO_WW_WC = 8
+        DELTA_RATIO_WW_WC = 1
+
         mouse_behaviour = self.model.get_mouse_behaviour()
+        if not self.model.is_sythetic_loaded():
+            self.model.c.signal_update_status_bar.emit("Synthetic image not selected!")
+            return
         if mouse_behaviour == PsModel.MouseBehaviour.WINDOW_SCALE:
             curr_pos = event.pos()
             delta_pos = curr_pos - self.last_pos
 
             delta_ww = -1*delta_pos.x()
             delta_wc = delta_pos.y()
-            print(delta_ww, delta_wc)
+
+            ratio_ww = ceil(abs(curr_pos.x() - self.last_pos.x())*.1)
+            ratio_wc = ceil(abs(curr_pos.y() - self.last_pos.y())*.1)
+
             if delta_ww != 0 or delta_wc != 0:
-                self.model.add_delta_window_scale(delta_ww=int(delta_ww * DELTA_RATIO_WW_WC), delta_wc=int(delta_wc * DELTA_RATIO_WW_WC))
+                self.model.add_delta_window_scale(delta_ww=ceil(delta_ww * ratio_ww), delta_wc=ceil(delta_wc * ratio_wc))
 
             self.last_pos = curr_pos
+
+        # if mouse_behaviour == PsModel.MouseBehaviour.WINDOW_SCALE:
+        #     curr_pos = event.pos()
+        #     delta_pos = curr_pos - self.last_pos
+        #
+        #     delta_ww = -1*delta_pos.x()
+        #     delta_wc = delta_pos.y()
+        #
+        #     if delta_ww != 0 or delta_wc != 0:
+        #         self.model.add_delta_window_scale(delta_ww=int(delta_ww * DELTA_RATIO_WW_WC), delta_wc=int(delta_wc * DELTA_RATIO_WW_WC))
+        #
+        #     self.last_pos = curr_pos
 
         elif mouse_behaviour == PsModel.MouseBehaviour.ZOOM:
             if self.last_pos is None:
