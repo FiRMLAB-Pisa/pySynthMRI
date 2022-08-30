@@ -334,6 +334,9 @@ class PsModel:
             smap["qmaps_needed"] = self.config.synth_types[smap_k]["qmaps_needed"]
             smap["window_width"] = self.config.synth_types[smap_k]["window_width"]
             smap["window_center"] = self.config.synth_types[smap_k]["window_center"]
+            smap["default_window_center"] = self.config.synth_types[smap_k]["window_center"]
+            smap["default_window_width"] = self.config.synth_types[smap_k]["window_width"]
+
             for param_k in smap["parameters"]:
                 # all stored smap
                 param = smap["parameters"][param_k]

@@ -119,14 +119,13 @@ class PsCanvasController:
             return
         if mouse_behaviour == PsModel.MouseBehaviour.WINDOW_SCALE:
             curr_pos = event.pos()
-            delta_pos = curr_pos - self.last_pos
+            delta_pos = self.last_pos - curr_pos
 
-            delta_ww = -1*delta_pos.x()
-            delta_wc = -1*delta_pos.y()
+            delta_ww = delta_pos.x()
+            delta_wc = delta_pos.y()
 
             ratio_ww = ceil(abs(curr_pos.x() - self.start_pos.x())*.1)
             ratio_wc = ceil(abs(curr_pos.y() - self.start_pos.y())*.1)
-            print(ratio_wc, ratio_ww)
             if delta_ww != 0 or delta_wc != 0:
                 self.model.add_delta_window_scale(delta_ww=ceil(delta_ww * ratio_ww), delta_wc=ceil(delta_wc * ratio_wc))
 
