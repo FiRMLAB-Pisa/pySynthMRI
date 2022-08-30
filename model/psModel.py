@@ -351,24 +351,35 @@ class PsModel:
         self.reload_smap()
 
     def set_manual_window_width(self, window_width):
-        if isinstance(window_width, int):
+        if isinstance(window_width, float):
             self._smap.set_window_width(window_width)
             self._default_smaps[self._smap.get_map_type()]["window_width"] = window_width
 
     def set_manual_window_center(self, window_center):
-        if isinstance(window_center, int):
+        if isinstance(window_center, float):
             self._smap.set_window_center(window_center)
             self._default_smaps[self._smap.get_map_type()]["window_center"] = window_center
 
     def add_delta_window_scale(self, delta_ww, delta_wc):
         if delta_ww != 0:
-            ww = self._smap.add_delta_window_width(delta_ww)
-            self._default_smaps[self._smap.get_map_type()]["window_width"] = ww
+            try:
+                ww = self._smap.add_delta_window_width(delta_ww)
+                self._default_smaps[self._smap.get_map_type()]["window_width"] = ww
+            except NotSelectedMapError as e:
+                self.c.signal_update_status_bar.emit(e.message)
+                return
 
         if delta_wc != 0:
-            wc = self._smap.add_delta_window_center(delta_wc)
-            self._default_smaps[self._smap.get_map_type()]["window_center"] = wc
+            try:
+                wc = self._smap.add_delta_window_center(delta_wc)
+                self._default_smaps[self._smap.get_map_type()]["window_center"] = wc
+            except NotSelectedMapError as e:
+                self.c.signal_update_status_bar.emit(e.message)
+                return
         self.reload_smap()
+
+    def is_sythetic_loaded(self):
+        return self._smap.np_matrix is not None
 
     def set_slice_num(self, slice_num, coordinate=None):
         self._smap.set_slice_num(slice_num, coordinate)

@@ -415,8 +415,11 @@ class PsController:
 
     def on_editing_finished_window_center(self):
         log.debug(f"on_editing_finished_window_center")
+        if not self.model.is_sythetic_loaded():
+            self.model.c.signal_update_status_bar.emit("Synthetic image not selected!")
+            return
         try:
-            value = int(self.view.info_widget.wc_label.text())
+            value = float(self.view.info_widget.wc_label.text())
             self.model.set_manual_window_center(value)
             self.model.reload_smap()
             # self.model.c.signal_update_status_bar.emit("Window grayscale reset.")
@@ -427,8 +430,11 @@ class PsController:
 
     def on_editing_finished_window_width(self):
         log.debug(f"on_editing_finished_window_width")
+        if not self.model.is_sythetic_loaded():
+            self.model.c.signal_update_status_bar.emit("Synthetic image not selected!")
+            return
         try:
-            value = int(self.view.info_widget.ww_label.text())
+            value = float(self.view.info_widget.ww_label.text())
             self.model.set_manual_window_width(value)
             self.model.reload_smap()
             # self.model.c.signal_update_status_bar.emit("Window grayscale reset.")

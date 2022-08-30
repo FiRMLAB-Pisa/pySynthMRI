@@ -162,23 +162,26 @@ class MRIImage:
         else:
             self._window_width = np.floor(max_val)
 
-
     def add_delta_window_width(self, delta):
+        if self.np_matrix is None:
+            raise NotSelectedMapError("Synthetic image not selected!")
         self._window_width -= delta
         if self._window_width >= self.maxWindowWidth:
             self._window_width = self.maxWindowWidth
         elif self._window_width <= self.minWindowWidth:
             self._window_width = self.minWindowWidth
-        log.debug("ww: {}".format(self._window_width))
+        # log.debug("ww: {}".format(self._window_width))
         return self._window_width
 
     def add_delta_window_center(self, delta):
+        if self.np_matrix is None:
+            raise NotSelectedMapError("Synthetic image not selected!")
         self._window_center -= delta
         if self._window_center >= self.maxWindowCenter:
             self._window_center = self.maxWindowCenter
         elif self._window_center <= self.minWindowCenter:
             self._window_center = self.minWindowCenter
-        log.debug("wc: {}".format(self._window_center))
+        # log.debug("wc: {}".format(self._window_center))
         return self._window_center
 
     def set_orientation(self, orientation):
