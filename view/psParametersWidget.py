@@ -58,10 +58,22 @@ class PsParametersWidget(QWidget):
 
     def reload_all_sliders(self):
         for i in reversed(range(self.slice_slider_layout.count())):
-            self.slice_slider_layout.itemAt(i).widget().setParent(None)
-
+            x = self.slice_slider_layout.itemAt(i).widget()
+            self.slice_slider_layout.removeWidget(x)
+            x.setParent(None)
+            # we need to remove connected slots
+            try:
+                x.sliderQ.valueChanged.disconnect()
+            except Exception:
+                pass
         for i in reversed(range(self.parameters_sliders_layout.count())):
-            self.parameters_sliders_layout.itemAt(i).widget().setParent(None)
+            x = self.parameters_sliders_layout.itemAt(i).widget()
+            self.parameters_sliders_layout.removeWidget(x)
+            x.setParent(None)
+            try:
+                x.sliderQ.valueChanged.disconnect()
+            except Exception:
+                pass
 
         log.debug("update")
         smap = self.model.get_smap()
