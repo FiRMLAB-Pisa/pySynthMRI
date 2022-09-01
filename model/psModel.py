@@ -14,6 +14,7 @@ from view.psSliderParam import PsSliderParam
 
 log = logging.getLogger(__name__)
 
+
 # PROFILELP
 # import cProfile as profile
 # pr = profile.Profile()
@@ -172,6 +173,9 @@ class PsModel:
 
     def get_qmap_matrix(self, qmap_type, dim):
         return self._qmaps[qmap_type].get_matrix(dim)
+
+    def get_preset_list(self):
+        return self.config.presets
 
     def set_orientation(self, orientation):
         # set all orientation
@@ -347,11 +351,13 @@ class PsModel:
                 param["step"] = self.config.synth_types[smap_k]["parameters"][param_k]["step"]
                 param["default"] = self.config.synth_types[smap_k]["parameters"][param_k]["default"]
                 # current loaded smap
-        self.set_smap_type(self._smap.get_map_type())
-        self._smap.set_default_scanner_parameters()
-        self.recompute_smap()
-        self.c.signal_parameters_updated.emit()
-        self.reload_smap()
+
+        if self._smap.get_map_type():
+            self.set_smap_type(self._smap.get_map_type())
+            self._smap.set_default_scanner_parameters()
+            self.recompute_smap()
+            self.c.signal_parameters_updated.emit()
+            self.reload_smap()
 
     def set_manual_window_width(self, window_width):
         if isinstance(window_width, float):
@@ -475,27 +481,37 @@ class PsModel:
     def translation_reset(self):
         self._translated_point = QPoint(0, 0)
 
-    def execute_batch_process(self, root_path):
+    def execute_batch_process(self, input_dir, preset, smaps):
         # iteratively select subject and synthesize images
-        suject_paths = get_subdirs(root_path)
+        suject_paths = get_subdirs(input_dir)
+        qmaps_path = None
+        smaps_path = None
         for subject_path in suject_paths:
             # TODO this is not general
-            qmaps_path = os.path.join(get_subdirs(get_subdirs(get_subdirs(os.path.join(subject_path, "nifti"))[0])[0])[0], 'qmap')
-            qmaps_path = os.path.normpath(qmaps_path)
-            smaps_path = os.path.join(get_subdirs(get_subdirs(get_subdirs(os.path.join(subject_path, "nifti"))[0])[0])[0], 'smap')
-            smaps_path = os.path.normpath(smaps_path)
+            try:
+                qmaps_path = os.path.join(
+                    get_subdirs(get_subdirs(get_subdirs(os.path.join(subject_path, "nifti"))[0])[0])[0], 'qmap')
+                qmaps_path = os.path.normpath(qmaps_path)
+                smaps_path = os.path.join(
+                    get_subdirs(get_subdirs(get_subdirs(os.path.join(subject_path, "nifti"))[0])[0])[0], 'smap')
+                smaps_path = os.path.normpath(smaps_path)
+            except FileNotFoundError as e:
+                self.c.signal_update_status_bar.emit(f"Error processing input directory: {input_dir}")
+                return
+
             if not os.path.exists(smaps_path):
-                os .makedirs(smaps_path)
+                os.makedirs(smaps_path)
 
             # load qmaps, compute all smaps, save smaps
             # 1 load qmaps
             self.update_qmap_batch_path(qmaps_path, file_type=psFileType.NIFTII)
             # 2 compute all smaps
             # get only preset
-            smaps = {k: v for k, v in self._default_smaps.items() if v["preset"] == self._current_preset}
+            smaps = {k: v for k, v in self._default_smaps.items() if k in smaps}
 
             for smap_k in smaps:
-                self.c.signal_update_status_bar.emit(f"Processing subject: {os.path.basename(subject_path)} - map: {smap_k}")
+                self.c.signal_update_status_bar.emit(
+                    f"Processing subject: {os.path.basename(subject_path)} - map: {smap_k}")
                 QApplication.processEvents()
                 self._smap.set_map_type(smap_k)
                 self._smap.set_title(self._default_smaps[smap_k]["title"])
@@ -506,13 +522,54 @@ class PsModel:
                 self._smap.set_equation(self._default_smaps[smap_k]["equation"])
                 self._smap.set_equation_string(self._default_smaps[smap_k]["equation_string"])
 
-
-
                 self.recompute_smap()
-                self.save_smap(os.path.join(smaps_path, smap_k[:-len(" - " + self._current_preset)] + ".nii"), psFileType.NIFTII)
+                self.save_smap(os.path.join(smaps_path, smap_k[:-len(" - " + self._current_preset)] + ".nii"),
+                               psFileType.NIFTII)
             self.c.signal_update_status_bar.emit("All Subjects processed.")
 
         pass
+
+    def execute_batch_process_old(self, root_path):
+        # iteratively select subject and synthesize images
+        suject_paths = get_subdirs(root_path)
+        for subject_path in suject_paths:
+            try:
+                # TODO this is not general
+                qmaps_path = os.path.join(
+                    get_subdirs(get_subdirs(get_subdirs(os.path.join(subject_path, "nifti"))[0])[0])[0], 'qmap')
+                qmaps_path = os.path.normpath(qmaps_path)
+                smaps_path = os.path.join(
+                    get_subdirs(get_subdirs(get_subdirs(os.path.join(subject_path, "nifti"))[0])[0])[0], 'smap')
+                smaps_path = os.path.normpath(smaps_path)
+                if not os.path.exists(smaps_path):
+                    os.makedirs(smaps_path)
+
+                # load qmaps, compute all smaps, save smaps
+                # 1 load qmaps
+                self.update_qmap_batch_path(qmaps_path, file_type=psFileType.NIFTII)
+                # 2 compute all smaps
+                # get only preset
+                smaps = {k: v for k, v in self._default_smaps.items() if v["preset"] == self._current_preset}
+
+                for smap_k in smaps:
+                    self.c.signal_update_status_bar.emit(
+                        f"Processing subject: {os.path.basename(subject_path)} - map: {smap_k}")
+                    QApplication.processEvents()
+                    self._smap.set_map_type(smap_k)
+                    self._smap.set_title(self._default_smaps[smap_k]["title"])
+                    self._smap.set_init_slices_num(self._qmaps[list(self._qmaps.keys())[0]])
+                    # self._smap.set_total_slice_num(self._qmaps[list(self._qmaps.keys())[0]].get_total_slice_num())
+                    self._smap.set_qmaps_needed(self._default_smaps[smap_k]["qmaps_needed"])
+                    self._smap.set_scanner_parameters(self._default_smaps[smap_k]["parameters"])
+                    self._smap.set_equation(self._default_smaps[smap_k]["equation"])
+                    self._smap.set_equation_string(self._default_smaps[smap_k]["equation_string"])
+
+                    self.recompute_smap()
+                    self.save_smap(os.path.join(smaps_path, smap_k[:-len(" - " + self._current_preset)] + ".nii"),
+                                   psFileType.NIFTII)
+                self.c.signal_update_status_bar.emit("All Subjects processed.")
+            except FileNotFoundError as e:
+                self.c.signal_update_status_bar.emit(f"Error processing {e}")
 
 
 def get_subdirs(path):
