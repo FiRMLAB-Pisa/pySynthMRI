@@ -90,7 +90,7 @@ class MRIImage:
     def get_matrix(self, dim):
 
         if self.np_matrix is None:
-            log.debug("Requesting None image")
+            #log.debug("Requesting None image")
             return None
         if self.np_matrix.ndim == 2:
             # smap case is never computed in 3d till save

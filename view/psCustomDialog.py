@@ -1,11 +1,14 @@
 import os
 
+from PyQt5 import QtCore
 from PyQt5.QtCore import Qt
 from PyQt5.QtGui import QPixmap
 from PyQt5.QtWidgets import QDialog, QDialogButtonBox, QVBoxLayout, QLabel, QGroupBox, QFormLayout, QLineEdit, \
-    QTextEdit, QWidget, QHBoxLayout
+    QTextEdit, QWidget, QHBoxLayout, QComboBox, QSpinBox, QListWidget, QAbstractItemView, QSizePolicy, QFileDialog
 
 # import Config
+from model.CheckableComboBox import CheckableComboBox
+from view.psQDoubleQListWidget import psQDoubleQListWidget
 
 
 class SimpleMessageDialog(QDialog):
@@ -301,3 +304,82 @@ class AboutDialog(QDialog):
         layout.addWidget(self.buttonBox)
 
         self.setLayout(layout)
+
+class BatchProcessDialog(QDialog):
+    NumGridRows = 3
+    NumButtons = 4
+    selected_preset = None
+
+    def __init__(self, presets, smap_types):
+        super(BatchProcessDialog, self).__init__()
+        self.createFormGroupBox(presets, smap_types)
+
+        self.selected_preset = None
+        self.selected_smaps = None
+        self.selected_input_dir = None
+
+        buttonBox = QDialogButtonBox(QDialogButtonBox.Ok | QDialogButtonBox.Cancel)
+        buttonBox.accepted.connect(self.accept)
+        buttonBox.rejected.connect(self.reject)
+
+        mainLayout = QVBoxLayout()
+        mainLayout.addWidget(self.formGroupBox)
+        mainLayout.addWidget(buttonBox)
+        self.setLayout(mainLayout)
+
+        self.setWindowTitle("Batch Process")
+
+    def accept(self):
+        self.selected_preset = self.preset_qcombo.currentText()
+        self.selected_smaps = self.smaps_qlist.selectedItems()
+        self.selected_input_dir = self.input_dir_label.text()
+        if self.selected_preset and self.selected_smaps and self.selected_input_dir != "Select input directory":
+            super().accept()
+
+    def createFormGroupBox(self,presets, smap_types):
+        self.smap_types = smap_types
+        self.formGroupBox = QGroupBox("Process information")
+
+        layout = QFormLayout()
+
+        self.preset_qcombo = QComboBox()
+        self.preset_qcombo.activated[str].connect(self.changed_preset)
+        layout.addRow(QLabel("Preset Images:"), self.preset_qcombo)
+        for preset in presets:
+            self.preset_qcombo.addItem(preset)
+
+
+        # self.smaps_qlist = QListWidget()
+        self.smaps_qlist = psQDoubleQListWidget()
+        self.smaps_qlist.setToolTip("""Choose Synthetic images to process.""")
+
+        synth_images_label = QLabel("Synthetic Images:")
+        synth_images_label.setAlignment(QtCore.Qt.AlignLeft | QtCore.Qt.AlignVCenter)
+        synth_images_label.setSizePolicy(QSizePolicy.Expanding, QSizePolicy.Expanding)
+        layout.addRow(synth_images_label, self.smaps_qlist)
+        smap_types = [x for x in smap_types if smap_types[x]["preset"] == self.preset_qcombo.currentText()]
+        self.smaps_qlist.insertItems(smap_types)
+
+
+        self.input_dir_label = QLabel("Select input directory")
+        layout.addRow(QLabel("Input Dir"), self.input_dir_label)
+        self.input_dir_label.mousePressEvent = self.clicked_input_dir_label
+        self.formGroupBox.setLayout(layout)
+
+    def changed_preset(self, preset):
+        self.smaps_qlist.clear()
+        smap_types = [x for x in self.smap_types if self.smap_types[x]["preset"] == preset]
+        self.smaps_qlist.insertItems(smap_types)
+
+    def clicked_input_dir_label(self, event):
+        self.open_batch_process_dialog()
+
+    def open_batch_process_dialog(self):
+        options = QFileDialog.Options()
+        options |= QFileDialog.DontUseNativeDialog
+
+        folderpath =  QFileDialog.getExistingDirectory(self, 'Select Folder that contains subjects subdirectories')
+        if folderpath:
+            self.input_dir_label.setText(folderpath)
+
+

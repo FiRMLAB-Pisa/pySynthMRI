@@ -102,7 +102,8 @@ class PsController:
         # batch process
         self.view.menu_bar.batch_process_action.triggered.connect(self.on_clicked_batch_process_button)
         # batch progress path selected
-        self.view.c.signal_batch_progress_path.connect(self.on_selected_path_batch_process_dialog)
+        self.view.c.signal_batch_progress_path.connect(self.on_selected_path_batch_process_dialog) # TODO REMOVE
+        self.view.c.signal_batch_progress_launch.connect(self.on_selected_launch_batch_process_dialog)
 
         # about
         self.view.menu_bar.about_action.triggered.connect(self.on_clicked_help_button)
@@ -232,11 +233,9 @@ class PsController:
             log.debug("on_clicked_custom_smap_button: cancel operation")
 
     def on_clicked_batch_process_button(self):
-        self.view.open_batch_process_dialog()
-    # def on_custom_smap_added(self, map_type):
-    #     # self.view.menu_bar.add_custom_smap(map_type)
-    #     smap_action = self.view.menu_bar.synth_images_action[map_type]
-    #     smap_action.triggered.connect(functools.partial(self.on_clicked_synth_image_menu, map_type))
+        # select preset, images, output dir
+        self.view.open_batch_process_info_dialog()
+        # self.view.open_batch_process_dialog()
 
     def on_clicked_custom_param_button(self):
         log.debug("on_clicked_custom_param_button")
@@ -410,8 +409,8 @@ class PsController:
         try:
             self.model.reload_configuration_file()
             self.model.c.signal_update_status_bar.emit("Configuration file correctly reloaded.")
-        except Exception as e:
-            self.model.c.signal_update_status_bar.emit(e.message)
+        except KeyError as e:
+            self.model.c.signal_update_status_bar.emit(str(e))
 
     def on_editing_finished_window_center(self):
         log.debug(f"on_editing_finished_window_center")
@@ -448,6 +447,10 @@ class PsController:
         self.model.zoom_reset()
         self.model.c.signal_update_status_bar.emit("Image position and zoom reset.")
 
-    def on_selected_path_batch_process_dialog(self, path):
+    def on_selected_path_batch_process_dialog(self, path):  # TODO REMOVE
         log.debug(f"on_selected_path_batch_progress_dialog: {path}")
         self.model.execute_batch_process(path)
+
+    def on_selected_launch_batch_process_dialog(self, input_dir, preset, smaps):
+        log.debug(f"on_selected_launch_batch_process_dialog: {input_dir} - {preset} - {smaps}")
+        self.model.execute_batch_process(input_dir, preset, smaps)
