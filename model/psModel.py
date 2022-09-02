@@ -15,14 +15,6 @@ from view.psSliderParam import PsSliderParam
 log = logging.getLogger(__name__)
 
 
-# PROFILELP
-# import cProfile as profile
-# pr = profile.Profile()
-# pr.disable()
-# PROFILEPL
-# log.setLevel(LOGGING_LVL)
-
-
 class ModelCommunicate(QObject):
     signal_qmap_updated = pyqtSignal(str)  # qmap_type
     signal_update_status_bar = pyqtSignal(str)  # message
@@ -298,16 +290,19 @@ class PsModel:
         # self.c.signal_smap_updated.emit(smap_type)
 
     def save_parameters(self):
-        map = self.get_smap()
-        if map.get_map_type() != "":
-            parameters = map.get_scanner_parameters()
+        # save all parameters
+        smaps = self.get_smap_list()
+        for smap_k in smaps:
+            parameters = smaps[smap_k]["parameters"]
             # update model
+            ww = smaps[smap_k]["window_width"]
+            wc = smaps[smap_k]["window_center"]
+            preset = smaps[smap_k]["preset"]
             self.update_config_strunct(parameters)
             # update config file
-            return self.update_config_file(self._current_preset, map.get_map_type(),
-                                           parameters)  # TODO use a database for configurations (see trello)
-        else:
-            return False
+
+            self.update_config_file(preset, smap_k, parameters, ww, wc)
+
 
     def update_config_strunct(self, parameters):
         for p_name in parameters:
@@ -315,8 +310,7 @@ class PsModel:
             parameters[p_name]['default'] = p_value
 
     def update_config_file(self, preset, map_type, parameters, ww=None, wc=None):
-        ww = self._smap.get_window_width()
-        wc = self._smap.get_window_center()
+
         return self.config.update_file(preset, map_type, parameters, ww, wc)
 
     def set_default_parameters(self):
@@ -333,7 +327,6 @@ class PsModel:
             smap["title"] = self.config.synth_types[smap_k]["title"]
             smap["equation"] = self.config.synth_types[smap_k]["equation"]
             smap["preset"] = self.config.synth_types[smap_k]["preset"]
-            smap["preset_idx"] = self.config.synth_types[smap_k]["preset_idx"]
             smap["equation_string"] = self.config.synth_types[smap_k]["equation_string"]
             smap["qmaps_needed"] = self.config.synth_types[smap_k]["qmaps_needed"]
             smap["window_width"] = self.config.synth_types[smap_k]["window_width"]
@@ -344,12 +337,13 @@ class PsModel:
             for param_k in smap["parameters"]:
                 # all stored smap
                 param = smap["parameters"][param_k]
-                param["label"] = self.config.synth_types[smap_k]["parameters"][param_k]["label"]
-                param["value"] = self.config.synth_types[smap_k]["parameters"][param_k]["value"]
-                param["min"] = self.config.synth_types[smap_k]["parameters"][param_k]["min"]
-                param["max"] = self.config.synth_types[smap_k]["parameters"][param_k]["max"]
-                param["step"] = self.config.synth_types[smap_k]["parameters"][param_k]["step"]
-                param["default"] = self.config.synth_types[smap_k]["parameters"][param_k]["default"]
+                new_param = self.config.synth_types[smap_k]["parameters"][param_k]
+                param["label"] = new_param["label"]
+                param["value"] = new_param["value"]
+                param["min"] = new_param["min"]
+                param["max"] = new_param["max"]
+                param["step"] = new_param["step"]
+                param["default"] = new_param["default"]
                 # current loaded smap
 
         if self._smap.get_map_type():
@@ -357,6 +351,9 @@ class PsModel:
             self._smap.set_default_scanner_parameters()
             self.recompute_smap()
             self.c.signal_parameters_updated.emit()
+            self.c.signal_parameter_sliders_init_handlers.emit()
+            self.c.signal_slice_slider_oriented.emit(str(self.get_orientation()))
+
             self.reload_smap()
 
     def set_manual_window_width(self, window_width):

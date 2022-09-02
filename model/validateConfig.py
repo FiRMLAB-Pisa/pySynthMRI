@@ -2,6 +2,7 @@ import copy
 import json
 
 from model.MRIImage import Interpolation
+from model.psExceptions import ConfigurationFilePermissionError
 
 CONFIG_FILE_NAME = "config.json"
 class ValidateConfig:
@@ -9,9 +10,9 @@ class ValidateConfig:
         fd = open(CONFIG_FILE_NAME)
         config = json.load(fd)
 
-        self.presets = config["presets"]
-        self.default_preset_idx = 0
-        self.default_preset = self.presets[self.default_preset_idx]
+        self.presets = config["synthetic_images"]
+        self.default_preset = list(self.presets.keys())[0]
+
         self.synth_types = self._parse_synthetic_maps(config)
         self.qmap_types = config["quantitative_maps"]
         self.image_interpolation = config["image_interpolation"]
@@ -26,12 +27,11 @@ class ValidateConfig:
     def _parse_synthetic_maps(self, config):
         # check all available presets
         synth_maps = dict()
-        for preset_idx, preset_key in enumerate(self.presets):
-            for smap_key in config["synthetic_images"]:
+        for preset_key in self.presets:
+            for smap_key in config["synthetic_images"][preset_key]:
                 new_name = smap_key + " - " + preset_key
-                synth_maps[new_name] = copy.deepcopy(config["synthetic_images"][smap_key])
+                synth_maps[new_name] = copy.deepcopy(config["synthetic_images"][preset_key][smap_key])
                 synth_maps[new_name]["preset"] = preset_key
-                synth_maps[new_name]["preset_idx"] = preset_idx
                 # synth_maps[new_name]["label"] = smap_key + " - " + preset_key
         return synth_maps
 
@@ -47,10 +47,7 @@ class ValidateConfig:
 
     def validate_scanner_parameters(self, synth_type):
         scanner_parameters = synth_type["parameters"]
-
         for k in scanner_parameters:
-            if len(scanner_parameters[k]["value"]) != 1:
-                scanner_parameters[k]["value"] = scanner_parameters[k]["value"][synth_type["preset_idx"]]
             scanner_parameters[k]["default"] = scanner_parameters[k]["value"]
 
     def validate_equation(self, synth_type, synth_type_label):
@@ -100,27 +97,23 @@ class ValidateConfig:
             with open(CONFIG_FILE_NAME, "r+") as fd:
                 config = json.load(fd)
                 # remove preset from name
-                clean_map_type = map_type[:-len(" - " + preset)]
-                # compute preset_idx
-                preset_idx = self.get_preset_idx(preset)
-
+                map_type = map_type[:-len(" - " + preset)]
                 # update config struct
-                for parameter in parameters:
-                    p_name = parameter
-                    p_value = parameters[parameter]["value"]
-                    config['synthetic_images'][clean_map_type]['parameters'][p_name]['value'][preset_idx] = p_value
+                for p_name in parameters:
+                    p_value = parameters[p_name]["value"]
+                    config['synthetic_images'][preset][map_type]['parameters'][p_name]['value'] = p_value
 
                 # update ww wc
                 if ww is not None and wc is not None:
-                    config['synthetic_images'][clean_map_type]['window_width'] = ww
-                    config['synthetic_images'][clean_map_type]['window_center'] = wc
+                    config['synthetic_images'][preset][map_type]['window_width'] = ww
+                    config['synthetic_images'][preset][map_type]['window_center'] = wc
                 # rewrite file
                 fd.seek(0)
                 json.dump(config, fd, indent=4)
                 fd.truncate()
                 return True
         except:
-            return False
+            raise ConfigurationFilePermissionError("Error saving configuration file. Check if file exists or if it is locked.")
 
     def get_preset_idx(self, preset):
         return self.presets.index(preset)

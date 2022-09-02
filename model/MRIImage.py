@@ -1,5 +1,6 @@
 import logging
 import os
+import sys
 from enum import Enum
 from pathlib import Path
 
@@ -311,8 +312,15 @@ class Qmap(MRIImage):
         elif self.file_type == psFileType.NIFTII:
             # need conversion
             slices = []
+            # if getattr(sys, 'frozen', False):
+            #     # for executable
+            #     template_path = os.path.join(sys._MEIPASS, 'resources', 'template', 'dicom.dcm')
+            #     print(template_path)
+            # else:
+            template_path = os.path.join('resources', 'template', 'dicom.dcm')
+
+            dicom_file = pydicom.dcmread(template_path)
             for i in range(self.np_matrix.shape[2]):
-                dicom_file = pydicom.dcmread(os.path.join('resources', 'template', 'dicom.dcm'))
                 arr = self.np_matrix[:, :, i].astype('uint16')
                 dicom_file.Rows = arr.shape[0]
                 dicom_file.Columns = arr.shape[1]

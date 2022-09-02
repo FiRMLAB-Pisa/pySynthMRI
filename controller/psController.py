@@ -10,7 +10,7 @@ from PyQt5 import QtCore, QtGui
 from PyQt5.QtCore import QUrl
 from PyQt5.QtGui import QCursor
 
-from model.psExceptions import NotSelectedMapError
+from model.psExceptions import NotSelectedMapError, ConfigurationFilePermissionError
 from model.psFileType import psFileType
 from model.psModel import Qmap, PsModel
 from model.MRIImage import Orientation, Interpolation
@@ -293,12 +293,7 @@ class PsController:
         for slider_key in self.model.slice_slider.keys():
             self.model.slice_slider[slider_key].sliderQ.valueChanged.connect(
                 functools.partial(self.on_change_parameter_slider, self.model.get_smap().map_type, slider_key))
-        # self.model.slice_slider["X"].sliderQ.valueChanged.connect(
-        #     functools.partial(self.on_change_parameter_slider, self.model.get_smap().map_type, "X"))
-        # self.model.slice_slider["Y"].sliderQ.valueChanged.connect(
-        #     functools.partial(self.on_change_parameter_slider, self.model.get_smap().map_type, "Y"))
-        # self.model.slice_slider["Z"].sliderQ.valueChanged.connect(
-        #     functools.partial(self.on_change_parameter_slider, self.model.get_smap().map_type, "Z"))
+
         # connect handlers to all parameters sliders
         parameters = self.model.get_smap().get_scanner_parameters()
         for parameter in parameters:
@@ -393,10 +388,11 @@ class PsController:
             self.view.tool_bar.button_zoom.setChecked(True)  # stay checked
 
     def on_clicked_save_param(self):
-        if self.model.save_parameters():
+        try:
+            self.model.save_parameters()
             self.model.c.signal_update_status_bar.emit("Scanner parameter saved.")
-        else:
-            self.model.c.signal_update_status_bar.emit("Select a synthetic map before saving.")
+        except ConfigurationFilePermissionError as e:
+            self.model.c.signal_update_status_bar.emit(e.message)
 
     def on_clicked_default_param(self):
         try:
