@@ -1,8 +1,8 @@
 import cv2
 import numpy as np
 from PyQt5.QtCore import Qt, QPoint
-from PyQt5.QtGui import QImage, QPixmap, QPainter, QFont, QPen, QFontMetrics
-from PyQt5.QtWidgets import QVBoxLayout, QWidget, QApplication, QLabel
+from PyQt5.QtGui import QImage, QPixmap, QPainter, QFont, QPen
+from PyQt5.QtWidgets import QVBoxLayout, QWidget
 
 from model.MRIImage import Interpolation, Orientation
 from view.psSyntheticCanvas import PsSyntheticCanvas

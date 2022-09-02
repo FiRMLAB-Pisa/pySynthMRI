@@ -18,3 +18,14 @@ class NotSelectedMapError(Exception):
     def __init__(self, message="Synthetic map not generated"):
         self.message = message
         super().__init__(self.message)
+
+
+class ConfigurationFilePermissionError(Exception):
+    """Exception raised when configuration file cannot be read or write
+    Parameters:
+        message: explanation of the error
+    """
+
+    def __init__(self, message="Error accessing configuration file. "):
+        self.message = message
+        super().__init__(self.message)
