@@ -382,4 +382,31 @@ class BatchProcessDialog(QDialog):
         if folderpath:
             self.input_dir_label.setText(folderpath)
 
+class SliderLabelDirectionDialog(QDialog):
+    def __init__(self, smap_type, parameter_type, parent=None):
+        super().__init__(parent)
 
+        self.setWindowTitle(f"Select mouse behaviour for parameter {parameter_type}")
+        layout = QVBoxLayout()
+
+        title = QLabel(f"Select mouse behaviour for parameter {parameter_type}")
+
+        self.combo = QComboBox()
+        self.combo.addItem("Vertical")
+        self.combo.addItem("Horizontal")
+        layout.addWidget(title)
+        layout.addWidget(self.combo)
+        self.setLayout(layout)
+        QBtn = QDialogButtonBox.Ok | QDialogButtonBox.No
+        buttonBox = QDialogButtonBox(QBtn)
+        buttonBox.accepted.connect(self.accept)
+        buttonBox.rejected.connect(self.reject)
+        layout.addWidget(buttonBox)
+
+    def accept(self) -> None:
+        self.direction = self.combo.currentText()
+        super(SliderLabelDirectionDialog, self).accept()
+
+    def reject(self) -> None:
+        self.direction = None
+        super(SliderLabelDirectionDialog, self).reject()

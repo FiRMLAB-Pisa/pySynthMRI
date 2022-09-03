@@ -72,6 +72,8 @@ class PsParametersWidget(QWidget):
             x.setParent(None)
             try:
                 x.sliderQ.valueChanged.disconnect()
+                x.h_button.clicked.disconnect()
+                x.v_button.clicked.disconnect()
             except Exception:
                 pass
 

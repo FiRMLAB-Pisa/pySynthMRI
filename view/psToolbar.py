@@ -48,9 +48,25 @@ class PsToolbar(QToolBar):
             # }
              """)
 
-        # MOUSE GROUP LABEL
-        self.label_mouse = QLabel(" Mouse: ")
-        self.label_mouse.setStyleSheet("QLabel {color : #999; }")
+        # SAVE NIFTII
+        self.button_save_niftii = QPushButton()
+        self.button_save_niftii.setIconSize(self.BUTTON_SIZE)
+        self.button_save_niftii.setCheckable(False)
+        self.button_save_niftii.setCursor(QCursor(QtCore.Qt.PointingHandCursor))
+        icon_save_niftii = QIcon()
+        icon_save_niftii.addPixmap(QPixmap(":/icons/save_niftii.png"), QIcon.Normal, QIcon.On)
+        self.button_save_niftii.setIcon(icon_save_niftii)
+        self.button_save_niftii.setToolTip("Save current synthetic image as Niftii file")
+
+        # SAVE DICOM
+        self.button_save_dicom = QPushButton()
+        self.button_save_dicom.setIconSize(self.BUTTON_SIZE)
+        self.button_save_dicom.setCheckable(False)
+        self.button_save_dicom.setCursor(QCursor(QtCore.Qt.PointingHandCursor))
+        icon_save_dicom = QIcon()
+        icon_save_dicom.addPixmap(QPixmap(":/icons/save_dicom.png"), QIcon.Normal, QIcon.On)
+        self.button_save_dicom.setIcon(icon_save_dicom)
+        self.button_save_dicom.setToolTip("Save current synthetic image as Dicom folder")
 
         # WINDOW SCALE MOUSE
         self.button_window_grayscale = QPushButton()
@@ -172,6 +188,17 @@ class PsToolbar(QToolBar):
                                         "font-size: 16pt")
         # self.preset_label.setFixedHeight(self.BUTTON_SIZE.height())
 
+
+        # H V LABELS
+        self.button_h_v_mouse = QPushButton()
+        self.button_h_v_mouse.setIconSize(self.BUTTON_SIZE)
+        self.button_h_v_mouse.setCheckable(True)
+        self.button_h_v_mouse.setCursor(QCursor(QtCore.Qt.PointingHandCursor))
+        icon_zoom = QIcon()
+        icon_zoom.addPixmap(QPixmap(":/cursors/center-of-gravity-80.png"), QIcon.Normal, QIcon.On)
+        self.button_h_v_mouse.setIcon(icon_zoom)
+        self.button_h_v_mouse.setToolTip("This mode allows to change parameter using Ctrl+muouse")
+
         # SYNTH IMAGES
         self.synth_images_buttons = dict()
         self.synth_images_actions = dict()
@@ -197,31 +224,10 @@ class PsToolbar(QToolBar):
             self.synth_images_buttons[smap_key] = smap_button
             self.smap_group_buttons.addButton(smap_button)
 
-        # SAVE NIFTII
-        self.button_save_niftii = QPushButton()
-        self.button_save_niftii.setIconSize(self.BUTTON_SIZE)
-        self.button_save_niftii.setCheckable(False)
-        self.button_save_niftii.setCursor(QCursor(QtCore.Qt.PointingHandCursor))
-        icon_save_niftii = QIcon()
-        icon_save_niftii.addPixmap(QPixmap(":/icons/save_niftii.png"), QIcon.Normal, QIcon.On)
-        self.button_save_niftii.setIcon(icon_save_niftii)
-        self.button_save_niftii.setToolTip("Save current synthetic image as Niftii file")
-
-        # SAVE DICOM
-        self.button_save_dicom = QPushButton()
-        self.button_save_dicom.setIconSize(self.BUTTON_SIZE)
-        self.button_save_dicom.setCheckable(False)
-        self.button_save_dicom.setCursor(QCursor(QtCore.Qt.PointingHandCursor))
-        icon_save_dicom = QIcon()
-        icon_save_dicom.addPixmap(QPixmap(":/icons/save_dicom.png"), QIcon.Normal, QIcon.On)
-        self.button_save_dicom.setIcon(icon_save_dicom)
-        self.button_save_dicom.setToolTip("Save current synthetic image as Dicom folder")
-
         # LAYOUT
         self.addWidget(self.button_save_niftii)
         self.addWidget(self.button_save_dicom)
         self.addSeparator()
-        # self.addWidget(self.label_mouse)
         self.addWidget(self.button_window_grayscale)
         self.addWidget(self.button_window_grayscale_default)
         self.addSeparator()
@@ -230,6 +236,8 @@ class PsToolbar(QToolBar):
         self.addWidget(self.button_default_zoom)
         self.addSeparator()
         self.addWidget(self.button_slicer)
+        self.addSeparator()
+        self.addWidget(self.button_h_v_mouse)
         self.addSeparator()
         # self.addWidget(self.label_parameters)
         self.addWidget(self.button_save_param)

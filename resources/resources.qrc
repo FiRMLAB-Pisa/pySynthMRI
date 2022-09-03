@@ -21,6 +21,8 @@
 </qresource>
 <qresource prefix="cursors">
         <file alias="zoom_cursor_w.png">cursors/zoom_cursor_w.png</file>
+        <file alias="center-of-gravity-80.png">cursors/center-of-gravity-80.png</file>
+        <file alias="center-of-gravity-32.png">cursors/center-of-gravity-32.png</file>
 </qresource>
 
 </RCC>

@@ -191,6 +191,9 @@ class MRIImage:
     def get_orientation(self):
         return self._orientation
 
+    def get_parameter_slider(self, param_k):
+        return self._parameters[param_k]["slider"]
+
     def set_slice_num(self, slices_num, coordinate=None):
         if slices_num < 0:
             slices_num = self.get_total_slices_num() - 1
@@ -352,11 +355,12 @@ class Smap(MRIImage):
         self._title = ""
         self._equation_string = ""
         self._orientation_labels_flag = True
+        self._vertical_parameter = None
+        self._horizontal_parameter = None
+
 
     def set_map_type(self, map_type):
         super(Smap, self).set_map_type(map_type)
-
-        # self.recompute_smap(dims=2)
 
     def set_equation(self, equation):
         self._equation = equation
@@ -381,6 +385,7 @@ class Smap(MRIImage):
     def get_scanner_parameters(self):
         return self._parameters
 
+
     def set_title(self, title):
         self._title = title
 
@@ -402,6 +407,48 @@ class Smap(MRIImage):
             except KeyError:
                 missing_qmaps.append(qmap)
         return missing_qmaps
+
+    def set_vertical_parameter(self, v_param):
+        if self._horizontal_parameter == v_param:
+            self._horizontal_parameter = None
+        self._vertical_parameter = v_param
+
+    def get_vertical_parameter(self):
+        return self._vertical_parameter
+
+    def set_horizontal_parameter(self, h_param):
+        if self._vertical_parameter == h_param:
+            self._vertical_parameter = None
+        self._horizontal_parameter = h_param
+
+    def get_horizontal_parameter(self):
+        return self._horizontal_parameter
+
+    def get_horizontal_parameter_value(self):
+        if self._horizontal_parameter is None:
+            return None
+        return self._parameters[self._horizontal_parameter]["value"]
+
+    def get_vertical_parameter_value(self):
+        if self._vertical_parameter is None:
+            return None
+        return self._parameters[self._vertical_parameter]["value"]
+
+    def set_vertical_parameter_value(self, v_param):
+        if v_param < self._parameters[self._vertical_parameter]["min"]:
+            v_param = self._parameters[self._vertical_parameter]["min"]
+        elif v_param > self._parameters[self._vertical_parameter]["max"]:
+            v_param = self._parameters[self._vertical_parameter]["max"]
+        self._parameters[self._vertical_parameter]["value"] = v_param
+        return v_param
+
+    def set_horizontal_parameter_value(self, h_param):
+        if h_param < self._parameters[self._horizontal_parameter]["min"]:
+            h_param = self._parameters[self._horizontal_parameter]["min"]
+        elif h_param > self._parameters[self._horizontal_parameter]["max"]:
+            h_param = self._parameters[self._horizontal_parameter]["max"]
+        self._parameters[self._horizontal_parameter]["value"] = h_param
+        return h_param
 
     def recompute_smap(self, dims=2):
         # eval equation

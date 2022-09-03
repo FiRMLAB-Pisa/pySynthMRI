@@ -1,12 +1,14 @@
 import logging
 
 from PyQt5.QtCore import Qt, QObject, pyqtSignal
+from PyQt5.QtGui import QPalette, QColor
 from PyQt5.QtWidgets import QGridLayout, QWidget, QVBoxLayout, QMainWindow, QFrame, QFileDialog, QAction
 
 from model.psFileType import psFileType
 from view.psCustomDialog import BatchProcessDialog
 from view.psInfoWidget import PsInfoWidget
 from view.psNavbar import PsNavbar
+from view.psParameterGraph import PsParameterGraph
 from view.psParametersWidget import PsParametersWidget
 from view.psQMapWidget import PsQMapWidget
 from view.psSyntheticImageWidget import PsSyntheticImageWidget
@@ -23,7 +25,7 @@ class MainWindowCommunicate(QObject):
     signal_update_qmap_path = pyqtSignal(str, str, str)
     signal_update_batch_qmap_path = pyqtSignal(str, str)
     signal_saving_smap = pyqtSignal(str, str)
-    signal_batch_progress_path = pyqtSignal(str) # TODO REMOVE
+    signal_batch_progress_path = pyqtSignal(str)  # TODO REMOVE
     signal_batch_progress_launch = pyqtSignal(str, str, list)
     # signal_custom_smap_added_to_navbar = pyqtSignal(str)
 
@@ -77,48 +79,51 @@ class PsMainWindow(QMainWindow):
         self.generalLayout.setColumnStretch(0, 2)
         self.generalLayout.setColumnStretch(1, 4)
         self.generalLayout.setColumnStretch(2, 1)
+        self.qframes = []
+        for y in range(3):
 
-        for x in range(1):
-            for y in range(3):
-                qframe = QFrame()
-                qframe.setLineWidth(2)
-                qframe.setFrameStyle(QFrame.Panel | QFrame.Raised)
+            qframe = QFrame()
+            self.qframes.append(qframe)
+            qframe.setLineWidth(2)
+            qframe.setFrameStyle(QFrame.Panel | QFrame.Raised)
 
-                self.generalLayout.addWidget(qframe, x, y)
-                # the 3rd column contains HverticalLayout with qmaps
-                if y == 0:
-                    left_side_widget_layout = QVBoxLayout()
+            self.generalLayout.addWidget(qframe, 0, y)
+            # the 3rd column contains HverticalLayout with qmaps
+            if y == 0:
+                left_side_widget_layout = QVBoxLayout()
 
-                    parameters_widget_group = PsParametersWidget(self.model)
-                    left_side_widget_layout.addWidget(parameters_widget_group)
+                parameters_widget_group = PsParametersWidget(self.model)
+                left_side_widget_layout.addWidget(parameters_widget_group)
 
-                    left_side_widget_layout.addStretch(1)
+                self.parameter_graph_widget = PsParameterGraph(self.model)
+                left_side_widget_layout.addWidget(self.parameter_graph_widget)
 
-                    # info
-                    self.info_widget = PsInfoWidget("Synthetic Image Info", self.model)
+                left_side_widget_layout.addStretch(1)
 
-                    left_side_widget_layout.addWidget(self.info_widget)
+                # info
+                self.info_widget = PsInfoWidget("Synthetic Image Info", self.model)
+                left_side_widget_layout.addWidget(self.info_widget)
 
-                    qframe.setLayout(left_side_widget_layout)
-                    # info text
+                qframe.setLayout(left_side_widget_layout)
+                # info text
 
-                if y == 1:
-                    # synthetic image
-                    smap_widget_groups = QVBoxLayout()
-                    # smap_widget_groups.addWidget(QLabel("Synthetic Image", alignment=Qt.AlignCenter))
-                    self.smap_view = PsSyntheticImageWidget(self.model)  # TODO rimettere
-                    # self.smap_view = ImageViewer(self.model)  #TODO rimuovere
+            if y == 1:
+                # synthetic image
+                smap_widget_groups = QVBoxLayout()
+                # smap_widget_groups.addWidget(QLabel("Synthetic Image", alignment=Qt.AlignCenter))
+                self.smap_view = PsSyntheticImageWidget(self.model)  # TODO rimettere
+                # self.smap_view = ImageViewer(self.model)  #TODO rimuovere
 
-                    smap_widget_groups.addWidget(self.smap_view)
-                    qframe.setLayout(smap_widget_groups)
-                elif y == 2:
-                    # quantitative images
-                    qmaps_widget_groups = QVBoxLayout()
-                    for qmap in self.model.get_qmap_types():
-                        self.qmap_view[qmap] = PsQMapWidget(self.model.get_qmap(qmap), self.model)
-                        qmaps_widget_groups.addWidget(self.qmap_view[qmap])
+                smap_widget_groups.addWidget(self.smap_view)
+                qframe.setLayout(smap_widget_groups)
+            elif y == 2:
+                # quantitative images
+                qmaps_widget_groups = QVBoxLayout()
+                for qmap in self.model.get_qmap_types():
+                    self.qmap_view[qmap] = PsQMapWidget(self.model.get_qmap(qmap), self.model)
+                    qmaps_widget_groups.addWidget(self.qmap_view[qmap])
 
-                    qframe.setLayout(qmaps_widget_groups)
+                qframe.setLayout(qmaps_widget_groups)
 
         self.setCentralWidget(self._centralWidget)
 
@@ -248,7 +253,8 @@ class PsMainWindow(QMainWindow):
         dlg = BatchProcessDialog(presets, smaps)
         res = dlg.exec_()
         if res:
-            self.c.signal_batch_progress_launch.emit(dlg.selected_input_dir, dlg.selected_preset, dlg.selected_smaps) # path, preset, smaps
+            self.c.signal_batch_progress_launch.emit(dlg.selected_input_dir, dlg.selected_preset,
+                                                     dlg.selected_smaps)  # path, preset, smaps
 
     # def open_batch_process_dialog(self):
     #     options = QFileDialog.Options()

@@ -46,9 +46,20 @@ class ValidateConfig:
             image_interpolation["interpolation_type"] = Interpolation.NONE
 
     def validate_scanner_parameters(self, synth_type):
+        synth_type["mouse_v"] = None
+        synth_type["mouse_h"] = None
         scanner_parameters = synth_type["parameters"]
-        for k in scanner_parameters:
+        for idx, k in enumerate(scanner_parameters):
             scanner_parameters[k]["default"] = scanner_parameters[k]["value"]
+            if idx == 0:
+                scanner_parameters[k]["mouse"] = "V"
+                synth_type["mouse_v"] = k
+            elif idx == 1:
+                scanner_parameters[k]["mouse"] = "H"
+                synth_type["mouse_h"] = k
+            else:
+                scanner_parameters[k]["mouse"] = "N"
+
 
     def validate_equation(self, synth_type, synth_type_label):
         symbols = ["exp", "abs", "sqrt", "cos", "sin", "tan"]
