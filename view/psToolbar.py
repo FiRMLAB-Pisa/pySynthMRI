@@ -13,6 +13,7 @@ class PsToolbar(QToolBar):
     def __init__(self, model, parent=None):
         super(QToolBar, self).__init__(parent)
         self.model = model
+        self.button_activated = True
         self.setContextMenuPolicy(Qt.PreventContextMenu)
         self.setMovable(True)
         self.setStyleSheet(
@@ -258,6 +259,8 @@ class PsToolbar(QToolBar):
         spacer.setSizePolicy(QSizePolicy.Expanding, QSizePolicy.Expanding)
         self.addWidget(spacer)
         self.addWidget(self.preset_label)
+        self.toggle_toolbar_buttons(False)
+        self.autotoggle_smaps_buttons()
 
     def activate_unique_smap_button(self, smap):
         self.synth_images_buttons[smap].setChecked(True)
@@ -292,3 +295,25 @@ class PsToolbar(QToolBar):
     def set_preset_label(self, preset):
         self.preset_label.setText(preset)
 
+    def toggle_toolbar_buttons(self, activate):
+        changed = not(activate == self.button_activated)
+        self.button_activated = activate
+        if changed:
+            self.button_save_niftii.setEnabled(activate)
+            self.button_save_dicom.setEnabled(activate)
+            self.button_window_grayscale.setEnabled(activate)
+            self.button_window_grayscale_default.setEnabled(activate)
+            self.button_zoom.setEnabled(activate)
+            self.button_translate.setEnabled(activate)
+            self.button_default_zoom.setEnabled(activate)
+            self.button_slicer.setEnabled(activate)
+            self.button_h_v_mouse.setEnabled(activate)
+            self.button_save_param.setEnabled(activate)
+            self.button_default_param.setEnabled(activate)
+            self.button_reload_config.setEnabled(activate)
+            # self._toggle_smaps_buttons(activate)
+
+    def autotoggle_smaps_buttons(self):
+        for sib in self.synth_images_buttons:
+            has_all_qmaps = not self.model.has_missing_qmap(sib)
+            self.synth_images_buttons[sib].setEnabled(has_all_qmaps)

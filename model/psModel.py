@@ -100,6 +100,15 @@ class PsModel:
         # return self.properties["curr_smap_type"]
         return self._smap.get_map_type()
 
+    def has_missing_qmap(self, smap):
+        for qmap in self._default_smaps[smap]["qmaps_needed"]:
+            try:
+                if not self._qmaps[qmap].is_loaded:
+                    return True
+            except KeyError:
+                return True
+        return False
+
     def update_qmap_batch_path(self, root_path, file_type):
         # foreach qmap defined in config.json
         for qmap_type in self._qmaps:
@@ -282,8 +291,8 @@ class PsModel:
         self._smap.set_window_width(self._default_smaps[smap_type]["window_width"])
         self._smap.set_default_window_center(self._default_smaps[smap_type]["default_window_center"])
         self._smap.set_default_window_width(self._default_smaps[smap_type]["default_window_width"])
-        self._smap.set_horizontal_parameter(self._default_smaps[smap_type]["mouse_h"])
-        self._smap.set_vertical_parameter(self._default_smaps[smap_type]["mouse_v"])
+        self._smap.set_parameter(self._default_smaps[smap_type]["mouse_h"], "h")
+        self._smap.set_parameter(self._default_smaps[smap_type]["mouse_v"], "v")
 
         # update preset
         self._current_preset = self._default_smaps[smap_type]['preset']
@@ -330,31 +339,19 @@ class PsModel:
             for param_k in parameters:
                 parameters[param_k]['slider'].show_v_h_buttons(checked)
 
-    def set_horizontal_parameter_value(self, h_value):
-        h_value = self._smap.set_horizontal_parameter_value(h_value)
-        if self.get_horizontal_parameter_value() is not None and self.get_vertical_parameter_value() is not None:
-            self.c.signal_update_parameter_value_graph.emit()
-        return h_value
 
-    def set_vertical_parameter_value(self, v_value):
-        v_value = self._smap.set_vertical_parameter_value(v_value)
-        if self.get_horizontal_parameter_value() is not None and self.get_vertical_parameter_value() is not None:
+    def set_parameter_value(self, v_value, direction):
+        v_value = self._smap.set_parameter_value(v_value, direction)
+        if self.get_parameter("h") is not None and self.get_parameter_value("v") is not None:
             self.c.signal_update_parameter_value_graph.emit()
         return v_value
 
-    def set_horizontal_mouse_parameter(self, smap_type, parameter_type):
-        self.get_smap().set_horizontal_parameter(parameter_type)
+    def set_mouse_parameter(self, parameter_type, direction):
+        self.get_smap().set_parameter(parameter_type, direction)
         self.c.signal_update_parameter_type_graph.emit()
 
-    def set_vertical_mouse_parameter(self, smap_type, parameter_type):
-        self.get_smap().set_vertical_parameter(parameter_type)
-        self.c.signal_update_parameter_type_graph.emit()
-
-    def get_parameter_details(self, axis):
-        if axis == "h":
-            param = self.get_horizontal_parameter()
-        elif axis == "v":
-            param = self.get_vertical_parameter()
+    def get_parameter_details(self, direction):
+        param = self.get_parameter(direction)
         if param is None:
             return None
         min = self.get_smap().get_scanner_parameters()[param]["min"]
@@ -364,35 +361,19 @@ class PsModel:
         label = param
         return min, max, default, value, label
 
-    def modify_h_parameters_mouse(self, h_param_delta):
-        parameter = self.get_horizontal_parameter()
+    def modify_mouse_parameters(self, h_param_delta, direction):
+        parameter = self.get_parameter(direction)
         if parameter is not None:
-            new_h_param = self.get_horizontal_parameter_value() + h_param_delta
-            new_h_param = self.set_horizontal_parameter_value(new_h_param)
-            slider = self._smap.get_parameter_slider(self._smap.get_horizontal_parameter())
+            new_h_param = self.get_parameter_value(direction) + h_param_delta
+            new_h_param = self.set_parameter_value(new_h_param, direction)
+            slider = self._smap.get_parameter_slider(self._smap.get_parameter(direction))
             slider.sliderQ.setValue(new_h_param)
 
-    def modify_v_parameters_mouse(self, v_param_delta):
-        parameter = self.get_vertical_parameter()
-        if parameter is not None:
-            new_v_param = self.get_vertical_parameter_value() + v_param_delta
-            new_v_param = self.set_vertical_parameter_value(new_v_param)
-            slider = self._smap.get_parameter_slider(self._smap.get_vertical_parameter())
-            # slider.sliderQ.blockSignals(True)
-            slider.sliderQ.setValue(new_v_param)
-            # slider.sliderQ.blockSignals(False)
+    def get_parameter_value(self, direction):
+        return self._smap.get_parameter_value(direction)
 
-    def get_horizontal_parameter_value(self):
-        return self._smap.get_horizontal_parameter_value()
-
-    def get_vertical_parameter_value(self):
-        return self._smap.get_vertical_parameter_value()
-
-    def get_horizontal_parameter(self):
-        return self._smap.get_horizontal_parameter()
-
-    def get_vertical_parameter(self):
-        return self._smap.get_vertical_parameter()
+    def get_parameter(self, direction: str):
+        return self._smap.get_parameter(direction)
 
     def update_config_strunct(self, parameters):
         for p_name in parameters:
@@ -412,29 +393,35 @@ class PsModel:
 
     def reload_configuration_file(self):
         self.config = ValidateConfig()
-        for smap_k in self._default_smaps:
-            smap = self._default_smaps[smap_k]
-            smap["title"] = self.config.synth_types[smap_k]["title"]
-            smap["equation"] = self.config.synth_types[smap_k]["equation"]
-            smap["preset"] = self.config.synth_types[smap_k]["preset"]
-            smap["equation_string"] = self.config.synth_types[smap_k]["equation_string"]
-            smap["qmaps_needed"] = self.config.synth_types[smap_k]["qmaps_needed"]
-            smap["window_width"] = self.config.synth_types[smap_k]["window_width"]
-            smap["window_center"] = self.config.synth_types[smap_k]["window_center"]
-            smap["default_window_center"] = self.config.synth_types[smap_k]["window_center"]
-            smap["default_window_width"] = self.config.synth_types[smap_k]["window_width"]
+        for smap_k in self.config.synth_types:
+            smap_new_conf = self.config.synth_types[smap_k]
+            if smap_k in self._default_smaps:
+                # this smap already exists
+                smap = self._default_smaps[smap_k]
+                smap["title"] = smap_new_conf["title"]
+                smap["equation"] = smap_new_conf["equation"]
+                smap["preset"] = smap_new_conf["preset"]
+                smap["equation_string"] = smap_new_conf["equation_string"]
+                smap["qmaps_needed"] = smap_new_conf["qmaps_needed"]
+                smap["window_width"] = smap_new_conf["window_width"]
+                smap["window_center"] = smap_new_conf["window_center"]
+                smap["default_window_center"] = smap_new_conf["window_center"]
+                smap["default_window_width"] = smap_new_conf["window_width"]
 
-            for param_k in smap["parameters"]:
-                # all stored smap
-                param = smap["parameters"][param_k]
-                new_param = self.config.synth_types[smap_k]["parameters"][param_k]
-                param["label"] = new_param["label"]
-                param["value"] = new_param["value"]
-                param["min"] = new_param["min"]
-                param["max"] = new_param["max"]
-                param["step"] = new_param["step"]
-                param["default"] = new_param["default"]
-                # current loaded smap
+                for param_k in smap["parameters"]:
+                    # all stored smap
+                    param = smap["parameters"][param_k]
+                    new_param = smap_new_conf["parameters"][param_k]
+                    param["label"] = new_param["label"]
+                    param["value"] = new_param["value"]
+                    param["min"] = new_param["min"]
+                    param["max"] = new_param["max"]
+                    param["step"] = new_param["step"]
+                    param["default"] = new_param["default"]
+
+            else: # new smap
+                self._default_smaps[smap_k] = smap_new_conf
+
 
         if self._smap.get_map_type():
             self.set_smap_type(self._smap.get_map_type())

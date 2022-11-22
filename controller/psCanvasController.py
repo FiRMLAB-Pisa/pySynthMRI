@@ -7,8 +7,8 @@ from math import ceil
 
 from PyQt5 import QtGui, QtCore
 from PyQt5.QtCore import Qt
-from PyQt5.QtGui import QPalette, QColor, QCursor
-from PyQt5.QtWidgets import QApplication, QFrame
+from PyQt5.QtGui import QCursor
+from PyQt5.QtWidgets import QApplication
 
 from model.psExceptions import NotLoadedMapError, NotSelectedMapError
 from model.psModel import PsModel
@@ -45,6 +45,8 @@ class PsCanvasController:
         self.view.smap_view.canvas.c.mouse_release_sgn.connect(self.mouse_release_handler)
         self.view.smap_view.canvas.c.mouse_move_sgn.connect(self.mouse_move_handler)
         self.view.smap_view.canvas.c.keyboard_pressed_sgn.connect(self.keyboard_press_handler)
+        self.view.keyPressEvent = self.keyboard_press_handler
+        self.view.keyReleaseEvent = self.keyboard_release_handler
         self.view.smap_view.canvas.c.keyboard_released_sgn.connect(self.keyboard_release_handler)
         self.view.smap_view.canvas.c.focus_in_sgn.connect(self.focus_in_handler)
         self.view.smap_view.canvas.c.focus_out_sgn.connect(self.focus_out_handler)
@@ -93,6 +95,7 @@ class PsCanvasController:
         if modifiers == Qt.ControlModifier:
             # parameters behavious overrides others (Ctrl+click)
             #log.debug("Ctrl+click")
+            #self.view.smap_view.setCursor(QCursor(QtGui.QPixmap(':cursors/center-of-gravity-32-w-s.png')))
             self.last_pos = self.start_pos = event.pos()
         else:
             mouse_behaviour = self.model.get_mouse_behaviour()
@@ -147,25 +150,25 @@ class PsCanvasController:
             v_validate = abs((curr_pos - self.start_pos).y()) > range_validate
 
             perc_step = .005  # 2%
-            v_param = self.model.get_smap().get_vertical_parameter()
+            v_param = self.model.get_smap().get_parameter("v")
             if v_param_delta != 0 and v_validate and v_param is not None:
-                param = self.model.get_smap().get_scanner_parameters()[self.model.get_smap().get_vertical_parameter()]
+                param = self.model.get_smap().get_scanner_parameters()[self.model.get_smap().get_parameter("v")]
                 range_param = param["max"] - param["min"]
                 if v_param_delta < 0:
                     v_param_delta_perc = -1*math.ceil(range_param * perc_step)
                 elif v_param_delta > 0:
                     v_param_delta_perc = math.ceil(range_param * perc_step)
-                self.model.modify_v_parameters_mouse(v_param_delta_perc)
+                self.model.modify_mouse_parameters(v_param_delta_perc, "v")
 
-            h_param = self.model.get_smap().get_horizontal_parameter()
+            h_param = self.model.get_smap().get_parameter("h")
             if h_param_delta != 0 and h_validate and h_param is not None:
-                param = self.model.get_smap().get_scanner_parameters()[self.model.get_smap().get_horizontal_parameter()]
+                param = self.model.get_smap().get_scanner_parameters()[self.model.get_smap().get_parameter("h")]
                 range_param = param["max"] - param["min"]
                 if h_param_delta < 0:
                     h_param_delta_perc = -1*math.ceil(range_param * perc_step)
                 elif h_param_delta > 0:
                     h_param_delta_perc = math.ceil(range_param * perc_step)
-                self.model.modify_h_parameters_mouse(h_param_delta_perc)
+                self.model.modify_mouse_parameters(h_param_delta_perc, "h")
 
             self.last_pos = curr_pos
 
@@ -245,9 +248,12 @@ class PsCanvasController:
                 self.last_pos = curr_pos
 
     def keyboard_press_handler(self, event):
+        self.model.c.signal_update_status_bar.emit("1")
         if event.modifiers() & Qt.ControlModifier :
+            self.model.c.signal_update_status_bar.emit("2")
             if self.model.is_h_v_parameter_interaction():
-                self.view.smap_view.setCursor(QCursor(QtGui.QPixmap(':cursors/center-of-gravity-32.png')))
+                self.model.c.signal_update_status_bar.emit("3")
+                self.view.smap_view.setCursor(QCursor(QtGui.QPixmap(':cursors/center-of-gravity-32-w-s.png')))
 
     def keyboard_release_handler(self, event):
         if event.key() == Qt.Key_Control and self.model.is_h_v_parameter_interaction():
@@ -257,24 +263,24 @@ class PsCanvasController:
             elif behaviour_mouse == self.model.MouseBehaviour.ZOOM:
                 self.view.smap_view.setCursor(QCursor(QtGui.QPixmap(':cursors/zoom_cursor_w.png')))
             elif behaviour_mouse == self.model.MouseBehaviour.SLICE:
-                self.view.smap_view.setCursor(QCursor(QtCore.Qt.PointingHandCursor))
+                self.view.smap_view.setCursor(QCursor(QtCore.Qt.SizeVerCursor))
             elif behaviour_mouse == self.model.MouseBehaviour.TRANSLATE:
-                self.view.smap_view.setCursor(QCursor(QtCore.Qt.PointingHandCursor))
+                self.view.smap_view.setCursor(QCursor(QtCore.Qt.SizeAllCursor))
             else:
                 self.view.smap_view.setCursor(QCursor(QtCore.Qt.ArrowCursor))
 
     def focus_in_handler(self, event):
-        canvasFrame = self.view.qframes[1]
-        canvasFrame.setFrameShadow(QFrame.Plain)
-        pal = canvasFrame.palette()
-        pal.setColor(QPalette.WindowText, QColor("red"))
-        canvasFrame.setPalette(pal)
-        print("get focus")
+        # canvasFrame = self.view.qframes[1]
+        # canvasFrame.setFrameShadow(QFrame.Plain)
+        # pal = canvasFrame.palette()
+        # pal.setColor(QPalette.WindowText, QColor("red"))
+        # canvasFrame.setPalette(pal)
+        pass
 
     def focus_out_handler(self, event):
-        canvasFrame = self.view.qframes[1]
-        canvasFrame.setFrameShadow(QFrame.Plain)
-        pal = canvasFrame.palette()
-        pal.setColor(QPalette.WindowText, QColor(170, 172, 191))
-        canvasFrame.setPalette(pal)
-        print("lost focus")
+        # canvasFrame = self.view.qframes[1]
+        # canvasFrame.setFrameShadow(QFrame.Plain)
+        # pal = canvasFrame.palette()
+        # pal.setColor(QPalette.WindowText, QColor(170, 172, 191))
+        # canvasFrame.setPalette(pal)
+        pass

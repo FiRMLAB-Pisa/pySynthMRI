@@ -176,7 +176,7 @@ class PsMainWindow(QMainWindow):
         self.menu_bar.synth_images_action[map_type] = action
         # add smap to toolbar
         self.tool_bar.add_new_synthetic_map_button(map_type)
-        self.tool_bar.activate_unique_smap_button(map_type)
+        # self.tool_bar.activate_unique_smap_button(map_type)
         # self.c.signal_custom_smap_added_to_navbar.emit(map_type)
 
     def open_dicom_batch_load_dialog(self):

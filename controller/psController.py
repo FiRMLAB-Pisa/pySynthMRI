@@ -4,18 +4,15 @@ only controller has write privileges over the model
 import functools
 import logging
 import os
-import time
 
 from PyQt5 import QtCore, QtGui
-from PyQt5.QtCore import QUrl, Qt
 from PyQt5.QtGui import QCursor
-from PyQt5.QtWidgets import QApplication
 
+from model.MRIImage import Orientation, Interpolation
 from model.psExceptions import NotSelectedMapError, ConfigurationFilePermissionError
 from model.psFileType import psFileType
-from model.psModel import Qmap, PsModel
-from model.MRIImage import Orientation, Interpolation
-from view.psCustomDialog import PsCustomSmapDialog, AboutDialog, SliderLabelDirectionDialog
+from model.psModel import PsModel
+from view.psCustomDialog import PsCustomSmapDialog, AboutDialog
 
 log = logging.getLogger(__name__)
 
@@ -28,7 +25,11 @@ class PsController:
         self.view = view
         self.connect_handlers()
 
+
     def connect_handlers(self):
+        # mainWindow
+        self.view.keyPressEvent = self.on_keypressed
+
         # MENU BAR
         # File
         # load dicom image
@@ -103,7 +104,7 @@ class PsController:
         # batch process
         self.view.menu_bar.batch_process_action.triggered.connect(self.on_clicked_batch_process_button)
         # batch progress path selected
-        self.view.c.signal_batch_progress_path.connect(self.on_selected_path_batch_process_dialog) # TODO REMOVE
+        self.view.c.signal_batch_progress_path.connect(self.on_selected_path_batch_process_dialog)  # TODO REMOVE
         self.view.c.signal_batch_progress_launch.connect(self.on_selected_launch_batch_process_dialog)
 
         # about
@@ -151,8 +152,6 @@ class PsController:
         self.view.info_widget.wc_label.editingFinished.connect(self.on_editing_finished_window_center)
         self.view.info_widget.ww_label.editingFinished.connect(self.on_editing_finished_window_width)
 
-
-
     def drag_event_handler(self, qmap_name, event):
         path = event.mimeData().text()
         print(path)
@@ -167,32 +166,42 @@ class PsController:
             if path.endswith(".nii"):
                 log.debug("Drop NIFTII file: {}".format(path))
                 self.model.update_qmap_path(qmap_name, path, psFileType.NIFTII)
+                self.view.tool_bar.autotoggle_smaps_buttons()
+
+    def on_keypressed(self, e):
+        if e.key() == QtCore.Qt.Key_Control:
+            if self.model.is_h_v_parameter_interaction():
+                self.view.smap_view.canvas.setFocus()
 
     def on_clicked_batch_load_dicom_button(self):
         log.debug("on_clicked_batch_load_dicom_button.")
         self.view.open_dicom_batch_load_dialog()
+        self.view.tool_bar.autotoggle_smaps_buttons()
 
     def on_clicked_batch_load_niftii_button(self):
         log.debug("on_clicked_batch_load_niftii_button.")
         self.view.open_niftii_batch_load_dialog()
+        self.view.tool_bar.autotoggle_smaps_buttons()
 
     def on_clicked_open_dicom_button(self, qmap):
         log.debug("on_clicked_open_dicom_button: " + qmap)
         self.view.open_dicom_load_dialog(qmap)
+        self.view.tool_bar.autotoggle_smaps_buttons()
 
     def on_clicked_open_niftii_button(self, qmap):
         log.debug("on_clicked_open_niftii_button: " + qmap)
         self.view.open_niftii_load_dialog(qmap)
+        self.view.tool_bar.autotoggle_smaps_buttons()
 
     def on_selected_path_batch_dialog_upload(self, path, file_type):
         log.debug("on_selected_path_batch_dialog_upload: " + path + " - Type: " + file_type)
         # look into directory and search predefined file names of the quantitatives
         self.model.update_qmap_batch_path(path, file_type)
 
-
     def on_selected_path_dialog_upload(self, qmap, path, file_type):
         log.debug("on_selected_path_dialog_upload: " + qmap + " - " + path + " - Type: " + file_type)
         self.model.update_qmap_path(qmap, path, file_type)
+        self.view.tool_bar.autotoggle_smaps_buttons()
 
     def on_clicked_save_dicom_button(self):
         log.debug("on_clicked_save_dicom_button")
@@ -265,6 +274,7 @@ class PsController:
         self.model.reload_smap()
         self.view.menu_bar.activate_unique_smap_action(map_type)
         self.view.tool_bar.activate_unique_smap_button(map_type)
+        self.view.tool_bar.toggle_toolbar_buttons(True)
 
     def on_clicked_orientation_button(self, orientation):
         log.debug("on_clicked_orientation_button - passed {}".format(orientation))
@@ -313,7 +323,7 @@ class PsController:
             v_button.clicked.connect(
                 functools.partial(self.on_clicked_v_mouse_parameter, self.model.get_smap().map_type, parameter))
 
-    def disable_all_v_buttons(self,except_parameter):
+    def disable_all_v_buttons(self, except_parameter):
         parameters = self.model.get_smap().get_scanner_parameters()
         for parameter in parameters:
             if parameter == except_parameter:
@@ -332,16 +342,16 @@ class PsController:
     def on_clicked_h_mouse_parameter(self, smap_type, parameter_type, checked):
         if checked:
             self.disable_all_h_buttons(except_parameter=parameter_type)
-            self.model.set_horizontal_mouse_parameter(smap_type, parameter_type)
+            self.model.set_mouse_parameter(parameter_type, "h")
         else:
-            self.model.set_horizontal_mouse_parameter(smap_type, None)
+            self.model.set_mouse_parameter(None, "h")
 
     def on_clicked_v_mouse_parameter(self, smap_type, parameter_type, checked):
         if checked:
             self.disable_all_v_buttons(except_parameter=parameter_type)
-            self.model.set_vertical_mouse_parameter(smap_type, parameter_type)
+            self.model.set_mouse_parameter(parameter_type, "v")
         else:
-            self.model.set_vertical_mouse_parameter(smap_type, None)
+            self.model.set_mouse_parameter(None, "v")
 
     def on_change_parameter_slider(self, smap_type, parameter_type, value):
         # get correct sider
@@ -376,40 +386,9 @@ class PsController:
 
             self.view.smap_view.setCursor(QCursor(QtCore.Qt.CrossCursor))
             self.model.set_mouse_behaviour(PsModel.MouseBehaviour.WINDOW_SCALE)
+            self.view.smap_view.canvas.setFocus()
         else:
             self.view.tool_bar.button_window_grayscale.setChecked(True)  # stay checked
-
-    def on_clicked_slice(self):
-        if self.view.tool_bar.button_slicer.isChecked():
-            self.view.tool_bar.button_window_grayscale.setChecked(False)
-            self.view.tool_bar.button_window_grayscale.setStyleSheet("")
-            self.view.tool_bar.button_zoom.setChecked(False)
-            self.view.tool_bar.button_zoom.setStyleSheet("")
-            self.view.tool_bar.button_translate.setChecked(False)
-            self.view.tool_bar.button_translate.setStyleSheet("")
-            self.view.tool_bar.button_slicer.setStyleSheet('background-color: "red"')  # rgb(42, 130, 218)
-            self.view.smap_view.setCursor(QCursor(QtCore.Qt.SizeVerCursor))
-            self.model.set_mouse_behaviour(PsModel.MouseBehaviour.SLICE)
-        else:
-            self.view.tool_bar.button_slicer.setChecked(True)  # stay checked
-
-
-    def on_clicked_v_h_mouse_parameter(self, event):
-        checked = self.view.tool_bar.button_h_v_mouse.isChecked()
-        try:
-            self.model.toggle_v_h_mouse_parameter(checked)
-
-            if checked:
-                self.model.set_h_v_parameter_interaction(True)
-                self.view.tool_bar.button_h_v_mouse.setStyleSheet('background-color: "red"')  # rgb(42, 130, 218)
-            else:
-                self.model.set_h_v_parameter_interaction(False)
-                self.view.tool_bar.button_h_v_mouse.setStyleSheet('')  # rgb(42, 130, 218)
-                # self.view.parameter_graph_widget.hide()
-            self.model.c.signal_update_status_bar.emit("on_clicked_v_h_mouse_parameter.")
-        except NotSelectedMapError as e:
-            self.model.c.signal_update_status_bar.emit(e.message)
-
 
     def on_clicked_translate(self):
         if self.view.tool_bar.button_translate.isChecked():
@@ -422,6 +401,7 @@ class PsController:
             self.view.tool_bar.button_translate.setStyleSheet('background-color: "red"')  # rgb(42, 130, 218)
             self.view.smap_view.setCursor(QCursor(QtCore.Qt.SizeAllCursor))
             self.model.set_mouse_behaviour(PsModel.MouseBehaviour.TRANSLATE)
+            self.view.smap_view.canvas.setFocus()
         else:
             self.view.tool_bar.button_translate.setChecked(True)  # stay checked
 
@@ -430,6 +410,7 @@ class PsController:
             self.model.get_smap().reset_widow_scale()
             self.model.reload_smap()
             self.model.c.signal_update_status_bar.emit("Window grayscale reset.")
+            self.view.smap_view.canvas.setFocus()
         except NotSelectedMapError as e:
             self.model.c.signal_update_status_bar.emit(e.message)
 
@@ -444,12 +425,45 @@ class PsController:
             self.view.tool_bar.button_translate.setStyleSheet("")
             self.view.tool_bar.button_zoom.setStyleSheet('background-color: "red"')  # rgb(42, 130, 218)
             self.model.set_mouse_behaviour(PsModel.MouseBehaviour.ZOOM)
+            self.view.smap_view.canvas.setFocus()
         else:
             self.view.tool_bar.button_zoom.setChecked(True)  # stay checked
+
+    def on_clicked_slice(self):
+        if self.view.tool_bar.button_slicer.isChecked():
+            self.view.tool_bar.button_window_grayscale.setChecked(False)
+            self.view.tool_bar.button_window_grayscale.setStyleSheet("")
+            self.view.tool_bar.button_zoom.setChecked(False)
+            self.view.tool_bar.button_zoom.setStyleSheet("")
+            self.view.tool_bar.button_translate.setChecked(False)
+            self.view.tool_bar.button_translate.setStyleSheet("")
+            self.view.tool_bar.button_slicer.setStyleSheet('background-color: "red"')  # rgb(42, 130, 218)
+            self.view.smap_view.setCursor(QCursor(QtCore.Qt.SizeVerCursor))
+            self.model.set_mouse_behaviour(PsModel.MouseBehaviour.SLICE)
+            self.view.smap_view.canvas.setFocus()
+        else:
+            self.view.tool_bar.button_slicer.setChecked(True)  # stay checked
+
+    def on_clicked_v_h_mouse_parameter(self, event):
+        checked = self.view.tool_bar.button_h_v_mouse.isChecked()
+        try:
+            self.model.toggle_v_h_mouse_parameter(checked)
+
+            if checked:
+                self.model.set_h_v_parameter_interaction(True)
+                self.view.tool_bar.button_h_v_mouse.setStyleSheet('background-color: "red"')  # rgb(42, 130, 218)
+            else:
+                self.model.set_h_v_parameter_interaction(False)
+                self.view.tool_bar.button_h_v_mouse.setStyleSheet('')  # rgb(42, 130, 218)
+                # self.view.parameter_graph_widget.hide()
+            self.model.c.signal_update_status_bar.emit("Modify parameters using Ctrl+mouse.")
+        except NotSelectedMapError as e:
+            self.model.c.signal_update_status_bar.emit(e.message)
 
     def on_clicked_save_param(self):
         try:
             self.model.save_parameters()
+            self.view.smap_view.canvas.setFocus()
             self.model.c.signal_update_status_bar.emit("Scanner parameter saved.")
         except ConfigurationFilePermissionError as e:
             self.model.c.signal_update_status_bar.emit(e.message)
@@ -457,6 +471,7 @@ class PsController:
     def on_clicked_default_param(self):
         try:
             self.model.set_default_parameters()
+            self.view.smap_view.canvas.setFocus()
             self.model.c.signal_update_status_bar.emit("Scanner parameter set to default values.")
         except NotSelectedMapError as e:
             self.model.c.signal_update_status_bar.emit(e.message)
@@ -464,6 +479,7 @@ class PsController:
     def on_clicked_reload_config(self):
         try:
             self.model.reload_configuration_file()
+            self.view.smap_view.canvas.setFocus()
             self.model.c.signal_update_status_bar.emit("Configuration file correctly reloaded.")
         except KeyError as e:
             self.model.c.signal_update_status_bar.emit(str(e))
@@ -501,6 +517,7 @@ class PsController:
     def on_clicked_default_zoom_and_translation(self):
         self.model.translation_reset()
         self.model.zoom_reset()
+        self.view.smap_view.canvas.setFocus()
         self.model.c.signal_update_status_bar.emit("Image position and zoom reset.")
 
     def on_selected_path_batch_process_dialog(self, path):  # TODO REMOVE

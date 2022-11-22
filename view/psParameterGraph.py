@@ -52,12 +52,12 @@ class PsParameterGraph(PlotWidget):
             self.set_value(x, y, x_default, y_default)
 
     def _update_handler(self):
-        y_p_k = self.model.get_vertical_parameter()
-        x_p_k = self.model.get_horizontal_parameter()
+        y_p_k = self.model.get_parameter("v")
+        x_p_k = self.model.get_parameter("h")
         if y_p_k is not None and x_p_k is not None and self.model.is_h_v_parameter_interaction():
             self.scatter.clear()
-            x_min, x_max, x_default, x_value, x_label = self.model.get_parameter_details("h")
             y_min, y_max, y_default, y_value, y_label = self.model.get_parameter_details("v")
+            x_min, x_max, x_default, x_value, x_label = self.model.get_parameter_details("h")
             # self.scatter.clear()
             self.update(x_value, y_value, x_default, y_default)
             self.show()
@@ -65,8 +65,8 @@ class PsParameterGraph(PlotWidget):
             self.hide()
 
     def _change_parameters(self):
-        y_p_k = self.model.get_vertical_parameter()
-        x_p_k = self.model.get_horizontal_parameter()
+        y_p_k = self.model.get_parameter("v")
+        x_p_k = self.model.get_parameter("h")
         if y_p_k is not None and x_p_k is not None and self.model.is_h_v_parameter_interaction():
             self.scatter.clear()
             x_min, x_max, x_default, x_value, x_label = self.model.get_parameter_details("h")

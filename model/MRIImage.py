@@ -39,8 +39,8 @@ class MRIImage:
     file_type = ""  # niftii, dicom
 
     # window scale
-    maxWindowWidth = 2 ** 18 - 1 # 4000
-    maxWindowCenter = 2 ** 18 - 1 # 4000
+    maxWindowWidth = 2 ** 18 - 1  # 4000
+    maxWindowCenter = 2 ** 18 - 1  # 4000
     minWindowWidth = -7000
     minWindowCenter = -7000
     _window_width = -1
@@ -91,7 +91,7 @@ class MRIImage:
     def get_matrix(self, dim):
 
         if self.np_matrix is None:
-            #log.debug("Requesting None image")
+            # log.debug("Requesting None image")
             return None
         if self.np_matrix.ndim == 2:
             # smap case is never computed in 3d till save
@@ -132,7 +132,6 @@ class MRIImage:
 
     def set_window_center(self, window_center):
         self._window_center = window_center
-
 
     def set_default_window_width(self, default_window_width):
         self._default_window_width = default_window_width
@@ -344,7 +343,7 @@ class Qmap(MRIImage):
 
 
 class Smap(MRIImage):
-    DICOM_SCALE = 2 ** 16 -1
+    DICOM_SCALE = 2 ** 16 - 1
 
     def __init__(self, qmaps):
         super(Smap, self).__init__()
@@ -357,7 +356,6 @@ class Smap(MRIImage):
         self._orientation_labels_flag = True
         self._vertical_parameter = None
         self._horizontal_parameter = None
-
 
     def set_map_type(self, map_type):
         super(Smap, self).set_map_type(map_type)
@@ -385,7 +383,6 @@ class Smap(MRIImage):
     def get_scanner_parameters(self):
         return self._parameters
 
-
     def set_title(self, title):
         self._title = title
 
@@ -408,47 +405,47 @@ class Smap(MRIImage):
                 missing_qmaps.append(qmap)
         return missing_qmaps
 
-    def set_vertical_parameter(self, v_param):
-        if self._horizontal_parameter == v_param:
-            self._horizontal_parameter = None
-        self._vertical_parameter = v_param
+    def set_parameter(self, param, direction):
+        if direction == "v":
+            if self._horizontal_parameter == param:
+                self._horizontal_parameter = None
+            self._vertical_parameter = param
+        elif direction == "h":
+            if self._vertical_parameter == param:
+                self._vertical_parameter = None
+            self._horizontal_parameter = param
 
-    def get_vertical_parameter(self):
-        return self._vertical_parameter
+    def get_parameter(self, direction):
+        if direction == "v":
+            return self._vertical_parameter
+        elif direction == "h":
+            return self._horizontal_parameter
 
-    def set_horizontal_parameter(self, h_param):
-        if self._vertical_parameter == h_param:
-            self._vertical_parameter = None
-        self._horizontal_parameter = h_param
+    def get_parameter_value(self, direction):
+        if direction == "h":
+            if self._horizontal_parameter is None:
+                return None
+            return self._parameters[self._horizontal_parameter]["value"]
+        elif direction == "v":
+            if self._vertical_parameter is None:
+                return None
+            return self._parameters[self._vertical_parameter]["value"]
 
-    def get_horizontal_parameter(self):
-        return self._horizontal_parameter
-
-    def get_horizontal_parameter_value(self):
-        if self._horizontal_parameter is None:
-            return None
-        return self._parameters[self._horizontal_parameter]["value"]
-
-    def get_vertical_parameter_value(self):
-        if self._vertical_parameter is None:
-            return None
-        return self._parameters[self._vertical_parameter]["value"]
-
-    def set_vertical_parameter_value(self, v_param):
-        if v_param < self._parameters[self._vertical_parameter]["min"]:
-            v_param = self._parameters[self._vertical_parameter]["min"]
-        elif v_param > self._parameters[self._vertical_parameter]["max"]:
-            v_param = self._parameters[self._vertical_parameter]["max"]
-        self._parameters[self._vertical_parameter]["value"] = v_param
-        return v_param
-
-    def set_horizontal_parameter_value(self, h_param):
-        if h_param < self._parameters[self._horizontal_parameter]["min"]:
-            h_param = self._parameters[self._horizontal_parameter]["min"]
-        elif h_param > self._parameters[self._horizontal_parameter]["max"]:
-            h_param = self._parameters[self._horizontal_parameter]["max"]
-        self._parameters[self._horizontal_parameter]["value"] = h_param
-        return h_param
+    def set_parameter_value(self, param_value, direction):
+        if direction == "v":
+            if param_value < self._parameters[self._vertical_parameter]["min"]:
+                param_value = self._parameters[self._vertical_parameter]["min"]
+            elif param_value > self._parameters[self._vertical_parameter]["max"]:
+                param_value = self._parameters[self._vertical_parameter]["max"]
+            self._parameters[self._vertical_parameter]["value"] = param_value
+            return param_value
+        elif direction == "h":
+            if param_value < self._parameters[self._horizontal_parameter]["min"]:
+                param_value = self._parameters[self._horizontal_parameter]["min"]
+            elif param_value > self._parameters[self._horizontal_parameter]["max"]:
+                param_value = self._parameters[self._horizontal_parameter]["max"]
+            self._parameters[self._horizontal_parameter]["value"] = param_value
+            return param_value
 
     def recompute_smap(self, dims=2):
         # eval equation

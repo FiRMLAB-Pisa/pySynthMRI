@@ -289,7 +289,7 @@ class AboutDialog(QDialog):
         logo.setPixmap(QPixmap(os.path.join('resources', 'logos', 'logo3.png')))
         layout.addWidget(logo)
 
-        layout.addWidget(QLabel("Version 0.2.2"))
+        layout.addWidget(QLabel("Version 0.2.5"))
         repo_label = QLabel("https://github.com/FiRMLAB-Pisa/pySynthMRI")
         repo_label.setTextInteractionFlags(Qt.LinksAccessibleByMouse)
         repo_label.setOpenExternalLinks(True)
