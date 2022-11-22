@@ -521,9 +521,9 @@ class PsController:
         self.model.c.signal_update_status_bar.emit("Image position and zoom reset.")
 
     def on_selected_path_batch_process_dialog(self, path):  # TODO REMOVE
-        log.debug(f"on_selected_path_batch_progress_dialog: {path}")
+        log.debug(f"[REMOVE] on_selected_path_batch_progress_dialog: {path}")
         self.model.execute_batch_process(path)
 
-    def on_selected_launch_batch_process_dialog(self, input_dir, preset, smaps):
-        log.debug(f"on_selected_launch_batch_process_dialog: {input_dir} - {preset} - {smaps}")
-        self.model.execute_batch_process(input_dir, preset, smaps)
+    def on_selected_launch_batch_process_dialog(self, input_dir, preset, smaps, output_type):
+        log.debug(f"on_selected_launch_batch_process_dialog: {input_dir} - {preset} - {smaps} - {output_type}")
+        self.model.execute_batch_process(input_dir, preset, smaps, output_type)

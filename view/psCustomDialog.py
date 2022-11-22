@@ -4,10 +4,12 @@ from PyQt5 import QtCore
 from PyQt5.QtCore import Qt
 from PyQt5.QtGui import QPixmap
 from PyQt5.QtWidgets import QDialog, QDialogButtonBox, QVBoxLayout, QLabel, QGroupBox, QFormLayout, QLineEdit, \
-    QTextEdit, QWidget, QHBoxLayout, QComboBox, QSpinBox, QListWidget, QAbstractItemView, QSizePolicy, QFileDialog
+    QTextEdit, QWidget, QHBoxLayout, QComboBox, QSpinBox, QListWidget, QAbstractItemView, QSizePolicy, QFileDialog, \
+    QFrame
 
 # import Config
 from model.CheckableComboBox import CheckableComboBox
+from model.psFileType import psFileType
 from view.psQDoubleQListWidget import psQDoubleQListWidget
 
 
@@ -305,6 +307,7 @@ class AboutDialog(QDialog):
 
         self.setLayout(layout)
 
+
 class BatchProcessDialog(QDialog):
     NumGridRows = 3
     NumButtons = 4
@@ -317,6 +320,7 @@ class BatchProcessDialog(QDialog):
         self.selected_preset = None
         self.selected_smaps = None
         self.selected_input_dir = None
+        self.selected_output_type = None
 
         buttonBox = QDialogButtonBox(QDialogButtonBox.Ok | QDialogButtonBox.Cancel)
         buttonBox.accepted.connect(self.accept)
@@ -333,21 +337,27 @@ class BatchProcessDialog(QDialog):
         self.selected_preset = self.preset_qcombo.currentText()
         self.selected_smaps = self.smaps_qlist.selectedItems()
         self.selected_input_dir = self.input_dir_label.text()
-        if self.selected_preset and self.selected_smaps and self.selected_input_dir != "Select input directory":
+        self.selected_output_type = self.combo_output_filetype.currentText()
+        if self.selected_preset and self.selected_smaps and self.selected_input_dir != "Select input directory" and self.combo_output_filetype:
             super().accept()
 
-    def createFormGroupBox(self,presets, smap_types):
+
+    def createFormGroupBox(self, presets, smap_types):
         self.smap_types = smap_types
         self.formGroupBox = QGroupBox("Process information")
+
+        separator = QFrame()
+        separator.setFrameShape(QFrame.HLine)
+        separator.setSizePolicy(QSizePolicy.Minimum, QSizePolicy.Expanding)
+        separator.setLineWidth(1)
 
         layout = QFormLayout()
 
         self.preset_qcombo = QComboBox()
         self.preset_qcombo.activated[str].connect(self.changed_preset)
-        layout.addRow(QLabel("Preset Images:"), self.preset_qcombo)
+        self.preset_qcombo.setMaximumWidth(100)
         for preset in presets:
             self.preset_qcombo.addItem(preset)
-
 
         # self.smaps_qlist = QListWidget()
         self.smaps_qlist = psQDoubleQListWidget()
@@ -356,14 +366,26 @@ class BatchProcessDialog(QDialog):
         synth_images_label = QLabel("Synthetic Images:")
         synth_images_label.setAlignment(QtCore.Qt.AlignLeft | QtCore.Qt.AlignVCenter)
         synth_images_label.setSizePolicy(QSizePolicy.Expanding, QSizePolicy.Expanding)
-        layout.addRow(synth_images_label, self.smaps_qlist)
         smap_types = [x for x in smap_types if smap_types[x]["preset"] == self.preset_qcombo.currentText()]
         self.smaps_qlist.insertItems(smap_types)
 
-
         self.input_dir_label = QLabel("Select input directory")
-        layout.addRow(QLabel("Input Dir"), self.input_dir_label)
         self.input_dir_label.mousePressEvent = self.clicked_input_dir_label
+
+        self.combo_output_filetype = QComboBox()
+        self.combo_output_filetype.addItem(psFileType.DICOM)
+        self.combo_output_filetype.addItem(psFileType.NIFTII)
+        self.combo_output_filetype.setMaximumWidth(100)
+
+
+
+        layout.addRow(QLabel("Preset Images:"), self.preset_qcombo)
+        layout.addRow(synth_images_label, self.smaps_qlist)
+        layout.addWidget(separator)
+        layout.addRow(QLabel("Input Dir"), self.input_dir_label)
+        layout.addWidget(separator)
+        layout.addRow(QLabel("Output Type"), self.combo_output_filetype)
+
         self.formGroupBox.setLayout(layout)
 
     def changed_preset(self, preset):
@@ -378,9 +400,10 @@ class BatchProcessDialog(QDialog):
         options = QFileDialog.Options()
         options |= QFileDialog.DontUseNativeDialog
 
-        folderpath =  QFileDialog.getExistingDirectory(self, 'Select Folder that contains subjects subdirectories')
+        folderpath = QFileDialog.getExistingDirectory(self, 'Select Folder that contains subjects subdirectories')
         if folderpath:
             self.input_dir_label.setText(folderpath)
+
 
 class SliderLabelDirectionDialog(QDialog):
     def __init__(self, smap_type, parameter_type, parent=None):

@@ -339,7 +339,6 @@ class PsModel:
             for param_k in parameters:
                 parameters[param_k]['slider'].show_v_h_buttons(checked)
 
-
     def set_parameter_value(self, v_value, direction):
         v_value = self._smap.set_parameter_value(v_value, direction)
         if self.get_parameter("h") is not None and self.get_parameter_value("v") is not None:
@@ -419,9 +418,8 @@ class PsModel:
                     param["step"] = new_param["step"]
                     param["default"] = new_param["default"]
 
-            else: # new smap
+            else:  # new smap
                 self._default_smaps[smap_k] = smap_new_conf
-
 
         if self._smap.get_map_type():
             self.set_smap_type(self._smap.get_map_type())
@@ -557,7 +555,7 @@ class PsModel:
     def translation_reset(self):
         self._translated_point = QPoint(0, 0)
 
-    def execute_batch_process(self, input_dir, preset, smaps):
+    def execute_batch_process(self, input_dir, preset, smaps, output_type):
         # iteratively select subject and synthesize images
         suject_paths = get_subdirs(input_dir)
         qmaps_path = None
@@ -575,6 +573,7 @@ class PsModel:
                 self.c.signal_update_status_bar.emit(f"Error processing input directory: {input_dir}")
                 return
 
+            #
             if not os.path.exists(smaps_path):
                 os.makedirs(smaps_path)
 
@@ -589,6 +588,10 @@ class PsModel:
                 self.c.signal_update_status_bar.emit(
                     f"Processing subject: {os.path.basename(subject_path)} - map: {smap_k}")
                 QApplication.processEvents()
+                # 1 load qmaps and generate smap
+
+                self.c.signal_update_status_bar.emit("All Subjects processed.")
+
                 self._smap.set_map_type(smap_k)
                 self._smap.set_title(self._default_smaps[smap_k]["title"])
                 self._smap.set_init_slices_num(self._qmaps[list(self._qmaps.keys())[0]])
@@ -597,13 +600,28 @@ class PsModel:
                 self._smap.set_scanner_parameters(self._default_smaps[smap_k]["parameters"])
                 self._smap.set_equation(self._default_smaps[smap_k]["equation"])
                 self._smap.set_equation_string(self._default_smaps[smap_k]["equation_string"])
+                self._smap.set_window_center(self._default_smaps[smap_k]["default_window_center"])
+                self._smap.set_window_width(self._default_smaps[smap_k]["default_window_width"])
 
                 self.recompute_smap()
-                self.save_smap(os.path.join(smaps_path, smap_k[:-len(" - " + self._current_preset)] + ".nii"),
-                               psFileType.NIFTII)  # TODO ERROR _current_preset!
-            self.c.signal_update_status_bar.emit("All Subjects processed.")
 
-        pass
+                if output_type == psFileType.NIFTII:
+                    self.save_smap(os.path.join(smaps_path, smap_k[:-len(" - " + self._current_preset)] + ".nii"),
+                                   psFileType.NIFTII)  # TODO ERROR _current_preset!
+                elif output_type == psFileType.DICOM:
+                    # self._smap.set_map_type(smap_k)
+                    # self._smap.set_title(self._default_smaps[smap_k]["title"])
+                    # self._smap.set_init_slices_num(self._qmaps[list(self._qmaps.keys())[0]])
+                    # # self._smap.set_total_slice_num(self._qmaps[list(self._qmaps.keys())[0]].get_total_slice_num())
+                    # self._smap.set_qmaps_needed(self._default_smaps[smap_k]["qmaps_needed"])
+                    # self._smap.set_scanner_parameters(self._default_smaps[smap_k]["parameters"])
+                    # self._smap.set_equation(self._default_smaps[smap_k]["equation"])
+                    # self._smap.set_equation_string(self._default_smaps[smap_k]["equation_string"])
+                    #
+                    # self.recompute_smap()
+                    self.save_smap(os.path.join(smaps_path, smap_k[:-len(" - " + self._current_preset)]),
+                                   psFileType.DICOM)  # TODO ERROR _current_preset!
+
 
     def execute_batch_process_old(self, root_path):
         # iteratively select subject and synthesize images
