@@ -10,6 +10,7 @@ class PsToolbar(QToolBar):
     ToolBar used in Visual Page.
     """
     BUTTON_SIZE = QSize(24, 24)
+
     def __init__(self, model, parent=None):
         super(QToolBar, self).__init__(parent)
         self.model = model
@@ -77,7 +78,8 @@ class PsToolbar(QToolBar):
         icon_window_grayscale = QIcon()
         icon_window_grayscale.addPixmap(QPixmap(":/icons/gradient_linear_40.png"), QIcon.Normal, QIcon.On)
         self.button_window_grayscale.setIcon(icon_window_grayscale)
-        self.button_window_grayscale.setToolTip("Use mouse to change:\n    window width  (\u2194)\n    window center (\u2195)")
+        self.button_window_grayscale.setToolTip(
+            "Use mouse to change:\n    window width  (\u2194)\n    window center (\u2195)")
 
         # WINDOW SCALE DEFAULT
         self.button_window_grayscale_default = QPushButton()
@@ -106,7 +108,8 @@ class PsToolbar(QToolBar):
         icon_translate = QIcon()
         icon_translate.addPixmap(QPixmap(":/icons/move_icon.png"), QIcon.Normal, QIcon.On)
         self.button_translate.setIcon(icon_translate)
-        self.button_translate.setToolTip("Use mouse to translate image:\n    vertival axis   (\u2195)\n    horizontal axis (\u2194)")
+        self.button_translate.setToolTip(
+            "Use mouse to translate image:\n    vertival axis   (\u2195)\n    horizontal axis (\u2194)")
 
         # DEFAULT ZOOM
         self.button_default_zoom = QPushButton()
@@ -126,7 +129,8 @@ class PsToolbar(QToolBar):
         icon_zoom = QIcon()
         icon_zoom.addPixmap(QPixmap(":/icons/three_layers.png"), QIcon.Normal, QIcon.On)
         self.button_slicer.setIcon(icon_zoom)
-        self.button_slicer.setToolTip("Use mouse to change slice:\n    next slice   (\u2193)\n    previous slice (\u2191)")
+        self.button_slicer.setToolTip(
+            "Use mouse to change slice:\n    next slice   (\u2193)\n    previous slice (\u2191)")
 
         # PARAMS GROUP LABEL
         self.label_parameters = QLabel(" Parameters: ")
@@ -189,7 +193,6 @@ class PsToolbar(QToolBar):
                                         "font-size: 16pt")
         # self.preset_label.setFixedHeight(self.BUTTON_SIZE.height())
 
-
         # H V LABELS
         self.button_h_v_mouse = QPushButton()
         self.button_h_v_mouse.setIconSize(self.BUTTON_SIZE)
@@ -199,6 +202,14 @@ class PsToolbar(QToolBar):
         icon_zoom.addPixmap(QPixmap(":/cursors/center-of-gravity-80.png"), QIcon.Normal, QIcon.On)
         self.button_h_v_mouse.setIcon(icon_zoom)
         self.button_h_v_mouse.setToolTip("This mode allows to change parameter using Ctrl+muouse")
+
+        # SCREENSHOT
+        self.button_screenshot = QPushButton()
+        self.button_screenshot.setIconSize(self.BUTTON_SIZE)
+        icon_screenshot = QIcon()
+        icon_screenshot.addPixmap(QPixmap(":/icons/screenshot_64.png"), QIcon.Normal, QIcon.On)
+        self.button_screenshot.setIcon(icon_screenshot)
+        self.button_screenshot.setToolTip("Press to save a screenshot")
 
         # SYNTH IMAGES
         self.synth_images_buttons = dict()
@@ -212,7 +223,7 @@ class PsToolbar(QToolBar):
             smap_button.setFixedHeight(self.BUTTON_SIZE.height())
             smap_button.setIconSize(self.BUTTON_SIZE)
             smap_button.setStyleSheet("QPushButton:pressed { background-color: red }"
-                              "QPushButton:checked { background-color: red }")
+                                      "QPushButton:checked { background-color: red }")
             smap_button.setCheckable(True)
             smap_button.setToolTip("{} ({})\nModel: {}".format(smap_key,
                                                                smap["title"],
@@ -244,8 +255,8 @@ class PsToolbar(QToolBar):
         self.addWidget(self.button_save_param)
         self.addWidget(self.button_default_param)
         self.addWidget(self.button_reload_config)
-
-        # self.addSeparator()
+        self.addSeparator()
+        self.addWidget(self.button_screenshot)
         # for pb in self.presets_buttons:
         #     self.addWidget(self.presets_buttons[pb])
 
@@ -296,7 +307,7 @@ class PsToolbar(QToolBar):
         self.preset_label.setText(preset)
 
     def toggle_toolbar_buttons(self, activate):
-        changed = not(activate == self.button_activated)
+        changed = not (activate == self.button_activated)
         self.button_activated = activate
         if changed:
             self.button_save_niftii.setEnabled(activate)
@@ -311,6 +322,7 @@ class PsToolbar(QToolBar):
             self.button_save_param.setEnabled(activate)
             self.button_default_param.setEnabled(activate)
             self.button_reload_config.setEnabled(activate)
+            self.button_screenshot.setEnabled(activate)
             # self._toggle_smaps_buttons(activate)
 
     def autotoggle_smaps_buttons(self):

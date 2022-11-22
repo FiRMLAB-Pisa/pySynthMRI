@@ -16,7 +16,7 @@ class ValidateConfig:
         self.synth_types = self._parse_synthetic_maps(config)
         self.qmap_types = config["quantitative_maps"]
         self.image_interpolation = config["image_interpolation"]
-
+        self.screenshot_directory = config["screenshot_directory"]
         for synth_type in self.synth_types:
             self.validate_equation(self.synth_types[synth_type], synth_type)
             self.validate_scanner_parameters(self.synth_types[synth_type])

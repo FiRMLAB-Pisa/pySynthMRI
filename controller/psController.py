@@ -6,12 +6,14 @@ import logging
 import os
 
 from PyQt5 import QtCore, QtGui
+from PyQt5.QtCore import QByteArray
 from PyQt5.QtGui import QCursor
 
 from model.MRIImage import Orientation, Interpolation
 from model.psExceptions import NotSelectedMapError, ConfigurationFilePermissionError
 from model.psFileType import psFileType
 from model.psModel import PsModel
+from model.utils import get_unique_filename
 from view.psCustomDialog import PsCustomSmapDialog, AboutDialog
 
 log = logging.getLogger(__name__)
@@ -20,7 +22,7 @@ log = logging.getLogger(__name__)
 # log.setLevel(LOGGING_LVL)
 
 class PsController:
-    def __init__(self, model, view):
+    def __init__(self, model: PsModel, view):
         self.model = model
         self.view = view
         self.connect_handlers()
@@ -124,6 +126,7 @@ class PsController:
         self.view.tool_bar.button_default_zoom.clicked.connect(self.on_clicked_default_zoom_and_translation)
         self.view.tool_bar.button_slicer.clicked.connect(self.on_clicked_slice)
         self.view.tool_bar.button_h_v_mouse.clicked.connect(self.on_clicked_v_h_mouse_parameter)
+        self.view.tool_bar.button_screenshot.clicked.connect(self.on_clicked_screenshot)
 
         self.view.tool_bar.button_translate.clicked.connect(self.on_clicked_translate)
         # presets buttons
@@ -459,6 +462,26 @@ class PsController:
             self.model.c.signal_update_status_bar.emit("Modify parameters using Ctrl+mouse.")
         except NotSelectedMapError as e:
             self.model.c.signal_update_status_bar.emit(e.message)
+
+    def on_clicked_screenshot(self, event):
+        # TODO SCREENSHOT
+        if self.model.get_smap().is_loaded():
+            old_orientation_labels_flag = self.model.get_smap().get_orientation_labels_flag()
+            self.model.get_smap().set_orientation_labels_flag(False)
+            old_interpolation_scale = self.model.interpolation["scale"]
+            self.model.interpolation["scale"] = 8
+            self.model.reload_smap()
+            screenshot = self.model.get_screenshot_image()
+            filename = os.path.join(self.model.get_screenshot_directory(), self.model.get_smap().map_type[:-len(" - " + self.model.get_current_preset())] + ".png")
+            # if file exist add incremental numeber to name
+            filename = get_unique_filename(filename)
+            if screenshot.save(filename,"PNG"):
+                self.model.c.signal_update_status_bar.emit(f"Screenshot saved: {filename}")
+            else:
+                self.model.c.signal_update_status_bar.emit("[ERROR] Error saving screenshot")
+            self.model.get_smap().set_orientation_labels_flag(old_orientation_labels_flag)
+            self.model.interpolation["scale"] = old_interpolation_scale
+            self.model.reload_smap()
 
     def on_clicked_save_param(self):
         try:

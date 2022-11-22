@@ -87,5 +87,6 @@
     "image_interpolation": {
         "interpolation_type": "linear",
         "scale": 2
-    }
+    },
+    "screenshot_directory": "C:\\Users\\Luca\\Downloads"
 }

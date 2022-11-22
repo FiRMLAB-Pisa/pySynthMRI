@@ -56,8 +56,8 @@ class PsModel:
         self.config = ValidateConfig()
         self._default_smaps = self.config.synth_types
         self._current_preset = self.config.default_preset
+        self._screenshot_directory = self.config.screenshot_directory
         self.generate_parameter_sliders()
-
         # self._default_smaps = [t for t in self.config.synth_types]
         # self._default_smaps = [t[0] for t in Config.synth_images]
 
@@ -87,6 +87,7 @@ class PsModel:
 
         self._anchor_point = QPoint(0, 0)
         self._translated_point = QPoint(0, 0)
+        self._screenshot_image = None  # cached generated image fort screenshot
 
     def set_h_v_parameter_interaction(self, h_v_parameter_interaction):
         self._h_v_parameter_interaction = h_v_parameter_interaction
@@ -249,6 +250,15 @@ class PsModel:
 
     def get_anchor_point(self):
         return self._anchor_point
+
+    def set_screenshot_image(self, screenshot_image):
+        self._screenshot_image = screenshot_image
+
+    def get_screenshot_image(self):
+        return self._screenshot_image
+
+    def get_screenshot_directory(self):
+        return self._screenshot_directory
 
     def reload_all_images(self):
         # reaload qmaps

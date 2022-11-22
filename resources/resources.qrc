@@ -18,6 +18,7 @@
     <file alias="save_file.png">icons/save_file.png</file>
     <file alias="move_icon.png">icons/move_icon.png</file>
     <file alias="reload_config.png">icons/reload_config.png</file>
+    <file alias="screenshot_64.png">icons/screenshot_64.png</file>
 </qresource>
 <qresource prefix="cursors">
         <file alias="zoom_cursor_w.png">cursors/zoom_cursor_w.png</file>
@@ -25,6 +26,8 @@
         <file alias="center-of-gravity-32.png">cursors/center-of-gravity-32.png</file>
         <file alias="center-of-gravity-32-w.png">cursors/center-of-gravity-32-w.png</file>
         <file alias="center-of-gravity-32-w-s.png">cursors/center-of-gravity-32-w-s.png</file>
+        <file alias="parameters_mouse.png">cursors/parameters_mouse.png</file>
+
 </qresource>
 
 </RCC>

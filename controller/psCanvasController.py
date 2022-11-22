@@ -248,12 +248,10 @@ class PsCanvasController:
                 self.last_pos = curr_pos
 
     def keyboard_press_handler(self, event):
-        self.model.c.signal_update_status_bar.emit("1")
-        if event.modifiers() & Qt.ControlModifier :
-            self.model.c.signal_update_status_bar.emit("2")
+        if event.modifiers() & Qt.ControlModifier:
             if self.model.is_h_v_parameter_interaction():
-                self.model.c.signal_update_status_bar.emit("3")
-                self.view.smap_view.setCursor(QCursor(QtGui.QPixmap(':cursors/center-of-gravity-32-w-s.png')))
+                # self.view.smap_view.setCursor(QCursor(QtGui.QPixmap(':cursors/center-of-gravity-32-w-s.png')))
+                self.view.smap_view.setCursor(QCursor(QtGui.QPixmap(':cursors/parameters_mouse.png')))
 
     def keyboard_release_handler(self, event):
         if event.key() == Qt.Key_Control and self.model.is_h_v_parameter_interaction():
