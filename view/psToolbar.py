@@ -10,9 +10,11 @@ class PsToolbar(QToolBar):
     ToolBar used in Visual Page.
     """
     BUTTON_SIZE = QSize(24, 24)
+
     def __init__(self, model, parent=None):
         super(QToolBar, self).__init__(parent)
         self.model = model
+        self.button_activated = True
         self.setContextMenuPolicy(Qt.PreventContextMenu)
         self.setMovable(True)
         self.setStyleSheet(
@@ -48,9 +50,25 @@ class PsToolbar(QToolBar):
             # }
              """)
 
-        # MOUSE GROUP LABEL
-        self.label_mouse = QLabel(" Mouse: ")
-        self.label_mouse.setStyleSheet("QLabel {color : #999; }")
+        # SAVE NIFTII
+        self.button_save_niftii = QPushButton()
+        self.button_save_niftii.setIconSize(self.BUTTON_SIZE)
+        self.button_save_niftii.setCheckable(False)
+        self.button_save_niftii.setCursor(QCursor(QtCore.Qt.PointingHandCursor))
+        icon_save_niftii = QIcon()
+        icon_save_niftii.addPixmap(QPixmap(":/icons/save_niftii.png"), QIcon.Normal, QIcon.On)
+        self.button_save_niftii.setIcon(icon_save_niftii)
+        self.button_save_niftii.setToolTip("Save current synthetic image as Niftii file")
+
+        # SAVE DICOM
+        self.button_save_dicom = QPushButton()
+        self.button_save_dicom.setIconSize(self.BUTTON_SIZE)
+        self.button_save_dicom.setCheckable(False)
+        self.button_save_dicom.setCursor(QCursor(QtCore.Qt.PointingHandCursor))
+        icon_save_dicom = QIcon()
+        icon_save_dicom.addPixmap(QPixmap(":/icons/save_dicom.png"), QIcon.Normal, QIcon.On)
+        self.button_save_dicom.setIcon(icon_save_dicom)
+        self.button_save_dicom.setToolTip("Save current synthetic image as Dicom folder")
 
         # WINDOW SCALE MOUSE
         self.button_window_grayscale = QPushButton()
@@ -60,7 +78,8 @@ class PsToolbar(QToolBar):
         icon_window_grayscale = QIcon()
         icon_window_grayscale.addPixmap(QPixmap(":/icons/gradient_linear_40.png"), QIcon.Normal, QIcon.On)
         self.button_window_grayscale.setIcon(icon_window_grayscale)
-        self.button_window_grayscale.setToolTip("Use mouse to change:\n    window width  (\u2194)\n    window center (\u2195)")
+        self.button_window_grayscale.setToolTip(
+            "Use mouse to change:\n    window width  (\u2194)\n    window center (\u2195)")
 
         # WINDOW SCALE DEFAULT
         self.button_window_grayscale_default = QPushButton()
@@ -89,7 +108,8 @@ class PsToolbar(QToolBar):
         icon_translate = QIcon()
         icon_translate.addPixmap(QPixmap(":/icons/move_icon.png"), QIcon.Normal, QIcon.On)
         self.button_translate.setIcon(icon_translate)
-        self.button_translate.setToolTip("Use mouse to translate image:\n    vertival axis   (\u2195)\n    horizontal axis (\u2194)")
+        self.button_translate.setToolTip(
+            "Use mouse to translate image:\n    vertival axis   (\u2195)\n    horizontal axis (\u2194)")
 
         # DEFAULT ZOOM
         self.button_default_zoom = QPushButton()
@@ -109,7 +129,8 @@ class PsToolbar(QToolBar):
         icon_zoom = QIcon()
         icon_zoom.addPixmap(QPixmap(":/icons/three_layers.png"), QIcon.Normal, QIcon.On)
         self.button_slicer.setIcon(icon_zoom)
-        self.button_slicer.setToolTip("Use mouse to change slice:\n    next slice   (\u2193)\n    previous slice (\u2191)")
+        self.button_slicer.setToolTip(
+            "Use mouse to change slice:\n    next slice   (\u2193)\n    previous slice (\u2191)")
 
         # PARAMS GROUP LABEL
         self.label_parameters = QLabel(" Parameters: ")
@@ -172,6 +193,24 @@ class PsToolbar(QToolBar):
                                         "font-size: 16pt")
         # self.preset_label.setFixedHeight(self.BUTTON_SIZE.height())
 
+        # H V LABELS
+        self.button_h_v_mouse = QPushButton()
+        self.button_h_v_mouse.setIconSize(self.BUTTON_SIZE)
+        self.button_h_v_mouse.setCheckable(True)
+        self.button_h_v_mouse.setCursor(QCursor(QtCore.Qt.PointingHandCursor))
+        icon_zoom = QIcon()
+        icon_zoom.addPixmap(QPixmap(":/cursors/center-of-gravity-80.png"), QIcon.Normal, QIcon.On)
+        self.button_h_v_mouse.setIcon(icon_zoom)
+        self.button_h_v_mouse.setToolTip("This mode allows to change parameter using Ctrl+muouse")
+
+        # SCREENSHOT
+        self.button_screenshot = QPushButton()
+        self.button_screenshot.setIconSize(self.BUTTON_SIZE)
+        icon_screenshot = QIcon()
+        icon_screenshot.addPixmap(QPixmap(":/icons/screenshot_64.png"), QIcon.Normal, QIcon.On)
+        self.button_screenshot.setIcon(icon_screenshot)
+        self.button_screenshot.setToolTip("Press to save a screenshot")
+
         # SYNTH IMAGES
         self.synth_images_buttons = dict()
         self.synth_images_actions = dict()
@@ -184,7 +223,7 @@ class PsToolbar(QToolBar):
             smap_button.setFixedHeight(self.BUTTON_SIZE.height())
             smap_button.setIconSize(self.BUTTON_SIZE)
             smap_button.setStyleSheet("QPushButton:pressed { background-color: red }"
-                              "QPushButton:checked { background-color: red }")
+                                      "QPushButton:checked { background-color: red }")
             smap_button.setCheckable(True)
             smap_button.setToolTip("{} ({})\nModel: {}".format(smap_key,
                                                                smap["title"],
@@ -197,31 +236,10 @@ class PsToolbar(QToolBar):
             self.synth_images_buttons[smap_key] = smap_button
             self.smap_group_buttons.addButton(smap_button)
 
-        # SAVE NIFTII
-        self.button_save_niftii = QPushButton()
-        self.button_save_niftii.setIconSize(self.BUTTON_SIZE)
-        self.button_save_niftii.setCheckable(False)
-        self.button_save_niftii.setCursor(QCursor(QtCore.Qt.PointingHandCursor))
-        icon_save_niftii = QIcon()
-        icon_save_niftii.addPixmap(QPixmap(":/icons/save_niftii.png"), QIcon.Normal, QIcon.On)
-        self.button_save_niftii.setIcon(icon_save_niftii)
-        self.button_save_niftii.setToolTip("Save current synthetic image as Niftii file")
-
-        # SAVE DICOM
-        self.button_save_dicom = QPushButton()
-        self.button_save_dicom.setIconSize(self.BUTTON_SIZE)
-        self.button_save_dicom.setCheckable(False)
-        self.button_save_dicom.setCursor(QCursor(QtCore.Qt.PointingHandCursor))
-        icon_save_dicom = QIcon()
-        icon_save_dicom.addPixmap(QPixmap(":/icons/save_dicom.png"), QIcon.Normal, QIcon.On)
-        self.button_save_dicom.setIcon(icon_save_dicom)
-        self.button_save_dicom.setToolTip("Save current synthetic image as Dicom folder")
-
         # LAYOUT
         self.addWidget(self.button_save_niftii)
         self.addWidget(self.button_save_dicom)
         self.addSeparator()
-        # self.addWidget(self.label_mouse)
         self.addWidget(self.button_window_grayscale)
         self.addWidget(self.button_window_grayscale_default)
         self.addSeparator()
@@ -231,12 +249,14 @@ class PsToolbar(QToolBar):
         self.addSeparator()
         self.addWidget(self.button_slicer)
         self.addSeparator()
+        self.addWidget(self.button_h_v_mouse)
+        self.addSeparator()
         # self.addWidget(self.label_parameters)
         self.addWidget(self.button_save_param)
         self.addWidget(self.button_default_param)
         self.addWidget(self.button_reload_config)
-
-        # self.addSeparator()
+        self.addSeparator()
+        self.addWidget(self.button_screenshot)
         # for pb in self.presets_buttons:
         #     self.addWidget(self.presets_buttons[pb])
 
@@ -250,6 +270,8 @@ class PsToolbar(QToolBar):
         spacer.setSizePolicy(QSizePolicy.Expanding, QSizePolicy.Expanding)
         self.addWidget(spacer)
         self.addWidget(self.preset_label)
+        self.toggle_toolbar_buttons(False)
+        self.autotoggle_smaps_buttons()
 
     def activate_unique_smap_button(self, smap):
         self.synth_images_buttons[smap].setChecked(True)
@@ -284,3 +306,26 @@ class PsToolbar(QToolBar):
     def set_preset_label(self, preset):
         self.preset_label.setText(preset)
 
+    def toggle_toolbar_buttons(self, activate):
+        changed = not (activate == self.button_activated)
+        self.button_activated = activate
+        if changed:
+            self.button_save_niftii.setEnabled(activate)
+            self.button_save_dicom.setEnabled(activate)
+            self.button_window_grayscale.setEnabled(activate)
+            self.button_window_grayscale_default.setEnabled(activate)
+            self.button_zoom.setEnabled(activate)
+            self.button_translate.setEnabled(activate)
+            self.button_default_zoom.setEnabled(activate)
+            self.button_slicer.setEnabled(activate)
+            self.button_h_v_mouse.setEnabled(activate)
+            self.button_save_param.setEnabled(activate)
+            self.button_default_param.setEnabled(activate)
+            self.button_reload_config.setEnabled(activate)
+            self.button_screenshot.setEnabled(activate)
+            # self._toggle_smaps_buttons(activate)
+
+    def autotoggle_smaps_buttons(self):
+        for sib in self.synth_images_buttons:
+            has_all_qmaps = not self.model.has_missing_qmap(sib)
+            self.synth_images_buttons[sib].setEnabled(has_all_qmaps)

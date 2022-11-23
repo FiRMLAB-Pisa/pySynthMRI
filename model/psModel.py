@@ -28,6 +28,9 @@ class ModelCommunicate(QObject):
     signal_parameter_sliders_initialized = pyqtSignal()
     signal_parameter_sliders_init_handlers = pyqtSignal()
 
+    signal_update_parameter_value_graph = pyqtSignal()
+    signal_update_parameter_type_graph = pyqtSignal()
+
 
 # counter_reload = 0
 
@@ -53,8 +56,8 @@ class PsModel:
         self.config = ValidateConfig()
         self._default_smaps = self.config.synth_types
         self._current_preset = self.config.default_preset
+        self._screenshot_directory = self.config.screenshot_directory
         self.generate_parameter_sliders()
-
         # self._default_smaps = [t for t in self.config.synth_types]
         # self._default_smaps = [t[0] for t in Config.synth_images]
 
@@ -79,16 +82,33 @@ class PsModel:
         self.slice_slider = None
         # mouse behaviour [window scale, zoom]
         self._mouse_behaviour_type = self.MouseBehaviour.NONE
-
+        self._h_v_parameter_interaction = False
         self._scaling_factor = 1  # synthesize image zoom
 
         self._anchor_point = QPoint(0, 0)
         self._translated_point = QPoint(0, 0)
+        self._screenshot_image = None  # cached generated image fort screenshot
+
+    def set_h_v_parameter_interaction(self, h_v_parameter_interaction):
+        self._h_v_parameter_interaction = h_v_parameter_interaction
+        self.c.signal_update_parameter_type_graph.emit()
+
+    def is_h_v_parameter_interaction(self):
+        return self._h_v_parameter_interaction
 
     def get_current_map_type(self):
         # current synthetic map type
         # return self.properties["curr_smap_type"]
         return self._smap.get_map_type()
+
+    def has_missing_qmap(self, smap):
+        for qmap in self._default_smaps[smap]["qmaps_needed"]:
+            try:
+                if not self._qmaps[qmap].is_loaded:
+                    return True
+            except KeyError:
+                return True
+        return False
 
     def update_qmap_batch_path(self, root_path, file_type):
         # foreach qmap defined in config.json
@@ -231,6 +251,15 @@ class PsModel:
     def get_anchor_point(self):
         return self._anchor_point
 
+    def set_screenshot_image(self, screenshot_image):
+        self._screenshot_image = screenshot_image
+
+    def get_screenshot_image(self):
+        return self._screenshot_image
+
+    def get_screenshot_directory(self):
+        return self._screenshot_directory
+
     def reload_all_images(self):
         # reaload qmaps
         qmap_types = self._qmaps.keys()
@@ -272,6 +301,9 @@ class PsModel:
         self._smap.set_window_width(self._default_smaps[smap_type]["window_width"])
         self._smap.set_default_window_center(self._default_smaps[smap_type]["default_window_center"])
         self._smap.set_default_window_width(self._default_smaps[smap_type]["default_window_width"])
+        self._smap.set_parameter(self._default_smaps[smap_type]["mouse_h"], "h")
+        self._smap.set_parameter(self._default_smaps[smap_type]["mouse_v"], "v")
+
         # update preset
         self._current_preset = self._default_smaps[smap_type]['preset']
         self.c.signal_preset_changed.emit(self._current_preset)
@@ -286,8 +318,16 @@ class PsModel:
         self.c.signal_parameter_sliders_init_handlers.emit()
         # self.c.signal_slice_slider_oriented.emit(str(self._qmaps[list(self._qmaps.keys())[0]].get_orientation()))
         self.c.signal_slice_slider_oriented.emit(str(self.get_orientation()))
+
+        self.c.signal_update_parameter_type_graph.emit()
+
         self.c.signal_update_status_bar.emit(" {} image synthesized.".format(smap_type))
         # self.c.signal_smap_updated.emit(smap_type)
+
+    def set_smap_parameter_value(self, parameter_k, value):
+        parameter = self.get_smap().get_scanner_parameters()[parameter_k]
+        parameter["value"] = value
+        self.c.signal_update_parameter_value_graph.emit()
 
     def save_parameters(self):
         # save all parameters
@@ -303,6 +343,46 @@ class PsModel:
 
             self.update_config_file(preset, smap_k, parameters, ww, wc)
 
+    def toggle_v_h_mouse_parameter(self, checked):
+        for smap_k in self.get_smap_list():
+            parameters = self.get_smap_list()[smap_k]['parameters']
+            for param_k in parameters:
+                parameters[param_k]['slider'].show_v_h_buttons(checked)
+
+    def set_parameter_value(self, v_value, direction):
+        v_value = self._smap.set_parameter_value(v_value, direction)
+        if self.get_parameter("h") is not None and self.get_parameter_value("v") is not None:
+            self.c.signal_update_parameter_value_graph.emit()
+        return v_value
+
+    def set_mouse_parameter(self, parameter_type, direction):
+        self.get_smap().set_parameter(parameter_type, direction)
+        self.c.signal_update_parameter_type_graph.emit()
+
+    def get_parameter_details(self, direction):
+        param = self.get_parameter(direction)
+        if param is None:
+            return None
+        min = self.get_smap().get_scanner_parameters()[param]["min"]
+        max = self.get_smap()._parameters[param]["max"]
+        default = self.get_smap()._parameters[param]["default"]
+        value = self.get_smap()._parameters[param]["value"]
+        label = param
+        return min, max, default, value, label
+
+    def modify_mouse_parameters(self, h_param_delta, direction):
+        parameter = self.get_parameter(direction)
+        if parameter is not None:
+            new_h_param = self.get_parameter_value(direction) + h_param_delta
+            new_h_param = self.set_parameter_value(new_h_param, direction)
+            slider = self._smap.get_parameter_slider(self._smap.get_parameter(direction))
+            slider.sliderQ.setValue(new_h_param)
+
+    def get_parameter_value(self, direction):
+        return self._smap.get_parameter_value(direction)
+
+    def get_parameter(self, direction: str):
+        return self._smap.get_parameter(direction)
 
     def update_config_strunct(self, parameters):
         for p_name in parameters:
@@ -322,29 +402,34 @@ class PsModel:
 
     def reload_configuration_file(self):
         self.config = ValidateConfig()
-        for smap_k in self._default_smaps:
-            smap = self._default_smaps[smap_k]
-            smap["title"] = self.config.synth_types[smap_k]["title"]
-            smap["equation"] = self.config.synth_types[smap_k]["equation"]
-            smap["preset"] = self.config.synth_types[smap_k]["preset"]
-            smap["equation_string"] = self.config.synth_types[smap_k]["equation_string"]
-            smap["qmaps_needed"] = self.config.synth_types[smap_k]["qmaps_needed"]
-            smap["window_width"] = self.config.synth_types[smap_k]["window_width"]
-            smap["window_center"] = self.config.synth_types[smap_k]["window_center"]
-            smap["default_window_center"] = self.config.synth_types[smap_k]["window_center"]
-            smap["default_window_width"] = self.config.synth_types[smap_k]["window_width"]
+        for smap_k in self.config.synth_types:
+            smap_new_conf = self.config.synth_types[smap_k]
+            if smap_k in self._default_smaps:
+                # this smap already exists
+                smap = self._default_smaps[smap_k]
+                smap["title"] = smap_new_conf["title"]
+                smap["equation"] = smap_new_conf["equation"]
+                smap["preset"] = smap_new_conf["preset"]
+                smap["equation_string"] = smap_new_conf["equation_string"]
+                smap["qmaps_needed"] = smap_new_conf["qmaps_needed"]
+                smap["window_width"] = smap_new_conf["window_width"]
+                smap["window_center"] = smap_new_conf["window_center"]
+                smap["default_window_center"] = smap_new_conf["window_center"]
+                smap["default_window_width"] = smap_new_conf["window_width"]
 
-            for param_k in smap["parameters"]:
-                # all stored smap
-                param = smap["parameters"][param_k]
-                new_param = self.config.synth_types[smap_k]["parameters"][param_k]
-                param["label"] = new_param["label"]
-                param["value"] = new_param["value"]
-                param["min"] = new_param["min"]
-                param["max"] = new_param["max"]
-                param["step"] = new_param["step"]
-                param["default"] = new_param["default"]
-                # current loaded smap
+                for param_k in smap["parameters"]:
+                    # all stored smap
+                    param = smap["parameters"][param_k]
+                    new_param = smap_new_conf["parameters"][param_k]
+                    param["label"] = new_param["label"]
+                    param["value"] = new_param["value"]
+                    param["min"] = new_param["min"]
+                    param["max"] = new_param["max"]
+                    param["step"] = new_param["step"]
+                    param["default"] = new_param["default"]
+
+            else:  # new smap
+                self._default_smaps[smap_k] = smap_new_conf
 
         if self._smap.get_map_type():
             self.set_smap_type(self._smap.get_map_type())
@@ -433,7 +518,8 @@ class PsModel:
                                              sp["min"],
                                              sp["max"],
                                              sp["value"],
-                                             sp["step"])
+                                             sp["step"],
+                                             sp["mouse"])
 
     def add_custom_smap(self, new_smap):
         for scanner_param in new_smap["parameters"]:
@@ -442,7 +528,8 @@ class PsModel:
                                          sp["min"],
                                          sp["max"],
                                          sp["value"],
-                                         sp["step"])
+                                         sp["step"],
+                                         sp["mouse"])
         self.config.validate_equation(new_smap)
         self._default_smaps[new_smap["name"]] = new_smap
         # self.c.signal_custom_smap_added.emit(new_smap["name"])
@@ -478,7 +565,7 @@ class PsModel:
     def translation_reset(self):
         self._translated_point = QPoint(0, 0)
 
-    def execute_batch_process(self, input_dir, preset, smaps):
+    def execute_batch_process(self, input_dir, preset, smaps, output_type):
         # iteratively select subject and synthesize images
         suject_paths = get_subdirs(input_dir)
         qmaps_path = None
@@ -496,6 +583,7 @@ class PsModel:
                 self.c.signal_update_status_bar.emit(f"Error processing input directory: {input_dir}")
                 return
 
+            #
             if not os.path.exists(smaps_path):
                 os.makedirs(smaps_path)
 
@@ -510,6 +598,10 @@ class PsModel:
                 self.c.signal_update_status_bar.emit(
                     f"Processing subject: {os.path.basename(subject_path)} - map: {smap_k}")
                 QApplication.processEvents()
+                # 1 load qmaps and generate smap
+
+                self.c.signal_update_status_bar.emit("All Subjects processed.")
+
                 self._smap.set_map_type(smap_k)
                 self._smap.set_title(self._default_smaps[smap_k]["title"])
                 self._smap.set_init_slices_num(self._qmaps[list(self._qmaps.keys())[0]])
@@ -518,13 +610,28 @@ class PsModel:
                 self._smap.set_scanner_parameters(self._default_smaps[smap_k]["parameters"])
                 self._smap.set_equation(self._default_smaps[smap_k]["equation"])
                 self._smap.set_equation_string(self._default_smaps[smap_k]["equation_string"])
+                self._smap.set_window_center(self._default_smaps[smap_k]["default_window_center"])
+                self._smap.set_window_width(self._default_smaps[smap_k]["default_window_width"])
 
                 self.recompute_smap()
-                self.save_smap(os.path.join(smaps_path, smap_k[:-len(" - " + self._current_preset)] + ".nii"),
-                               psFileType.NIFTII)
-            self.c.signal_update_status_bar.emit("All Subjects processed.")
 
-        pass
+                if output_type == psFileType.NIFTII:
+                    self.save_smap(os.path.join(smaps_path, smap_k[:-len(" - " + self._current_preset)] + ".nii"),
+                                   psFileType.NIFTII)  # TODO ERROR _current_preset!
+                elif output_type == psFileType.DICOM:
+                    # self._smap.set_map_type(smap_k)
+                    # self._smap.set_title(self._default_smaps[smap_k]["title"])
+                    # self._smap.set_init_slices_num(self._qmaps[list(self._qmaps.keys())[0]])
+                    # # self._smap.set_total_slice_num(self._qmaps[list(self._qmaps.keys())[0]].get_total_slice_num())
+                    # self._smap.set_qmaps_needed(self._default_smaps[smap_k]["qmaps_needed"])
+                    # self._smap.set_scanner_parameters(self._default_smaps[smap_k]["parameters"])
+                    # self._smap.set_equation(self._default_smaps[smap_k]["equation"])
+                    # self._smap.set_equation_string(self._default_smaps[smap_k]["equation_string"])
+                    #
+                    # self.recompute_smap()
+                    self.save_smap(os.path.join(smaps_path, smap_k[:-len(" - " + self._current_preset)]),
+                                   psFileType.DICOM)  # TODO ERROR _current_preset!
+
 
     def execute_batch_process_old(self, root_path):
         # iteratively select subject and synthesize images

@@ -1,7 +1,7 @@
 import logging
 
 from PyQt5.QtCore import pyqtSignal, QObject
-from PyQt5.QtGui import QWheelEvent, QMouseEvent
+from PyQt5.QtGui import QWheelEvent, QMouseEvent, QKeyEvent, QFocusEvent
 from PyQt5.QtWidgets import QLabel, QSizePolicy
 
 log = logging.getLogger(__name__)
@@ -12,6 +12,11 @@ class CanvasCommunicate(QObject):
     mouse_press_sgn = pyqtSignal(QMouseEvent)
     mouse_release_sgn = pyqtSignal(QMouseEvent)
     mouse_move_sgn = pyqtSignal(QMouseEvent)
+    keyboard_pressed_sgn = pyqtSignal(QKeyEvent)
+    keyboard_released_sgn = pyqtSignal(QKeyEvent)
+    focus_in_sgn = pyqtSignal(QFocusEvent)
+    focus_out_sgn = pyqtSignal(QFocusEvent)
+
 
 
 class PsSyntheticCanvas(QLabel):
@@ -51,3 +56,25 @@ class PsSyntheticCanvas(QLabel):
         """Override built-in event"""
         self.c.mouse_move_sgn.emit(event)
         return super(PsSyntheticCanvas, self).mouseMoveEvent(event)
+
+    def keyPressEvent(self, event):
+        """Override built-in event"""
+        super(PsSyntheticCanvas, self).keyPressEvent(event)
+        self.c.keyboard_pressed_sgn.emit(event)
+
+    def keyReleaseEvent(self, event):
+        """Override built-in event"""
+        super(PsSyntheticCanvas, self).keyReleaseEvent(event)
+        self.c.keyboard_released_sgn.emit(event)
+
+    def focusInEvent(self, event):
+        """Override built-in event"""
+        super(PsSyntheticCanvas, self).focusInEvent(event)
+        self.c.focus_in_sgn.emit(event)
+        # self.setStyleSheet("border: 1px solid red;")
+
+    def focusOutEvent(self, event):
+        """Override built-in event"""
+        super(PsSyntheticCanvas, self).focusOutEvent(event)
+        self.c.focus_out_sgn.emit(event)
+        # self.setStyleSheet("")

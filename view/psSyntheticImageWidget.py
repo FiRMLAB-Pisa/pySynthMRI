@@ -110,6 +110,8 @@ class PsSyntheticImageWidget(QWidget):
 
         qImg = QImage(cv_image.data, width, height, QImage.Format.Format_Grayscale16)
 
+        self.model.set_screenshot_image(qImg)
+
         if smap.get_orientation_labels_flag():
             self.draw_positions(qImg, orientation)
 

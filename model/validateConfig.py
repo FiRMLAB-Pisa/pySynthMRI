@@ -16,7 +16,7 @@ class ValidateConfig:
         self.synth_types = self._parse_synthetic_maps(config)
         self.qmap_types = config["quantitative_maps"]
         self.image_interpolation = config["image_interpolation"]
-
+        self.screenshot_directory = config["screenshot_directory"]
         for synth_type in self.synth_types:
             self.validate_equation(self.synth_types[synth_type], synth_type)
             self.validate_scanner_parameters(self.synth_types[synth_type])
@@ -46,9 +46,20 @@ class ValidateConfig:
             image_interpolation["interpolation_type"] = Interpolation.NONE
 
     def validate_scanner_parameters(self, synth_type):
+        synth_type["mouse_v"] = None
+        synth_type["mouse_h"] = None
         scanner_parameters = synth_type["parameters"]
-        for k in scanner_parameters:
+        for idx, k in enumerate(scanner_parameters):
             scanner_parameters[k]["default"] = scanner_parameters[k]["value"]
+            if idx == 0:
+                scanner_parameters[k]["mouse"] = "V"
+                synth_type["mouse_v"] = k
+            elif idx == 1:
+                scanner_parameters[k]["mouse"] = "H"
+                synth_type["mouse_h"] = k
+            else:
+                scanner_parameters[k]["mouse"] = "N"
+
 
     def validate_equation(self, synth_type, synth_type_label):
         symbols = ["exp", "abs", "sqrt", "cos", "sin", "tan"]

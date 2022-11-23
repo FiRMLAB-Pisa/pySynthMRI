@@ -62,8 +62,8 @@ if __name__ == '__main__':
         # model.update_qmap_path("T2", "C:/Users/Luca/OneDrive - University of Pisa/dicom_mrf_example/newTree/T2", "dicom")
         # model.update_qmap_path("PD", "C:/Users/Luca/OneDrive - University of Pisa/dicom_mrf_example/newTree/PD", "dicom")
 
-        view.tool_bar.synth_images_buttons["GRE"].clicked.emit()
-        view.tool_bar.synth_images_buttons["GRE"].setChecked(True)
+        view.tool_bar.synth_images_buttons["FSE - FS15T"].clicked.emit()
+        view.tool_bar.synth_images_buttons["FSE - FS15T"].setChecked(True)
     sys.exit(app.exec_())
 
     app.exec_()

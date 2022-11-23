@@ -1,3 +1,5 @@
+import os.path
+
 import numpy as np
 
 
@@ -26,7 +28,7 @@ def reorder_img(img, resample=None):
 
     axis_numbers = np.argmax(np.abs(data), axis=0)
     while not np.all(np.sort(axis_numbers) == axis_numbers):
-        first_inversion = np.argmax(np.diff(axis_numbers)<0)
+        first_inversion = np.argmax(np.diff(axis_numbers) < 0)
         axis1 = first_inversion + 1
         axis2 = first_inversion
         data = np.swapaxes(data, axis1, axis2)
@@ -112,6 +114,15 @@ def from_matrix_vector(matrix, vector):
     nin, nout = matrix.shape
     t = np.zeros((nin + 1, nout + 1), matrix.dtype)
     t[0:nin, 0:nout] = matrix
-    t[nin,   nout] = 1.
+    t[nin, nout] = 1.
     t[0:nin, nout] = vector
     return t
+
+
+def get_unique_filename(filename_path):
+    postfix = 1
+    new_filename_path = filename_path
+    while os.path.exists(new_filename_path):
+        new_filename_path = filename_path[:-4] + "_" + str(postfix) + ".png"
+        postfix += 1
+    return new_filename_path
