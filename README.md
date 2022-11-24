@@ -73,15 +73,16 @@ Make sure you have [Python](https://python.org/) version >= 3.6.
 <!-- USAGE EXAMPLES -->
 # Usage
 
-### Lauch PySynthMRI
-You can launch PySynthMRI running `launcher.py` in your Python IDE or via operating system command-line or terminal:
 
-```shell
-python pySynthMRI.py
-```
 ### Configuration
-In order to correctly execute pySynthMRI, *config.json* file need to exist.
-A default configuration file is provided for reference. <br/>
+In order to correctly execute pySynthMRI, `config.json` file need to be created.
+A default configuration file (`config-sample.json`) is provided for reference. <br/>
+We suggest to copy sample file:
+
+```sh
+   cp config-sample.json config.json
+```
+    
 Below part of the configuration file is reported for help.
 ```json
 {
@@ -116,7 +117,12 @@ Below part of the configuration file is reported for help.
     "screenshot_directory": "PATH-TO-SCREENSHOT-DIR"  # Directory for exporting screenshots
 }
 ```
+### Lauch PySynthMRI
+You can launch PySynthMRI running `launcher.py` in your Python IDE or via operating system command-line or terminal:
 
+```shell
+python pySynthMRI.py
+```
 
 ### Default Signal Models
 Custom signal models can be added at runtime or using the configuration file. <br/>

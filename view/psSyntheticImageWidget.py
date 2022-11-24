@@ -99,13 +99,14 @@ class PsSyntheticImageWidget(QWidget):
         zoom = self.model.get_zoom()
         # scale_center_point = self.model.get_anchor_point()
         translation_point = self.model.get_translated_point()
-        # M = get_affine_cv(scale_center_point, 0, zoom, translation_point)
-
-        M = get_affine_cv(QPoint(img_2d_cp.shape[0] / 2, img_2d_cp.shape[1] / 2), 0, zoom, translation_point)
-        img_2d_cp = cv2.warpAffine(img_2d_cp, M, (img_2d_cp.shape[0], img_2d_cp.shape[1]))
 
         # convert to grayscale 16 bit
-        cv_image = (65535 * ((img_2d_cp - img_2d_cp.min()) / img_2d_cp.ptp())).astype(np.uint16)  # .copy()
+        cv_image = (65535 * ((img_2d_cp - img_2d_cp.min()) / img_2d_cp.ptp())).astype(np.uint16)
+
+        # M = get_affine_cv(scale_center_point, 0, zoom, translation_point)
+        M = get_affine_cv(QPoint(cv_image.shape[0] / 2, cv_image.shape[1] / 2), 0, zoom, translation_point)
+        cv_image = cv2.warpAffine(cv_image, M, (cv_image.shape[0], cv_image.shape[1]))
+
         height, width = cv_image.shape
 
         qImg = QImage(cv_image.data, width, height, QImage.Format.Format_Grayscale16)
@@ -116,7 +117,8 @@ class PsSyntheticImageWidget(QWidget):
             self.draw_positions(qImg, orientation)
 
         qPixMap = QPixmap(qImg)
-        qPixMap = qPixMap.scaled(self.canvas.size() * self.model.get_zoom(), Qt.KeepAspectRatio)
+        # qPixMap = qPixMap.scaled(self.canvas.size() * self.model.get_zoom(), Qt.KeepAspectRatio)
+        qPixMap = qPixMap.scaled(self.canvas.size(), Qt.KeepAspectRatio)
 
         self.canvas.setAlignment(Qt.AlignCenter)
         self.canvas.setPixmap(qPixMap)
