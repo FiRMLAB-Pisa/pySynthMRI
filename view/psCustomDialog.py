@@ -288,7 +288,7 @@ class AboutDialog(QDialog):
         layout.addWidget(title)
 
         logo = QLabel()
-        logo.setPixmap(QPixmap(os.path.join('resources', 'logos', 'logo3.png')))
+        logo.setPixmap(QPixmap(os.path.join('resources', 'logos', 'logo.png')))
         layout.addWidget(logo)
 
         layout.addWidget(QLabel("Version 0.2.5"))
