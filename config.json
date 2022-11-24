@@ -7,70 +7,134 @@
                 "parameters": {
                     "TE": {
                         "label": "TE [ms]",
-                        "value": 1,
+                        "value": 80,
                         "min": 1,
                         "max": 100,
                         "step": 1
                     }
-                },
-                "window_center": 2600,
-                "window_width": 2600
+                }
             },
-            "DIR": {
-                "title": "3D Double Inversion Revovery",
-                "equation": "PD * ( 1 - 2*exp(-TI_2/T1) + 2*exp(-(TI_1+TI_2)/T1) -  exp(-TR/T1) * (2/exp(-(TE/2)/T1)-1)  )",
+            "GRE": {
+                "title": "T1w - Gradient Echo ",
+                "equation": "1 - exp(-TR/T1)",
+                "parameters": {
+                    "TR": {
+                        "label": "TR [ms]",
+                        "value": 220,
+                        "min": 100,
+                        "max": 500,
+                        "step": 5
+                    }
+                }
+            },
+            "FLAIR": {
+                "title": "T2w - Fluid Attenuated Inversion Recover",
+                "equation": "abs(PD)*exp(-TSAT/T1)*exp(-TE/T2)*(1-2*exp(-TI/T1))",
                 "parameters": {
                     "TE": {
                         "label": "TE [ms]",
-                        "value": 55,
+                        "value": 82,
                         "min": 1,
                         "max": 100,
                         "step": 1
                     },
-                    "TR": {
-                        "label": "TR [ms]",
-                        "value": 10,
-                        "min": 10,
-                        "max": 10000,
-                        "step": 1
-                    },
-                    "TI_1": {
-                        "label": "TI_1 [ms]",
-                        "value": 1231,
+                    "TI": {
+                        "label": "TI [ms]",
+                        "value": 2500,
                         "min": 1000,
                         "max": 3500,
-                        "step": 10,
-                        "weight": 3
+                        "step": 10
                     },
-                    "TI_2": {
-                        "label": "TI_2 [ms]",
-                        "value": 300,
-                        "min": 1,
-                        "max": 600,
-                        "step": 10,
-                        "weight": 3
+                    "TSAT": {
+                        "label": "T1SAT [ms]",
+                        "value": 500,
+                        "min": 400,
+                        "max": 10000,
+                        "step": 10
                     }
-                },
-                "window_center": 1900,
-                "window_width": 500
+                }
+            },
+            "MP2RAGE": {
+                "title": "T1w - Magnetization-Prepared 2 RApid Gradient Echoes",
+                "equation": "1-2*exp(-TI/T1)",
+                "parameters": {
+                "TI": {
+                    "label": "TI [ms]",
+                    "value": 1300,
+                    "min": 1000,
+                    "max": 3500,
+                    "step": 10
+                }
+            }
             }
         },
         "FS7T": {
             "FSE": {
-                "title": "T2w - Fast Spin Echo",
-                "equation": "PD*exp(-TE/T2)",
+            "title": "T2w - Fast Spin Echo",
+            "equation": "PD*exp(-TE/T2)",
+            "parameters": {
+                "TE": {
+                    "label": "TE [ms]",
+                    "value": 88,
+                    "min": 1,
+                    "max": 100,
+                    "step": 1
+                }
+            }
+        },
+            "GRE": {
+                "title": "T1w - Gradient Echo ",
+                "equation": "1 - exp(-TR/T1)",
+                "parameters": {
+                    "TR": {
+                        "label": "TR [ms]",
+                        "value": 230,
+                        "min": 100,
+                        "max": 500,
+                        "step": 5
+                    }
+                }
+            },
+            "FLAIR": {
+                "title": "T2w - Fluid Attenuated Inversion Recover",
+                "equation": "abs(PD)*exp(-TSAT/T1)*exp(-TE/T2)*(1-2*exp(-TI/T1))",
                 "parameters": {
                     "TE": {
                         "label": "TE [ms]",
-                        "value": 28,
+                        "value": 84,
                         "min": 1,
                         "max": 100,
                         "step": 1
+                    },
+                    "TI": {
+                        "label": "TI [ms]",
+                        "value": 2550,
+                        "min": 1000,
+                        "max": 3500,
+                        "step": 10
+                    },
+                    "TSAT": {
+                        "label": "T1SAT [ms]",
+                        "value": 550,
+                        "min": 400,
+                        "max": 10000,
+                        "step": 10
                     }
-                },
-                "window_center": 2600,
-                "window_width": 2600
+                }
+            },
+            "MP2RAGE": {
+            "title": "T1w - Magnetization-Prepared 2 RApid Gradient Echoes",
+            "equation": "1-2*exp(-TI/T1)",
+            "parameters": {
+                "TI": {
+                    "label": "TI [ms]",
+                    "value": 1400,
+                    "min": 1000,
+                    "max": 3500,
+                    "step": 10
+                }
             }
+        }
         }
     },
     "quantitative_maps": {
@@ -88,5 +152,5 @@
         "interpolation_type": "linear",
         "scale": 2
     },
-    "screenshot_directory": "C:\\Users\\Luca\\Downloads"
+    "screenshot_directory": "PATH-TO-SCREENSHOT-DIRECTORY"
 }
