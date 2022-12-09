@@ -29,6 +29,18 @@ class Interpolation(Enum):
     NN = 4
 
 
+class Colormap(object):
+    COLORMAP_HOT = ("HOT", 11)
+    COLORMAP_BONE = ("BONE", 1)
+    COLORMAP_JET = ("JET", 2)
+    COLORMAP_WINTER = ("WINTER", 3)
+    COLORMAP_HSV = ("HSV", 9)
+    COLOR_LIST = ["HOT", "BONE", "JET", "WINTER", "HSV"]
+
+    # def __iter__(self):
+    #     for attr, value in self.__dict__.iteritems():
+    #         yield attr, value
+
 class MRIImage:
     np_matrix = None
     np_matrix_3d = None
@@ -239,6 +251,8 @@ class Qmap(MRIImage):
         self.header = None
         self.original_template = None
         self.slice_spacing = 0.
+        self._colormap = Colormap.COLORMAP_HOT
+        self._inverted = False
 
     def load_from_dicom(self):
         path = Path(self.path)
@@ -340,6 +354,18 @@ class Qmap(MRIImage):
                 dicom_file.PixelData = arr.tobytes()
                 slices.append(dicom_file)
             return slices
+
+    def set_colormap(self, colormap):
+        self._colormap = colormap
+
+    def get_colormap(self):
+        return self._colormap
+
+    def set_inverted(self, inverted):
+        self._inverted = inverted
+
+    def get_inverted(self):
+        return self._inverted
 
 
 class Smap(MRIImage):

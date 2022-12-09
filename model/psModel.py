@@ -146,6 +146,16 @@ class PsModel:
             self.c.signal_update_status_bar.emit(
                 "{} map CANNOT BE loaded. Check again path: {}".format(qmap_type, path))
 
+    def update_qmap_colormap(self, qmap_k, colormap):
+        log.debug(f"Update colormap to {colormap}")
+        self._qmaps[qmap_k].set_colormap(colormap)
+        self.reload_qmaps()
+
+    def invert_qmap(self, qmap_k, inverted):
+        log.debug(f"Inverted qmap {qmap_k} to {inverted}")
+        self._qmaps[qmap_k].set_inverted(inverted)
+        self.reload_qmaps()
+
     def get_qmap(self, qmap_type):
         return self._qmaps[qmap_type]
 
@@ -262,11 +272,14 @@ class PsModel:
 
     def reload_all_images(self):
         # reaload qmaps
+        self.reload_qmaps()
+        # reload smap
+        self.reload_smap()
+
+    def reload_qmaps(self):
         qmap_types = self._qmaps.keys()
         for qmap_type in qmap_types:
             self.c.signal_qmap_updated.emit(qmap_type)
-        # reload smap
-        self.reload_smap()
 
     def reload_smap(self):
         # global counter_reload

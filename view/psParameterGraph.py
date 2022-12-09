@@ -71,7 +71,7 @@ class PsParameterGraph(PlotWidget):
             self.scatter.clear()
             x_min, x_max, x_default, x_value, x_label = self.model.get_parameter_details("h")
             y_min, y_max, y_default, y_value, y_label = self.model.get_parameter_details("v")
-            print(f"(x: {x_min}, {x_max}), {x_default}, {x_value}, {x_label}")
+            #print(f"(x: {x_min}, {x_max}), {x_default}, {x_value}, {x_label}")
             self.set_labels(x_label, y_label)
             self.update(x_value, y_value, x_default, y_default)
             self.set_ranges((x_min, x_max), (y_min, y_max))
