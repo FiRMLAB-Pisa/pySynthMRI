@@ -58,11 +58,14 @@ class PsController:
 
         self.view.menu_bar.file_save_niftii_action.triggered.connect(self.on_clicked_save_niftii_button)
         self.view.c.signal_saving_smap.connect(self.on_selected_path_dialog_save)
+        # dicom tag changes
+        self.view.c.signal_set_header_tag.connect(self.on_set_header_tag)
 
         # self.view.menu_bar.back_action.triggered.connect(self.on_clicked_back_button)
         self.view.menu_bar.exit_action.triggered.connect(self.on_clicked_exit_button)
 
         # self.view.menu_bar.settings_custom_param_action.triggered.connect(self.on_clicked_custom_param_button)
+
 
         # Preset change
 
@@ -147,6 +150,8 @@ class PsController:
         qmaps = self.view.qmap_view
         for qmap_name in qmaps:
             qmaps[qmap_name].c.drop_event.connect(functools.partial(self.drag_event_handler, qmap_name))
+            qmaps[qmap_name].c.colormap_changed_signal.connect(functools.partial(self.colormap_changed_handler, qmap_name))
+            qmaps[qmap_name].c.invert_relaxation_map_signal.connect(functools.partial(self.invert_relaxation_handler, qmap_name))
 
         # preset changed from menubar image selection
         self.model.c.signal_preset_changed.connect(self.on_clicked_preset_menu)
@@ -157,19 +162,26 @@ class PsController:
 
     def drag_event_handler(self, qmap_name, event):
         path = event.mimeData().text()
-        print(path)
         if path.startswith("file:///"):
             path = path[8:]
 
         if os.path.isdir(path):
             # dicom folder
+            log.debug("Drop DICOM folder: {}".format(path))
             self.model.update_qmap_path(qmap_name, path, psFileType.DICOM)
+            self.view.tool_bar.autotoggle_smaps_buttons()
 
         elif os.path.isfile(path):
             if path.endswith(".nii"):
                 log.debug("Drop NIFTII file: {}".format(path))
                 self.model.update_qmap_path(qmap_name, path, psFileType.NIFTII)
                 self.view.tool_bar.autotoggle_smaps_buttons()
+
+    def colormap_changed_handler(self, qmap_name, colormap):
+        self.model.update_qmap_colormap(qmap_name, colormap)
+
+    def invert_relaxation_handler(self, qmap_name, inverted):
+        self.model.invert_qmap(qmap_name, inverted)
 
     def on_keypressed(self, e):
         if e.key() == QtCore.Qt.Key_Control:
@@ -217,6 +229,10 @@ class PsController:
     def on_selected_path_dialog_save(self, path, file_type):
         log.debug("on_selected_path_dialog_save: " + path + " - Type: " + file_type)
         self.model.save_smap(path, file_type)
+
+    def on_set_header_tag(self, tag, value):
+        log.debug("on_set_header_tag: " + tag + ": " + value)
+        self.model.set_header_tag(tag, value)
 
     def on_clicked_back_button(self):
         log.debug("on_clicked_back_button")

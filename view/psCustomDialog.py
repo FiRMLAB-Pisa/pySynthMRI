@@ -4,11 +4,9 @@ from PyQt5 import QtCore
 from PyQt5.QtCore import Qt
 from PyQt5.QtGui import QPixmap
 from PyQt5.QtWidgets import QDialog, QDialogButtonBox, QVBoxLayout, QLabel, QGroupBox, QFormLayout, QLineEdit, \
-    QTextEdit, QWidget, QHBoxLayout, QComboBox, QSpinBox, QListWidget, QAbstractItemView, QSizePolicy, QFileDialog, \
+    QTextEdit, QWidget, QHBoxLayout, QComboBox, QSizePolicy, QFileDialog, \
     QFrame
 
-# import Config
-from model.CheckableComboBox import CheckableComboBox
 from model.psFileType import psFileType
 from view.psQDoubleQListWidget import psQDoubleQListWidget
 
@@ -291,7 +289,7 @@ class AboutDialog(QDialog):
         logo.setPixmap(QPixmap(os.path.join('resources', 'logos', 'logo.png')))
         layout.addWidget(logo)
 
-        layout.addWidget(QLabel("Version 0.2.5"))
+        layout.addWidget(QLabel("Version 0.2.6"))
         repo_label = QLabel("https://github.com/FiRMLAB-Pisa/pySynthMRI")
         repo_label.setTextInteractionFlags(Qt.LinksAccessibleByMouse)
         repo_label.setOpenExternalLinks(True)
@@ -306,6 +304,88 @@ class AboutDialog(QDialog):
         layout.addWidget(self.buttonBox)
 
         self.setLayout(layout)
+
+
+class SaveDicomDialog(QDialog):
+
+    def __init__(self, model):
+        super(SaveDicomDialog, self).__init__()
+        self.patient_id = None
+        self.study_id = None
+        self.series_number = None
+        self.output_filepath = None
+        self.model = model
+
+        formGroupBox = self.createFormGroupBox()
+        formGroupBox.setSizePolicy(QSizePolicy.Minimum, QSizePolicy.Expanding)
+
+        button_box = QDialogButtonBox(QDialogButtonBox.Ok | QDialogButtonBox.Cancel)
+        button_box.accepted.connect(self.accept)
+        button_box.rejected.connect(self.reject)
+
+        main_layout = QVBoxLayout()
+        main_layout.addWidget(formGroupBox)
+        main_layout.addWidget(button_box)
+        self.setLayout(main_layout)
+
+        self.setWindowTitle("SAVE DICOM FILE")
+
+    def accept(self):
+        self.patient_id = self.patient_id_line_edit.text()
+        self.study_id = self.study_id_line_edit.text()
+        self.series_number = self.series_number_line_edit.text()
+        self.output_filepath = self.output_filepath_line_edit.text()
+
+        if self.patient_id != "" \
+                and self.study_id != "" \
+                and self.series_number != "" \
+                and self.output_filepath != "":
+            super().accept()
+
+    def createFormGroupBox(self):
+        formGroupBox = QGroupBox()
+        separator = QFrame()
+        separator.setFrameShape(QFrame.HLine)
+        separator.setSizePolicy(QSizePolicy.Minimum, QSizePolicy.Expanding)
+        separator.setLineWidth(1)
+        self.patient_id_line_edit = QLineEdit()
+        self.study_id_line_edit = QLineEdit()
+        self.series_number_line_edit = QLineEdit()
+        self.series_number_line_edit.setText(str(self.model.get_series_number()))
+
+        self.output_filepath_line_edit = QLineEdit()
+        self.output_filepath_line_edit.setText("Click to select Output Folder")
+
+        form_layout = QFormLayout()
+        form_layout.addRow(QLabel("Patient ID"), self.patient_id_line_edit)
+        form_layout.addRow(QLabel("Study ID"), self.study_id_line_edit)
+        form_layout.addRow(QLabel("Series Number"), self.series_number_line_edit)
+        form_layout.addWidget(separator)
+        self.output_filepath_label = QLabel("Dicom Filename")
+        form_layout.addRow(self.output_filepath_label, self.output_filepath_line_edit)
+        formGroupBox.setLayout(form_layout)
+
+        self.output_filepath_label.mousePressEvent = self.clicked_output_filepath
+        self.output_filepath_line_edit.mousePressEvent = self.clicked_output_filepath
+
+        return formGroupBox
+
+    def clicked_output_filepath(self, event):
+        self.open_save_output_file_dicom_dialog()
+
+    def open_save_output_file_dicom_dialog(self):
+        options = QFileDialog.Options()
+        options |= QFileDialog.DontUseNativeDialog
+        scanner_params = self.model.get_smap().get_scanner_parameters()
+        default_file_name = self.model.get_smap().get_map_type()
+        for sp in scanner_params:
+            default_file_name += "_" + sp + "_" + str(scanner_params[sp]["value"])
+
+        path = QFileDialog.getSaveFileName(self, 'Save File', default_file_name)
+
+        if path != ('', ''):
+            # log.debug("Saving dicoms to: " + path[0])
+            self.output_filepath_line_edit.setText(os.path.normpath(path[0]))
 
 
 class BatchProcessDialog(QDialog):
@@ -341,7 +421,6 @@ class BatchProcessDialog(QDialog):
         if self.selected_preset and self.selected_smaps and self.selected_input_dir != "Select input directory" and self.combo_output_filetype:
             super().accept()
 
-
     def createFormGroupBox(self, presets, smap_types):
         self.smap_types = smap_types
         self.formGroupBox = QGroupBox("Process information")
@@ -376,8 +455,6 @@ class BatchProcessDialog(QDialog):
         self.combo_output_filetype.addItem(psFileType.DICOM)
         self.combo_output_filetype.addItem(psFileType.NIFTII)
         self.combo_output_filetype.setMaximumWidth(100)
-
-
 
         layout.addRow(QLabel("Preset Images:"), self.preset_qcombo)
         layout.addRow(synth_images_label, self.smaps_qlist)
