@@ -181,6 +181,15 @@ class PsModel:
     def get_smap(self):
         return self._smap
 
+    def is_smap_synthesized(self):
+        if self._smap.map_type:
+            return True
+        else:
+            return False
+
+    def get_series_number(self):
+        return self._smap.get_series_number()
+
     def save_smap(self, path, file_type):
         if file_type == psFileType.NIFTII:
             self._smap.save_niftii(path)
@@ -189,6 +198,9 @@ class PsModel:
 
         self.c.signal_update_status_bar.emit(
             "{} map saved on {} in {} format.".format(self.get_smap().file_type, path, file_type))
+
+    def set_header_tag(self, tag, value):
+        self._smap.set_header_tag(tag, value)
 
     def get_smap_list(self):
         return self._default_smaps
@@ -316,6 +328,7 @@ class PsModel:
         self._smap.set_default_window_width(self._default_smaps[smap_type]["default_window_width"])
         self._smap.set_parameter(self._default_smaps[smap_type]["mouse_h"], "h")
         self._smap.set_parameter(self._default_smaps[smap_type]["mouse_v"], "v")
+        self._smap.set_series_number(self._default_smaps[smap_type]["series_number"])
 
         # update preset
         self._current_preset = self._default_smaps[smap_type]['preset']
@@ -625,6 +638,7 @@ class PsModel:
                 self._smap.set_equation_string(self._default_smaps[smap_k]["equation_string"])
                 self._smap.set_window_center(self._default_smaps[smap_k]["default_window_center"])
                 self._smap.set_window_width(self._default_smaps[smap_k]["default_window_width"])
+                self._smap.set_series_number(self._default_smaps[smap_k]["series_number"])
 
                 self.recompute_smap()
 
@@ -680,6 +694,7 @@ class PsModel:
                     self._smap.set_scanner_parameters(self._default_smaps[smap_k]["parameters"])
                     self._smap.set_equation(self._default_smaps[smap_k]["equation"])
                     self._smap.set_equation_string(self._default_smaps[smap_k]["equation_string"])
+                    self._smap.set_series_number(self._default_smaps[smap_k]["series_number"])
 
                     self.recompute_smap()
                     self.save_smap(os.path.join(smaps_path, smap_k[:-len(" - " + self._current_preset)] + ".nii"),

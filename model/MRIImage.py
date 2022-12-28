@@ -1,12 +1,13 @@
 import logging
 import os
-import sys
+from datetime import datetime
 from enum import Enum
 from pathlib import Path
 
 import nibabel as nib
 import numpy as np
 import pydicom
+from pydicom.uid import generate_uid
 
 from model.psExceptions import NotLoadedMapError, NotSelectedMapError
 from model.psFileType import psFileType
@@ -382,6 +383,8 @@ class Smap(MRIImage):
         self._orientation_labels_flag = True
         self._vertical_parameter = None
         self._horizontal_parameter = None
+        self._series_number = None
+        self._header = dict()
 
     def set_map_type(self, map_type):
         super(Smap, self).set_map_type(map_type)
@@ -415,11 +418,26 @@ class Smap(MRIImage):
     def get_title(self):
         return self._title
 
+    def get_header_tag(self, tag):
+        try:
+            return self._header[tag]
+        except KeyError:
+            return None
+
+    def set_header_tag(self, tag, value):
+        self._header[tag] = value
+
     def get_orientation_labels_flag(self):
         return self._orientation_labels_flag
 
     def set_orientation_labels_flag(self, orientation_labels_flag):
         self._orientation_labels_flag = orientation_labels_flag
+
+    def set_series_number(self, series_number):
+        self._series_number = series_number
+
+    def get_series_number(self):
+        return self._series_number
 
     def get_missing_qmaps(self):
         missing_qmaps = []
@@ -537,21 +555,33 @@ class Smap(MRIImage):
             os.mkdir(save_dir_path)
 
         template = self.get_dicom_template_from_qmap()
+
         # NB: This is ok for axial images.
         slice_spacing = self._qmaps[list(self._qmaps.keys())[0]].slice_spacing[1]
+        series_uid = generate_uid()
+        # equal for many different synthesized images (use entropy source for generate UID)
+        # based on study id, patient name
+        study_uid = generate_uid(entropy_srcs=[str(self._header["PatientID"]), str(self._header["StudyID"])])
 
         sym_central_location = 0.
         for s in range(len(template)):
+            # add SERIES NUMBER, UID, OTHER INFO
+            log.info(str(self._header))
+            for tag in self._header:
+                template[s][tag].value = self._header[tag]
+
             s_relative_idx = s - len(template) / 2.
-            # change series description
             template[s].PixelData = tmp[:, :, s].tobytes()
             save_path = os.path.join(save_dir_path, "series_" + str(s + 1) + ".dcm")
             template[s].WindowCenter = self.get_window_center()
             template[s].WindowWidth = self.get_window_width()
+            # change series description
             template[s].SeriesDescription = self.get_series_description()
             # location centered on the central slice
             sym_location = (slice_spacing / 2.) + s_relative_idx * slice_spacing
             template[s].ImagePositionPatient = [0., 0., sym_location]
+            template[s].SliceLocation = sym_location
+
             # add Parameters informations
             if "TE" in self._parameters:
                 template[s].EchoTime = self._parameters["TE"]["value"]
@@ -559,8 +589,26 @@ class Smap(MRIImage):
                 template[s].InversionTime = self._parameters["TI"]["value"]
             if "TR" in self._parameters:
                 template[s].RepetitionTime = self._parameters["TR"]["value"]
-            # Add magnetic field
 
+            if template[s].PatientName == "":
+                template[s].PatientName = "ANONYMOUS^ANONYMOUS"
+
+            if template[s].PatientBirthDate == "":
+                template[s].PatientBirthDate = "19000101"
+
+            if template[s].StudyDescription == "":
+                template[s].StudyDescription = "Synthesized Image [PySynthMRI]"
+
+            if template[s].StudyDate == "":
+                template[s].StudyDate = datetime.today().strftime('%Y%m%d')
+
+            template[s].InstanceNumber = s
+            template[s].ProtocolName = "PySynthMRI"
+
+            # Generate UID
+            template[s].SOPInstanceUID = generate_uid()
+            template[s].SeriesInstanceUID = series_uid
+            template[s].StudyInstanceUID = study_uid
             template[s].save_as(save_path)
 
     def import_header_from_qmap(self, header, file_type):

@@ -1,11 +1,10 @@
 import logging
 
 from PyQt5.QtCore import Qt, QObject, pyqtSignal
-from PyQt5.QtGui import QPalette, QColor
 from PyQt5.QtWidgets import QGridLayout, QWidget, QVBoxLayout, QMainWindow, QFrame, QFileDialog, QAction
 
 from model.psFileType import psFileType
-from view.psCustomDialog import BatchProcessDialog
+from view.psCustomDialog import BatchProcessDialog, SaveDicomDialog
 from view.psInfoWidget import PsInfoWidget
 from view.psNavbar import PsNavbar
 from view.psParameterGraph import PsParameterGraph
@@ -27,6 +26,7 @@ class MainWindowCommunicate(QObject):
     signal_saving_smap = pyqtSignal(str, str)
     signal_batch_progress_path = pyqtSignal(str)  # TODO REMOVE
     signal_batch_progress_launch = pyqtSignal(str, str, list, str)
+    signal_set_header_tag = pyqtSignal(str, str)
     # signal_custom_smap_added_to_navbar = pyqtSignal(str)
 
 
@@ -221,20 +221,35 @@ class PsMainWindow(QMainWindow):
             self.c.signal_update_qmap_path.emit(qmap, folderpath, psFileType.NIFTII)
 
     def open_dicom_save_dialog(self):
-        options = QFileDialog.Options()
-        options |= QFileDialog.DontUseNativeDialog
-        scanner_params = self.model.get_smap().get_scanner_parameters()
-        default_file_name = self.model.get_smap().get_map_type()
-        for sp in scanner_params:
-            default_file_name += "_" + sp + "_" + str(scanner_params[sp]["value"])
+        if not self.model.is_smap_synthesized():
+            self.model.c.signal_update_status_bar.emit("[WARNING] Synthesize image before saving")
+            return
+        dlg = SaveDicomDialog(self.model)
+        dlg.exec_()
+        self.c.signal_set_header_tag.emit("PatientID", str(dlg.patient_id))
+        self.c.signal_set_header_tag.emit("StudyID", str(dlg.study_id))
+        self.c.signal_set_header_tag.emit("SeriesNumber", str(dlg.series_number))
 
-        path = QFileDialog.getSaveFileName(self, 'Save File', default_file_name)
-
-        if path != ('', ''):
-            log.debug("Saving dicoms to: " + path[0])
-            self.c.signal_saving_smap.emit(path[0], psFileType.DICOM)
+        output_dir = dlg.output_filepath
+        if output_dir:
+            self.c.signal_saving_smap.emit(output_dir, psFileType.DICOM)
+        # options = QFileDialog.Options()
+        # options |= QFileDialog.DontUseNativeDialog
+        # scanner_params = self.model.get_smap().get_scanner_parameters()
+        # default_file_name = self.model.get_smap().get_map_type()
+        # for sp in scanner_params:
+        #     default_file_name += "_" + sp + "_" + str(scanner_params[sp]["value"])
+        #
+        # path = QFileDialog.getSaveFileName(self, 'Save File', default_file_name)
+        #
+        # if path != ('', ''):
+        #     log.debug("Saving dicoms to: " + path[0])
+        #     self.c.signal_saving_smap.emit(path[0], psFileType.DICOM)
 
     def open_niftii_save_dialog(self):
+        if not self.model.is_smap_synthesized():
+            self.model.c.signal_update_status_bar.emit("[WARNING] Synthesize image before saving")
+            return
         options = QFileDialog.Options()
         options |= QFileDialog.DontUseNativeDialog
         scanner_params = self.model.get_smap().get_scanner_parameters()

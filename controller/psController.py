@@ -58,11 +58,14 @@ class PsController:
 
         self.view.menu_bar.file_save_niftii_action.triggered.connect(self.on_clicked_save_niftii_button)
         self.view.c.signal_saving_smap.connect(self.on_selected_path_dialog_save)
+        # dicom tag changes
+        self.view.c.signal_set_header_tag.connect(self.on_set_header_tag)
 
         # self.view.menu_bar.back_action.triggered.connect(self.on_clicked_back_button)
         self.view.menu_bar.exit_action.triggered.connect(self.on_clicked_exit_button)
 
         # self.view.menu_bar.settings_custom_param_action.triggered.connect(self.on_clicked_custom_param_button)
+
 
         # Preset change
 
@@ -164,7 +167,9 @@ class PsController:
 
         if os.path.isdir(path):
             # dicom folder
+            log.debug("Drop DICOM folder: {}".format(path))
             self.model.update_qmap_path(qmap_name, path, psFileType.DICOM)
+            self.view.tool_bar.autotoggle_smaps_buttons()
 
         elif os.path.isfile(path):
             if path.endswith(".nii"):
@@ -224,6 +229,10 @@ class PsController:
     def on_selected_path_dialog_save(self, path, file_type):
         log.debug("on_selected_path_dialog_save: " + path + " - Type: " + file_type)
         self.model.save_smap(path, file_type)
+
+    def on_set_header_tag(self, tag, value):
+        log.debug("on_set_header_tag: " + tag + ": " + value)
+        self.model.set_header_tag(tag, value)
 
     def on_clicked_back_button(self):
         log.debug("on_clicked_back_button")
