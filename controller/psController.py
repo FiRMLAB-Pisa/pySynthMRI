@@ -4,6 +4,7 @@ only controller has write privileges over the model
 import functools
 import logging
 import os
+import sys
 
 from PyQt5 import QtCore, QtGui
 from PyQt5.QtCore import QByteArray
@@ -238,9 +239,9 @@ class PsController:
         log.debug("on_clicked_back_button")
 
     def on_clicked_exit_button(self):
-        self.model.appSM.quit()
+        # self.model.appSM.quit()
         log.debug("on_clicked_exit_button")
-        # viz_window.model.appSM.quit
+        sys.exit()
 
     def on_clicked_custom_smap_button(self):
         log.debug("on_clicked_custom_smap_button")

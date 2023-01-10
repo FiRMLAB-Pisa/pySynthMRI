@@ -47,7 +47,7 @@ if __name__ == '__main__':
     palette.setColor(QPalette.HighlightedText, QColor("black"))
     app.setPalette(palette)
 
-    model = PsModel(app)
+    model = PsModel()
 
     view = PsMainWindow(model)
     general_controller = PsController(model, view)

@@ -268,8 +268,10 @@ class PsMainWindow(QMainWindow):
         dlg = BatchProcessDialog(presets, smaps)
         res = dlg.exec_()
         if res:
-            self.c.signal_batch_progress_launch.emit(dlg.selected_input_dir, dlg.selected_preset,
-                                                     dlg.selected_smaps, dlg.selected_output_type)  # path, preset, smaps
+            self.c.signal_batch_progress_launch.emit(dlg.selected_input_dir,
+                                                     dlg.selected_preset,
+                                                     dlg.selected_smaps,
+                                                     dlg.selected_output_type)  # path, preset, smaps, type
 
     # def open_batch_process_dialog(self):
     #     options = QFileDialog.Options()

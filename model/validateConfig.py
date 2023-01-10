@@ -32,6 +32,8 @@ class ValidateConfig:
                 new_name = smap_key + " - " + preset_key
                 synth_maps[new_name] = copy.deepcopy(config["synthetic_images"][preset_key][smap_key])
                 synth_maps[new_name]["preset"] = preset_key
+                if "series_number" not in synth_maps[new_name]:
+                    synth_maps[new_name]["series_number"] = ""
                 # synth_maps[new_name]["label"] = smap_key + " - " + preset_key
         return synth_maps
 

@@ -4,6 +4,7 @@
             "FSE": {
                 "title": "T2w - Fast Spin Echo",
                 "equation": "PD*exp(-TE/T2)",
+                "series_number": 9101,
                 "parameters": {
                     "TE": {
                         "label": "TE [ms]",
@@ -17,6 +18,7 @@
             "GRE": {
                 "title": "T1w - Gradient Echo ",
                 "equation": "1 - exp(-TR/T1)",
+                "series_number": 9102,
                 "parameters": {
                     "TR": {
                         "label": "TR [ms]",
@@ -30,6 +32,7 @@
             "FLAIR": {
                 "title": "T2w - Fluid Attenuated Inversion Recover",
                 "equation": "abs(PD)*exp(-TSAT/T1)*exp(-TE/T2)*(1-2*exp(-TI/T1))",
+                "series_number": 9103,
                 "parameters": {
                     "TE": {
                         "label": "TE [ms]",
@@ -57,6 +60,7 @@
             "MP2RAGE": {
                 "title": "T1w - Magnetization-Prepared 2 RApid Gradient Echoes",
                 "equation": "1-2*exp(-TI/T1)",
+                "series_number": 9104,
                 "parameters": {
                 "TI": {
                     "label": "TI [ms]",
@@ -72,6 +76,7 @@
             "FSE": {
             "title": "T2w - Fast Spin Echo",
             "equation": "PD*exp(-TE/T2)",
+            "series_number": 9101,
             "parameters": {
                 "TE": {
                     "label": "TE [ms]",
@@ -85,6 +90,7 @@
             "GRE": {
                 "title": "T1w - Gradient Echo ",
                 "equation": "1 - exp(-TR/T1)",
+                "series_number": 9102,
                 "parameters": {
                     "TR": {
                         "label": "TR [ms]",
@@ -98,6 +104,7 @@
             "FLAIR": {
                 "title": "T2w - Fluid Attenuated Inversion Recover",
                 "equation": "abs(PD)*exp(-TSAT/T1)*exp(-TE/T2)*(1-2*exp(-TI/T1))",
+                "series_number": 9103,
                 "parameters": {
                     "TE": {
                         "label": "TE [ms]",
@@ -123,18 +130,19 @@
                 }
             },
             "MP2RAGE": {
-            "title": "T1w - Magnetization-Prepared 2 RApid Gradient Echoes",
-            "equation": "1-2*exp(-TI/T1)",
-            "parameters": {
-                "TI": {
-                    "label": "TI [ms]",
-                    "value": 1400,
-                    "min": 1000,
-                    "max": 3500,
-                    "step": 10
+                "title": "T1w - Magnetization-Prepared 2 RApid Gradient Echoes",
+                "equation": "1-2*exp(-TI/T1)",
+                "series_number": 9104,
+                "parameters": {
+                    "TI": {
+                        "label": "TI [ms]",
+                        "value": 1400,
+                        "min": 1000,
+                        "max": 3500,
+                        "step": 10
+                    }
                 }
             }
-        }
         }
     },
     "quantitative_maps": {
