@@ -144,3 +144,4 @@ pySynthMRI.spec
 pySynthMRI.spec.default
 pySynthMRI-shared/
 config.json
+/test/

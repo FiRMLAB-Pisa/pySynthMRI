@@ -315,7 +315,7 @@ class SaveDicomDialog(QDialog):
         self.series_number = None
         self.output_filepath = None
         self.model = model
-
+        self.setMinimumWidth(400)
         formGroupBox = self.createFormGroupBox()
         formGroupBox.setSizePolicy(QSizePolicy.Minimum, QSizePolicy.Expanding)
 
@@ -354,7 +354,7 @@ class SaveDicomDialog(QDialog):
         self.series_number_line_edit.setText(str(self.model.get_series_number()))
 
         self.output_filepath_line_edit = QLineEdit()
-        self.output_filepath_line_edit.setText("Click to select Output Folder")
+        self.output_filepath_line_edit.setPlaceholderText("Click to select Output Folder")
 
         form_layout = QFormLayout()
         form_layout.addRow(QLabel("Patient ID"), self.patient_id_line_edit)

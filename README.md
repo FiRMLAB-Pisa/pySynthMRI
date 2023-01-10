@@ -99,7 +99,8 @@ Below part of the configuration file is reported for help.
                         "max": 100,               # Max value
                         "step": 1                 # Slider/Mouse parameter step 
                     }
-                }
+                },
+                "series_number": 9001             # [optional] Add to SeriesNumber DICOM tag (0020,0011)
             },
 [...]
     "quantitative_maps": {                        # Quantitative maps that can be loaded

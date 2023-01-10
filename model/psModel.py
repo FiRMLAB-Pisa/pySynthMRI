@@ -47,9 +47,7 @@ class PsModel:
         SLICE = 3
         TRANSLATE = 4
 
-    def __init__(self, appSM):
-
-        self.appSM = appSM
+    def __init__(self):
         # Pyqt5 sygnal
         self.c = ModelCommunicate()
         # list of possible synthetic maps
@@ -442,6 +440,7 @@ class PsModel:
                 smap["window_center"] = smap_new_conf["window_center"]
                 smap["default_window_center"] = smap_new_conf["window_center"]
                 smap["default_window_width"] = smap_new_conf["window_width"]
+                smap["series_number"] = smap_new_conf["series_number"]
 
                 for param_k in smap["parameters"]:
                     # all stored smap
@@ -599,6 +598,11 @@ class PsModel:
         for subject_path in suject_paths:
             # TODO this is not general
             try:
+                exam_number = get_subdirs(get_subdirs(os.path.join(subject_path, "nifti"))[0])[0]
+                exam_number = os.path.normpath(exam_number).split("\\")[-1]
+                self._smap.set_header_tag("StudyID", exam_number)
+                self._smap.set_header_tag("PatientID", "000")
+
                 qmaps_path = os.path.join(
                     get_subdirs(get_subdirs(get_subdirs(os.path.join(subject_path, "nifti"))[0])[0])[0], 'qmap')
                 qmaps_path = os.path.normpath(qmaps_path)
@@ -646,19 +650,9 @@ class PsModel:
                     self.save_smap(os.path.join(smaps_path, smap_k[:-len(" - " + self._current_preset)] + ".nii"),
                                    psFileType.NIFTII)  # TODO ERROR _current_preset!
                 elif output_type == psFileType.DICOM:
-                    # self._smap.set_map_type(smap_k)
-                    # self._smap.set_title(self._default_smaps[smap_k]["title"])
-                    # self._smap.set_init_slices_num(self._qmaps[list(self._qmaps.keys())[0]])
-                    # # self._smap.set_total_slice_num(self._qmaps[list(self._qmaps.keys())[0]].get_total_slice_num())
-                    # self._smap.set_qmaps_needed(self._default_smaps[smap_k]["qmaps_needed"])
-                    # self._smap.set_scanner_parameters(self._default_smaps[smap_k]["parameters"])
-                    # self._smap.set_equation(self._default_smaps[smap_k]["equation"])
-                    # self._smap.set_equation_string(self._default_smaps[smap_k]["equation_string"])
-                    #
-                    # self.recompute_smap()
+
                     self.save_smap(os.path.join(smaps_path, smap_k[:-len(" - " + self._current_preset)]),
                                    psFileType.DICOM)  # TODO ERROR _current_preset!
-
 
     def execute_batch_process_old(self, root_path):
         # iteratively select subject and synthesize images
