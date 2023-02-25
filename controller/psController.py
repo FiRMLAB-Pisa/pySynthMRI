@@ -15,7 +15,7 @@ from model.psExceptions import NotSelectedMapError, ConfigurationFilePermissionE
 from model.psFileType import psFileType
 from model.psModel import PsModel
 from model.utils import get_unique_filename
-from view.psCustomDialog import PsCustomSmapDialog, AboutDialog
+from view.psCustomDialog import PsCustomSmapDialog, AboutDialog, ScreenshotDialog
 
 log = logging.getLogger(__name__)
 
@@ -489,7 +489,11 @@ class PsController:
             self.model.interpolation["scale"] = 8
             self.model.reload_smap()
             screenshot = self.model.get_screenshot_image()
-            filename = os.path.join(self.model.get_screenshot_directory(), self.model.get_smap().map_type[:-len(" - " + self.model.get_current_preset())] + ".png")
+            # ask user the output path
+            screenshot_basename = self.model.get_smap().map_type[:-len(" - " + self.model.get_current_preset())] + ".png"
+            screenshot_dlg = ScreenshotDialog(screenshot_basename)
+            screenshot_dlg.exec_()
+            filename = screenshot_dlg.screenshot_path
             # if file exist add incremental numeber to name
             filename = get_unique_filename(filename)
             if screenshot.save(filename,"PNG"):
