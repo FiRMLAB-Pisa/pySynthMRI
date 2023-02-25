@@ -187,7 +187,7 @@ class PsToolbar(QToolBar):
         #     self.presets_group_buttons.addButton(preset_button)
 
         # PRESET LABEL
-        self.preset_label = QLabel("1.5T")
+        self.preset_label = QLabel(self.model.get_current_preset())
         self.preset_label.setStyleSheet("color: rgb(170, 172, 191); "
                                         "font-weight: bold;"
                                         "font-size: 16pt")
