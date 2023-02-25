@@ -51,12 +51,19 @@ PysynthMRI is a python open-source tool which provides a user-friendly interface
 
 
 <!-- GETTING STARTED -->
-# Getting Started
+# Getting Started with Windows
 
+## WINDOWS Installation
+
+1. Download Release from: https://github.com/FiRMLAB-Pisa/pySynthMRI/releases/download/v1.0.0/pySynthMRI-v1.0.0.zip
+2. unzip pySynthMRI-v1.0.0.zip
+3. run PySynthMRI.exe
+
+
+# Getting Started with Linux or MacOS
 These instructions will give you a copy of the project up and running on your local machine,
-independently of your OS<br>
+using Linux or MacOS<br>
 Make sure you have [Python](https://python.org/) version >= 3.6.
-
 ## Installation
 
 1. Clone the repository:
@@ -141,7 +148,7 @@ To facilitate the user, PySynthMRI contains a set of default contrast images in 
 <!-- LICENSE -->
 ## License
 
-PySynthMRI is distributed under MIT License. See [LICENSE.txt](https://github.com/FiRMLAB-Pisa/pySynthMRI/blob/main/LICENSE) for more information.
+PySynthMRI is distributed under GPL License. See [LICENSE.txt](https://github.com/FiRMLAB-Pisa/pySynthMRI/blob/main/LICENSE) for more information.
 
 <!-- MARKDOWN LINKS & IMAGES -->
 <!-- https://www.markdownguide.org/basic-syntax/#reference-style-links -->
