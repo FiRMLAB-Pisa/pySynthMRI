@@ -1,11 +1,12 @@
 import os
+from pathlib import Path
 
 from PyQt5 import QtCore
 from PyQt5.QtCore import Qt
 from PyQt5.QtGui import QPixmap
 from PyQt5.QtWidgets import QDialog, QDialogButtonBox, QVBoxLayout, QLabel, QGroupBox, QFormLayout, QLineEdit, \
     QTextEdit, QWidget, QHBoxLayout, QComboBox, QSizePolicy, QFileDialog, \
-    QFrame
+    QFrame, QGridLayout, QPushButton
 
 from model.psFileType import psFileType
 from view.psQDoubleQListWidget import psQDoubleQListWidget
@@ -304,6 +305,58 @@ class AboutDialog(QDialog):
         layout.addWidget(self.buttonBox)
 
         self.setLayout(layout)
+
+
+class ScreenshotDialog(QDialog):
+    def __init__(self, screenshot_basename):
+        super(ScreenshotDialog, self).__init__()
+        self.screenshot_basename = screenshot_basename
+        self.screenshot_path = None
+        self.setMinimumWidth(400)
+        formGroupBox = self.createFormGroupBox()
+        formGroupBox.setSizePolicy(QSizePolicy.Minimum, QSizePolicy.Expanding)
+        button_box = QDialogButtonBox(QDialogButtonBox.Ok | QDialogButtonBox.Cancel)
+        button_box.accepted.connect(self.accept)
+        button_box.rejected.connect(self.reject)
+
+        main_layout = QVBoxLayout()
+        main_layout.addWidget(formGroupBox)
+        main_layout.addWidget(button_box)
+        self.setLayout(main_layout)
+        self.setWindowTitle("SAVE SCREENSHOT")
+
+    def accept(self):
+        self.screenshot_path = self.screenshot_line_edit.text()
+
+        if self.screenshot_path != "":
+            super().accept()
+
+    def createFormGroupBox(self):
+        self.screenshot_line_edit = QLineEdit()
+        widget = QWidget()
+        layout = QGridLayout()
+        widget.setLayout(layout)
+
+        # file selection
+        file_browse = QPushButton('Browse')
+        file_browse.clicked.connect(self.open_file_dialog)
+
+        layout.addWidget(QLabel('Save Screenshot as:'), 0, 0)
+        layout.addWidget(self.screenshot_line_edit, 0, 1)
+        layout.addWidget(file_browse, 0, 2)
+
+        return widget
+
+    def open_file_dialog(self):
+        filename, ok = QFileDialog.getSaveFileName(
+            self,
+            caption="Save as",
+            directory=self.screenshot_basename,
+            filter="Images (*.png)"
+        )
+        if filename:
+            path = Path(filename)
+            self.screenshot_line_edit.setText(str(path))
 
 
 class SaveDicomDialog(QDialog):

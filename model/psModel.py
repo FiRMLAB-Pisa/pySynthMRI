@@ -54,7 +54,6 @@ class PsModel:
         self.config = ValidateConfig()
         self._default_smaps = self.config.synth_types
         self._current_preset = self.config.default_preset
-        self._screenshot_directory = self.config.screenshot_directory
         self.generate_parameter_sliders()
         # self._default_smaps = [t for t in self.config.synth_types]
         # self._default_smaps = [t[0] for t in Config.synth_images]
@@ -276,9 +275,6 @@ class PsModel:
 
     def get_screenshot_image(self):
         return self._screenshot_image
-
-    def get_screenshot_directory(self):
-        return self._screenshot_directory
 
     def reload_all_images(self):
         # reaload qmaps

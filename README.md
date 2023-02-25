@@ -115,7 +115,6 @@ Below part of the configuration file is reported for help.
         }
     },
 [...]
-    "screenshot_directory": "PATH-TO-SCREENSHOT-DIR"  # Directory for exporting screenshots
 }
 ```
 ### Lauch PySynthMRI
