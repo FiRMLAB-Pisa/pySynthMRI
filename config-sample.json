@@ -1,6 +1,5 @@
 {
     "synthetic_images": {
-        "1.5T": {},
         "3.0T": {
             "GRE": {
                 "title": "T1w - Gradient Echo",
@@ -194,6 +193,7 @@
                 "window_width": 2000.0
             }
         },
+        "1.5T": {},
         "7.0T": {}
     },
     "quantitative_maps": {
