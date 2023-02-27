@@ -28,12 +28,13 @@
   <summary>Table of Contents</summary>
   <ol>
     <li>
-      <a href="#about-the-project">About</a>
+      <a href="#about">About</a>
     </li>
     <li>
-      <a href="#getting-started">Getting Started</a>
+       <a>Getting Started</a>
       <ul>
-        <li><a href="#installation">Installation</a></li>
+        <li><a href="#getting-started-with-windows">Windows</a></li>
+        <li><a href="#getting-started-with-linux-or-macos">Linux</a></li>
       </ul>
     </li>
     <li><a href="#usage">Usage</a></li>
