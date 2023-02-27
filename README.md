@@ -138,18 +138,18 @@ To facilitate the user, PySynthMRI contains a set of default contrast images in 
 
 | Title   | Equation                                                                                     | Description                                          |
 |---------|----------------------------------------------------------------------------------------------|------------------------------------------------------|
-| FSE     | PD \* exp(-TE/T2)                                                                            | T2w - Fast Spin Echo                                 |
-| GRE     | 1 - exp(-TR/T1)                                                                              | T1w - Gradient Echo                                  |
-| FLAIR   | abs(PD)\*exp(-TSAT/T1)\*exp(-TE/T2)*(1-2*exp(-TI/T1))                                        | T2w - Fluid Attenuated Inversion Recover             |
+| FSE     | PD \* ((1 - exp(-TR/T1))\*exp(-TE/T2))                                                       | T2w - Fast Spin Echo                                 |
+| GRE     | PD \* ((1 - exp(-TR/T1))\*exp(-TE/T2)                                                        | T1w - Gradient Echo                                  |
+| FLAIR   |abs(PD) \* exp(-TSAT/T1)\*exp(-TE/T2)\*(1-2\*exp(-TI/T1))                                     | T2w - Fluid Attenuated Inversion Recover             |
 | MP2RAGE | 1-2\*exp(-TI/T1)                                                                             | T1w - Magnetization-Prepared 2 RApid Gradient Echoes |
-| DIR     | PD \* ( 1 - 2\*exp(-TI_2/T1) + 2*exp(-(TI_1+TI_2)/T1) -  exp(-TR/T1) * (2/exp(-(TE/2)/T1)-1) | 3D Double Inversion Revovery                         |
-
+| DIR     | PD \* (1 - 2\*exp(-TI_2/T1) + 2\*exp(-(TI_1+TI_2)/T1) -  exp(-TR/T1)) \* (exp(-TE/T2))       | 3D Double Inversion Revovery                         |
+| TBE | PD \* (1-2\*exp(-TI/T1)) \* (1-exp(-TR/T1)) \* exp(-TE/T2)                                       | Tissue Border Enhancement by inversion recovery      |
 
 
 <!-- LICENSE -->
 ## License
 
-PySynthMRI is distributed under GPL License. See [LICENSE.txt](https://github.com/FiRMLAB-Pisa/pySynthMRI/blob/main/LICENSE) for more information.
+PySynthMRI is distributed under GPL-v3.0 License. See [LICENSE.txt](https://github.com/FiRMLAB-Pisa/pySynthMRI/blob/main/LICENSE) for more information.
 
 <!-- MARKDOWN LINKS & IMAGES -->
 <!-- https://www.markdownguide.org/basic-syntax/#reference-style-links -->
