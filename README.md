@@ -149,7 +149,7 @@ To facilitate the user, PySynthMRI contains a set of default contrast images in 
 <!-- LICENSE -->
 ## License
 
-PySynthMRI is distributed under GPL-v3.0 License. See [LICENSE.txt](https://github.com/FiRMLAB-Pisa/pySynthMRI/blob/main/LICENSE) for more information.
+PySynthMRI is distributed under GPL-v3.0 License. See [LICENSE.txt](https://github.com/FiRMLAB-Pisa/pySynthMRI/blob/main/LICENSE.txt) for more information.
 
 <!-- MARKDOWN LINKS & IMAGES -->
 <!-- https://www.markdownguide.org/basic-syntax/#reference-style-links -->
