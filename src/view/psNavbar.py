@@ -1,11 +1,7 @@
 import logging
-import os
 
-from PyQt5.QtCore import QObject, pyqtSignal
 from PyQt5.QtGui import QKeySequence
-from PyQt5.QtWidgets import QMenuBar, QAction, QMenu, QActionGroup, QFileDialog
-
-from model.psFileType import psFileType
+from PyQt5.QtWidgets import QMenuBar, QAction, QMenu, QActionGroup
 
 log = logging.getLogger("psNavbar")
 

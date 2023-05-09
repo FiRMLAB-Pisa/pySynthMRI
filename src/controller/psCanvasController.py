@@ -10,8 +10,8 @@ from PyQt5.QtCore import Qt
 from PyQt5.QtGui import QCursor
 from PyQt5.QtWidgets import QApplication
 
-from model.psExceptions import NotLoadedMapError, NotSelectedMapError
-from model.psModel import PsModel
+from src.model.psExceptions import NotLoadedMapError, NotSelectedMapError
+from src.model.psModel import PsModel
 
 log = logging.getLogger(__name__)
 

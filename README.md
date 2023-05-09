@@ -163,5 +163,5 @@ PySynthMRI is distributed under GPL-v3.0 License. See [LICENSE.txt](https://gith
 [issues-url]: https://github.com/FiRMLAB-Pisa/pySynthMRI/issues
 [license-shield]: https://img.shields.io/github/license/FiRMLAB-Pisa/pySynthMRI
 [license-url]: https://github.com/FiRMLAB-Pisa/pySynthMRI/blob/master/LICENSE.md
-[pysynthmri-arch]: resources/images/arch.png
-[pysynthmri-screenshot]: resources/images/screenshot.png
+[pysynthmri-arch]: src/resources/images/arch.png
+[pysynthmri-screenshot]: src/resources/images/screenshot.png

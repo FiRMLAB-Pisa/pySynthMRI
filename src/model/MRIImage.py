@@ -9,8 +9,8 @@ import numpy as np
 import pydicom
 from pydicom.uid import generate_uid
 
-from model.psExceptions import NotLoadedMapError, NotSelectedMapError
-from model.psFileType import psFileType
+from src.model.psExceptions import NotLoadedMapError, NotSelectedMapError
+from src.model.psFileType import psFileType
 
 log = logging.getLogger(__name__)
 

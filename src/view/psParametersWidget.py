@@ -2,7 +2,7 @@ import logging
 
 from PyQt5.QtWidgets import QWidget, QVBoxLayout, QGroupBox
 
-from model.MRIImage import Orientation
+from src.model.MRIImage import Orientation
 
 log = logging.getLogger(__name__)
 

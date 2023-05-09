@@ -8,8 +8,8 @@ from PyQt5.QtWidgets import QDialog, QDialogButtonBox, QVBoxLayout, QLabel, QGro
     QTextEdit, QWidget, QHBoxLayout, QComboBox, QSizePolicy, QFileDialog, \
     QFrame, QGridLayout, QPushButton
 
-from model.psFileType import psFileType
-from view.psQDoubleQListWidget import psQDoubleQListWidget
+from src.model.psFileType import psFileType
+from src.view.psQDoubleQListWidget import psQDoubleQListWidget
 
 
 class SimpleMessageDialog(QDialog):

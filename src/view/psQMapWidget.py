@@ -6,7 +6,7 @@ from PyQt5.QtCore import Qt, QObject, pyqtSignal
 from PyQt5.QtGui import QImage, QPixmap, QDropEvent, QCursor
 from PyQt5.QtWidgets import QWidget, QVBoxLayout, QLabel, QSizePolicy, QMenu, QAction
 
-from model.MRIImage import Colormap
+from src.model.MRIImage import Colormap
 
 
 class QMapCommunicate(QObject):

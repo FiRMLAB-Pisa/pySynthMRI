@@ -10,10 +10,10 @@ import logging
 from PyQt5.QtGui import QPalette, QColor
 from PyQt5.QtWidgets import QApplication
 
-from controller.psCanvasController import PsCanvasController
-from controller.psController import PsController
-from model.psModel import PsModel
-from view.psMainWindow import PsMainWindow
+from src.controller.psCanvasController import PsCanvasController
+from src.controller.psController import PsController
+from src.model.psModel import PsModel
+from src.view.psMainWindow import PsMainWindow
 
 DEBUG = False
 

@@ -6,11 +6,11 @@ from enum import Enum
 from PyQt5.QtCore import QObject, pyqtSignal, QPoint
 from PyQt5.QtWidgets import QApplication
 
-from model.psExceptions import NotLoadedMapError, NotSelectedMapError
-from model.psFileType import psFileType
-from model.validateConfig import ValidateConfig
-from model.MRIImage import Qmap, Smap, Orientation
-from view.psSliderParam import PsSliderParam
+from src.model.psExceptions import NotLoadedMapError, NotSelectedMapError
+from src.model.psFileType import psFileType
+from src.model.validateConfig import ValidateConfig
+from src.model.MRIImage import Qmap, Smap, Orientation
+from src.view.psSliderParam import PsSliderParam
 
 log = logging.getLogger(__name__)
 

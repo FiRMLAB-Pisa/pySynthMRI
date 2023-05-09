@@ -3,15 +3,15 @@ import logging
 from PyQt5.QtCore import Qt, QObject, pyqtSignal
 from PyQt5.QtWidgets import QGridLayout, QWidget, QVBoxLayout, QMainWindow, QFrame, QFileDialog, QAction
 
-from model.psFileType import psFileType
-from view.psCustomDialog import BatchProcessDialog, SaveDicomDialog
-from view.psInfoWidget import PsInfoWidget
-from view.psNavbar import PsNavbar
-from view.psParameterGraph import PsParameterGraph
-from view.psParametersWidget import PsParametersWidget
-from view.psQMapWidget import PsQMapWidget
-from view.psSyntheticImageWidget import PsSyntheticImageWidget
-from view.psToolbar import PsToolbar
+from src.model.psFileType import psFileType
+from src.view.psCustomDialog import BatchProcessDialog, SaveDicomDialog
+from src.view.psInfoWidget import PsInfoWidget
+from src.view.psNavbar import PsNavbar
+from src.view.psParameterGraph import PsParameterGraph
+from src.view.psParametersWidget import PsParametersWidget
+from src.view.psQMapWidget import PsQMapWidget
+from src.view.psSyntheticImageWidget import PsSyntheticImageWidget
+from src.view.psToolbar import PsToolbar
 
 log = logging.getLogger(__name__)
 

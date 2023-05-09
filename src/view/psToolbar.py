@@ -1,8 +1,7 @@
 from PyQt5 import QtCore
 from PyQt5.QtCore import Qt, QSize
-from PyQt5.QtGui import QPixmap, QIcon, QCursor, QFont
-from PyQt5.QtWidgets import QToolBar, QLabel, QPushButton, QButtonGroup, QComboBox, QWidget, QSizePolicy
-import resources.resources
+from PyQt5.QtGui import QPixmap, QIcon, QCursor
+from PyQt5.QtWidgets import QToolBar, QLabel, QPushButton, QButtonGroup, QWidget, QSizePolicy
 
 
 class PsToolbar(QToolBar):

@@ -1,8 +1,8 @@
 import copy
 import json
 
-from model.MRIImage import Interpolation
-from model.psExceptions import ConfigurationFilePermissionError
+from src.model.MRIImage import Interpolation
+from src.model.psExceptions import ConfigurationFilePermissionError
 
 CONFIG_FILE_NAME = "config.json"
 class ValidateConfig:

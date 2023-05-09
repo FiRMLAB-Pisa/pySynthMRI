@@ -4,8 +4,8 @@ from PyQt5.QtCore import Qt, QPoint
 from PyQt5.QtGui import QImage, QPixmap, QPainter, QFont, QPen
 from PyQt5.QtWidgets import QVBoxLayout, QWidget
 
-from model.MRIImage import Interpolation, Orientation
-from view.psSyntheticCanvas import PsSyntheticCanvas
+from src.model.MRIImage import Interpolation, Orientation
+from src.view.psSyntheticCanvas import PsSyntheticCanvas
 
 
 class PsSyntheticImageWidget(QWidget):

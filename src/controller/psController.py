@@ -7,15 +7,14 @@ import os
 import sys
 
 from PyQt5 import QtCore, QtGui
-from PyQt5.QtCore import QByteArray
 from PyQt5.QtGui import QCursor
 
-from model.MRIImage import Orientation, Interpolation
-from model.psExceptions import NotSelectedMapError, ConfigurationFilePermissionError
-from model.psFileType import psFileType
-from model.psModel import PsModel
-from model.utils import get_unique_filename
-from view.psCustomDialog import PsCustomSmapDialog, AboutDialog, ScreenshotDialog
+from src.model.MRIImage import Orientation, Interpolation
+from src.model.psExceptions import NotSelectedMapError, ConfigurationFilePermissionError
+from src.model.psFileType import psFileType
+from src.model.psModel import PsModel
+from src.model.utils import get_unique_filename
+from src.view.psCustomDialog import PsCustomSmapDialog, AboutDialog, ScreenshotDialog
 
 log = logging.getLogger(__name__)
 
