@@ -38,6 +38,7 @@
       </ul>
     </li>
     <li><a href="#usage">Usage</a></li>
+    <li><a href="#example-data">Example Data</a></li>
     <li><a href="#license">License</a></li>
   </ol>
 </details>
@@ -146,10 +147,29 @@ To facilitate the user, PySynthMRI contains a set of default contrast images in 
 | TBE | PD \* (1-2\*exp(-TI/T1)) \* (1-exp(-TR/T1)) \* exp(-TE/T2)                                       | Tissue Border Enhancement by inversion recovery      |
 
 
+
+
+<!-- EXAMPLE DATA -->
+## Example Data
+In order to test the software with in-vivo data, we provide downloadable example files at the following [LINK](https://github.com/FiRMLAB-Pisa/pySynthMRI/releases/download/v1.0.0/test_data.zip): .
+The zip file contains 3 quantitative, anonymized maps.
+
+<h4 align="center">
+
+| Filename        | Quantitative Map | 
+|-----------------|------------------|
+| qmap_t1_bet.nii | T1               |
+| qmap_t2_bet.nii | T2               |
+| qmap_pd_bet.nii | PD               |
+    
+</h4>
+
 <!-- LICENSE -->
 ## License
 
 PySynthMRI is distributed under GPL-v3.0 License. See [LICENSE.txt](https://github.com/FiRMLAB-Pisa/pySynthMRI/blob/main/LICENSE.txt) for more information.
+
+
 
 <!-- MARKDOWN LINKS & IMAGES -->
 <!-- https://www.markdownguide.org/basic-syntax/#reference-style-links -->
