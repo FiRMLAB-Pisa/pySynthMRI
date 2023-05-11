@@ -151,7 +151,7 @@ To facilitate the user, PySynthMRI contains a set of default contrast images in 
 
 <!-- EXAMPLE DATA -->
 ## Example Data
-In order to test the software with in-vivo data, we provide downloadable example files at the following [LINK](https://github.com/FiRMLAB-Pisa/pySynthMRI/releases/download/v1.0.0/test_data.zip): .
+In order to test the software with in-vivo data, we provide downloadable example files at the following link: [test_data.zip](https://github.com/FiRMLAB-Pisa/pySynthMRI/releases/download/v1.0.0/test_data.zip).
 The zip file contains 3 quantitative, anonymized maps.
 
 <h4 align="center">
