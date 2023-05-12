@@ -57,7 +57,7 @@ PysynthMRI is a python open-source tool which provides a user-friendly interface
 
 ## WINDOWS Installation
 
-1. Download Release from: https://github.com/FiRMLAB-Pisa/pySynthMRI/releases/download/v1.0.0/pySynthMRI-v1.0.0.zip
+1. Download Release from: [https://github.com/FiRMLAB-Pisa/pySynthMRI/releases/download/v1.0.0/pySynthMRI-v1.0.0.zip](https://github.com/FiRMLAB-Pisa/pySynthMRI/releases/download/v1.0.0/pySynthMRI-v1.0.0-windows-executable.zip)
 2. unzip pySynthMRI-v1.0.0.zip
 3. run PySynthMRI.exe
 
