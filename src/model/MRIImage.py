@@ -558,6 +558,7 @@ class Smap(MRIImage):
 
         # NB: This is ok for axial images.
         slice_spacing = self._qmaps[list(self._qmaps.keys())[0]].slice_spacing[1]
+        # if series number not exists, add using config file
         series_uid = generate_uid()
         # equal for many different synthesized images (use entropy source for generate UID)
         # based on study id, patient name
@@ -566,7 +567,6 @@ class Smap(MRIImage):
         sym_central_location = 0.
         for s in range(len(template)):
             # add SERIES NUMBER, UID, OTHER INFO
-            log.info(str(self._header))
             for tag in self._header:
                 template[s][tag].value = self._header[tag]
 
@@ -606,10 +606,13 @@ class Smap(MRIImage):
             template[s].ProtocolName = "PySynthMRI"
             template[s].SoftwareVersions = "PySynthMRI-v1.0.0"
 
+            template[s].SeriesNumber = self.get_series_number()
+
             # Generate UID
             template[s].SOPInstanceUID = generate_uid()
             template[s].SeriesInstanceUID = series_uid
             template[s].StudyInstanceUID = study_uid
+            # log.info(str(template[s]._header))
             template[s].save_as(save_path)
 
     def import_header_from_qmap(self, header, file_type):
