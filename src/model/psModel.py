@@ -2,7 +2,7 @@ import logging
 import math
 import os
 from enum import Enum
-
+import random
 from PyQt5.QtCore import QObject, pyqtSignal, QPoint
 from PyQt5.QtWidgets import QApplication
 
@@ -592,19 +592,28 @@ class PsModel:
         qmaps_path = None
         smaps_path = None
         for subject_path in suject_paths:
-            # TODO this is not general
             try:
-                exam_number = get_subdirs(get_subdirs(os.path.join(subject_path, "nifti"))[0])[0]
-                exam_number = os.path.normpath(exam_number).split("\\")[-1]
-                self._smap.set_header_tag("StudyID", exam_number)
+                # exam_number = get_subdirs(get_subdirs(os.path.join(subject_path, "nifti"))[0])[0]
+                # exam_number = os.path.normpath(exam_number).split("\\")[-1]
+                # self._smap.set_header_tag("StudyID", exam_number)
+                self._smap.set_header_tag("StudyID", "RND-" + str(random.randint(0, 1000000)))
                 self._smap.set_header_tag("PatientID", "000")
 
-                qmaps_path = os.path.join(
-                    get_subdirs(get_subdirs(get_subdirs(os.path.join(subject_path, "nifti"))[0])[0])[0], 'qmap')
-                qmaps_path = os.path.normpath(qmaps_path)
-                smaps_path = os.path.join(
-                    get_subdirs(get_subdirs(get_subdirs(os.path.join(subject_path, "nifti"))[0])[0])[0], 'smap')
-                smaps_path = os.path.normpath(smaps_path)
+                # old
+                # qmaps_path = os.path.join(
+                #     get_subdirs(get_subdirs(get_subdirs(os.path.join(subject_path, "nifti"))[0])[0])[0], 'qmap')
+                # qmaps_path = os.path.normpath(qmaps_path)
+                # smaps_path = os.path.join(
+                #     get_subdirs(get_subdirs(get_subdirs(os.path.join(subject_path, "nifti"))[0])[0])[0], 'smap')
+                # smaps_path = os.path.normpath(smaps_path)
+
+                # new
+                # search "qmap" folder in subject folder and return path
+                output_base_path = self.search_forlder(subject_path, 'qmap')
+                qmaps_path = os.path.join(output_base_path, 'qmap')
+                smaps_path = os.path.join(output_base_path, 'smap')
+
+
             except FileNotFoundError as e:
                 self.c.signal_update_status_bar.emit(f"Error processing input directory: {input_dir}")
                 return
@@ -649,6 +658,13 @@ class PsModel:
 
                     self.save_smap(os.path.join(smaps_path, smap_k[:-len(" - " + self._current_preset)]),
                                    psFileType.DICOM)  # TODO ERROR _current_preset!
+
+    def search_forlder(self, root_path, folder_name):
+        for root, dirs, files in os.walk(root_path):
+            for dir in dirs:
+                if dir == folder_name:
+                    return root
+        return None
 
     def execute_batch_process_old(self, root_path):
         # iteratively select subject and synthesize images
