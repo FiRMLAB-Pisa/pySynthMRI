@@ -1,1 +1,1 @@
-import resources.resources
+from src.resources import resources

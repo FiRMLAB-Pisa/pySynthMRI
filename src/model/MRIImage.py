@@ -604,6 +604,7 @@ class Smap(MRIImage):
 
             template[s].InstanceNumber = s
             template[s].ProtocolName = "PySynthMRI"
+            template[s].SoftwareVersions = "PySynthMRI-v1.0.0"
 
             # Generate UID
             template[s].SOPInstanceUID = generate_uid()
