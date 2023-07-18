@@ -17,7 +17,8 @@ from src.view.psMainWindow import PsMainWindow
 
 DEBUG = False
 
-logging.basicConfig(level=logging.DEBUG)
+# logging.basicConfig(level=logging.DEBUG)
+logging.basicConfig(level=logging.INFO)
 
 if __name__ == '__main__':
 

@@ -77,17 +77,21 @@ class PsQMapWidget(QWidget):
         if self.qmap.get_inverted():
             np_matrix_2d = 1./np_matrix_2d
             np_matrix_2d[np_matrix_2d==np.inf] = 0
-            np_matrix_2d = np_matrix_2d * 10000
+            #np_matrix_2d = np_matrix_2d * 10000
+            m_max = self.qmap.get_max_value()
+            m_min = self.qmap.get_min_value()
+        else:
+            # scale over min max of all slices
+            m_max = self.qmap.get_max_value()
+            m_min = self.qmap.get_min_value()
 
         img_2d_cp = np_matrix_2d.astype(np.uint16)
 
-        # scale over min max of all slices
-        m_max = self.qmap.get_max_value()
-        m_min = self.qmap.get_min_value()
 
-        if self.qmap.get_inverted():
-            m_max = np_matrix_2d.max()
-            m_min = np_matrix_2d.min()
+
+        # if self.qmap.get_inverted():
+        #     m_max, m_min = 1/m_min,  1/m_max # np_matrix_2d.max()
+        #     # m_min = np_matrix_2d.min()
 
         cv_image = (255 * ((img_2d_cp - m_min) / (m_max - m_min))).astype(np.uint8)  # .copy()
         # scale over min max of single slice

@@ -184,8 +184,8 @@ class PsCanvasController:
                 delta_ww = delta_pos.x()
                 delta_wc = delta_pos.y()
 
-                ratio_ww = ceil(abs(curr_pos.x() - self.start_pos.x())*.1)
-                ratio_wc = ceil(abs(curr_pos.y() - self.start_pos.y())*.1)
+                ratio_ww = ceil(abs(curr_pos.x() - self.start_pos.x())*.01)
+                ratio_wc = ceil(abs(curr_pos.y() - self.start_pos.y())*.01)
                 if delta_ww != 0 or delta_wc != 0:
                     self.model.add_delta_window_scale(delta_ww=ceil(delta_ww * ratio_ww), delta_wc=ceil(delta_wc * ratio_wc))
 

@@ -20,8 +20,10 @@ class ValidateConfig:
             self.validate_equation(self.synth_types[synth_type], synth_type)
             self.validate_scanner_parameters(self.synth_types[synth_type])
             self.validate_window_scale(self.synth_types[synth_type])
+
         # interpolation
         self.validate_interpolation(self.image_interpolation)
+
 
     def _parse_synthetic_maps(self, config):
         # check all available presets

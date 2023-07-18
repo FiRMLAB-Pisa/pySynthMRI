@@ -66,6 +66,8 @@ class MRIImage:
                         Orientation.CORONAL: -1}
     _m_max = None
     _m_min = None
+    _inv_m_max = None
+    _inv_m_min = None
 
     def set_init_slices_num(self, qmap_ref=None):
         if qmap_ref is not None:
@@ -94,12 +96,22 @@ class MRIImage:
     def update_min_max(self):
         self._m_max = self.np_matrix.max()
         self._m_min = self.np_matrix.min()
+        np_inv = 1/self.np_matrix
+        np_inv = np_inv[np.isfinite(np_inv)]
+        self._inv_m_max = np_inv.max()
+        self._inv_m_min = np_inv.min()
 
-    def get_max_value(self):
-        return self._m_max
+    def get_max_value(self, inverted=False):
+        if inverted:
+            return self._inv_m_max
+        else:
+            return self._m_max
 
-    def get_min_value(self):
-        return self._m_min
+    def get_min_value(self, inverted=False):
+        if inverted:
+            return self._inv_m_min
+        else:
+            return self._m_min
 
     def get_matrix(self, dim):
 
@@ -170,6 +182,7 @@ class MRIImage:
             self._window_center = self._default_window_center
         else:
             self._window_center = np.floor(max_val / 2)
+
         if self._default_window_width is not None:
             self._window_width = self._default_window_width
         else:
@@ -254,6 +267,7 @@ class Qmap(MRIImage):
         self.slice_spacing = 0.
         self._colormap = Colormap.COLORMAP_HOT
         self._inverted = False
+        self._rescale = False
 
     def load_from_dicom(self):
         path = Path(self.path)
@@ -323,6 +337,13 @@ class Qmap(MRIImage):
         self.update_min_max()
         self.slice_spacing = self.header['pixdim'][1:3]
 
+    def set_rescale(self, rescale):
+        self._rescale = rescale
+
+    def rescale_map(self):
+        if self._rescale:
+            self.np_matrix = self.np_matrix / self.np_matrix.max()
+
     def get_dicom(self):
         if self.file_type == psFileType.DICOM:
             return self.original_template
@@ -385,8 +406,10 @@ class Smap(MRIImage):
         self._horizontal_parameter = None
         self._series_number = None
         self._header = dict()
+        self._scaling_factor = None
 
     def set_map_type(self, map_type):
+        self._scaling_factor = None
         super(Smap, self).set_map_type(map_type)
 
     def set_equation(self, equation):
@@ -492,6 +515,8 @@ class Smap(MRIImage):
             return param_value
 
     def recompute_smap(self, dims=2):
+
+
         # eval equation
         # log.debug(self._equation)
 
@@ -508,18 +533,47 @@ class Smap(MRIImage):
         mask = self.get_mask(dims=dims)
         img[~mask] = 0
 
-        # get scaling
-        img = np.abs(img)
-        maxval = img.max()
-        minval = img.min()
-
-        scaling = self.DICOM_SCALE / (maxval - minval) * 0.1
-        offset = minval
+        # # get scaling
+        # img = np.abs(img)
+        # maxval = img.max()
+        # minval = img.min()
+        #
+        # scaling = self.DICOM_SCALE / (maxval - minval) * 0.1
+        # offset = minval
+        #
+        # if dims == 3:
+        #     self.np_matrix_3d = (scaling * (img - offset)).astype(np.float32)
+        # else:
+        #     self.np_matrix = (scaling * (img - offset)).astype(np.float32)
 
         if dims == 3:
+            img = np.abs(img)
+            maxval = img.max()
+            minval = img.min()
+            scaling = self.DICOM_SCALE / (maxval - minval)
+            offset = minval
             self.np_matrix_3d = (scaling * (img - offset)).astype(np.float32)
         else:
-            self.np_matrix = (scaling * (img - offset)).astype(np.float32)
+            # self.np_matrix = (scaling * (img - offset)).astype(np.float32)
+            img = np.abs(img)
+            maxval = img.max()
+            minval = img.min()
+
+            # in case new synthetization, compute scaling_factor
+            if self._scaling_factor is None:
+                self._scaling_factor = .1 * self.DICOM_SCALE / maxval
+                log.info("New Scaling Factor: " + str(self._scaling_factor))
+
+            # NB scaling factor cannot be greater than DICOM_SCALE, otherwise recompute it
+            if maxval*self._scaling_factor > self.DICOM_SCALE:
+                # recompute
+                self._scaling_factor = .1 * self.DICOM_SCALE / maxval
+                log.info("Recomputed Scaling Factor: " + str(self._scaling_factor))
+
+            try:
+                self.np_matrix = (self._scaling_factor * img).astype(np.float32)
+            except RuntimeWarning as e:
+                print(e)
 
     def size(self):
         return self.get_matrix_shape()

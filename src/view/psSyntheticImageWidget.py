@@ -50,7 +50,6 @@ class PsSyntheticImageWidget(QWidget):
                              [a_21, a_22, a_23]], dtype=float)
 
         synthetic_image_2d = smap.get_matrix(dim=2)
-        img_2d_cp = synthetic_image_2d.astype(np.uint16)
 
         # interpolate
         interpolation = self.model.interpolation["interpolation_type"]
@@ -58,24 +57,24 @@ class PsSyntheticImageWidget(QWidget):
         orientation = smap.get_orientation()
 
         if interpolation == Interpolation.LINEAR:
-            img_2d_cp = cv2.resize(img_2d_cp,
-                                   dsize=(round(img_2d_cp.shape[0] * scale),
-                                          round(img_2d_cp.shape[1] * scale)),
+            img_2d_cp = cv2.resize(synthetic_image_2d,
+                                   dsize=(round(synthetic_image_2d.shape[0] * scale),
+                                          round(synthetic_image_2d.shape[1] * scale)),
                                    interpolation=cv2.INTER_LINEAR)
         elif interpolation == Interpolation.NN:
-            img_2d_cp = cv2.resize(img_2d_cp,
-                                   dsize=(round(img_2d_cp.shape[0] * scale),
-                                          round(img_2d_cp.shape[1] * scale)),
+            img_2d_cp = cv2.resize(synthetic_image_2d,
+                                   dsize=(round(synthetic_image_2d.shape[0] * scale),
+                                          round(synthetic_image_2d.shape[1] * scale)),
                                    interpolation=cv2.INTER_NEAREST)
         elif interpolation == Interpolation.BICUBIC:
-            img_2d_cp = cv2.resize(img_2d_cp,
-                                   dsize=(round(img_2d_cp.shape[0] * scale),
-                                          round(img_2d_cp.shape[1] * scale)),
+            img_2d_cp = cv2.resize(synthetic_image_2d,
+                                   dsize=(round(synthetic_image_2d.shape[0] * scale),
+                                          round(synthetic_image_2d.shape[1] * scale)),
                                    interpolation=cv2.INTER_CUBIC)
         elif interpolation == Interpolation.NONE:
-            img_2d_cp = cv2.resize(img_2d_cp,
-                                   dsize=(round(img_2d_cp.shape[0] * scale),
-                                          round(img_2d_cp.shape[1] * scale)))
+            img_2d_cp = cv2.resize(synthetic_image_2d,
+                                   dsize=(round(synthetic_image_2d.shape[0] * scale),
+                                          round(synthetic_image_2d.shape[1] * scale)))
 
         # scale to windowWidth and windowCenter
         try:
@@ -92,16 +91,30 @@ class PsSyntheticImageWidget(QWidget):
 
         v_min = (wc - 0.5 * ww)
         v_max = (wc + 0.5 * ww)
-        img_2d_cp[img_2d_cp > v_max] = v_max
-        img_2d_cp[img_2d_cp < v_min] = v_min
+        # img_2d_cp[img_2d_cp > v_max] = v_max
+        # img_2d_cp[img_2d_cp < v_min] = v_min
+
+        y_min = 0
+        y_max = 65535
+        m_min = img_2d_cp <= wc - 0.5 - (ww - 1) / 2
+        m_max = img_2d_cp > wc - 0.5 + (ww - 1) / 2
+        m_res = np.logical_not(np.logical_or(m_min, m_max))
+        img_2d_cp[m_min] = y_min
+        img_2d_cp[m_max] = y_max
+        img_2d_cp[m_res] = (((img_2d_cp[m_res] - (wc - 0.5)) / (ww - 1) + 0.5) * (y_max - y_min)) + y_min
+        img_2d_cp[img_2d_cp < 0] = y_min
 
         # use Affine Transformation Matrix M
         zoom = self.model.get_zoom()
         # scale_center_point = self.model.get_anchor_point()
         translation_point = self.model.get_translated_point()
 
+
+        # img_2d_cp = synthetic_image_2d.astype(np.uint16)
+
         # convert to grayscale 16 bit
         cv_image = (65535 * ((img_2d_cp - img_2d_cp.min()) / img_2d_cp.ptp())).astype(np.uint16)
+        # print(ww, wc, synthetic_image_2d.min(), synthetic_image_2d.max(), cv_image.min(), cv_image.max())
 
         # M = get_affine_cv(scale_center_point, 0, zoom, translation_point)
         M = get_affine_cv(QPoint(cv_image.shape[0] / 2, cv_image.shape[1] / 2), 0, zoom, translation_point)

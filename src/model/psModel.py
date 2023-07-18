@@ -62,6 +62,7 @@ class PsModel:
         self._qmaps = dict()
         for qmap in self.config.qmap_types:
             self._qmaps[qmap] = Qmap(map_type=qmap)
+            self._qmaps[qmap].set_rescale(self.config.qmap_types["T1"].get("rescale", False))
 
         # orientation
         self._orientation = Orientation.AXIAL  # default
@@ -133,6 +134,7 @@ class PsModel:
                 self._qmaps[qmap_type].load_from_niftii()
             else:
                 return
+            self._qmaps[qmap_type].rescale_map()
             self._qmaps[qmap_type].is_loaded = True
 
             self.generate_slice_slider()
