@@ -148,6 +148,10 @@ class PsModel:
         self._qmaps[qmap_k].set_colormap(colormap)
         self.reload_qmaps()
 
+    def update_qmap_colorbar(self, qmap_k):
+        log.debug(f"Toggle colorbar to {qmap_k}")
+        self.reload_qmaps()
+
     def invert_qmap(self, qmap_k, inverted):
         log.debug(f"Inverted qmap {qmap_k} to {inverted}")
         self._qmaps[qmap_k].set_inverted(inverted)

@@ -152,6 +152,8 @@ class PsController:
             qmaps[qmap_name].c.drop_event.connect(functools.partial(self.drag_event_handler, qmap_name))
             qmaps[qmap_name].c.colormap_changed_signal.connect(functools.partial(self.colormap_changed_handler, qmap_name))
             qmaps[qmap_name].c.invert_relaxation_map_signal.connect(functools.partial(self.invert_relaxation_handler, qmap_name))
+            qmaps[qmap_name].c.colorbar_toggled_signal.connect(functools.partial(self.colorbar_toggled_handler, qmap_name))
+
 
         # preset changed from menubar image selection
         self.model.c.signal_preset_changed.connect(self.on_clicked_preset_menu)
@@ -179,6 +181,9 @@ class PsController:
 
     def colormap_changed_handler(self, qmap_name, colormap):
         self.model.update_qmap_colormap(qmap_name, colormap)
+
+    def colorbar_toggled_handler(self, qmap_name):
+        self.model.update_qmap_colorbar(qmap_name)
 
     def invert_relaxation_handler(self, qmap_name, inverted):
         self.model.invert_qmap(qmap_name, inverted)
