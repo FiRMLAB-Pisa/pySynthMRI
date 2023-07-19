@@ -604,7 +604,7 @@ class Smap(MRIImage):
 
             template[s].InstanceNumber = s
             template[s].ProtocolName = "PySynthMRI"
-            template[s].SoftwareVersions = "PySynthMRI-v1.0.0"
+            template[s].SoftwareVersions = "PySynthMRI-v1.0.1"
 
             template[s].SeriesNumber = self.get_series_number()
 
