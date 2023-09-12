@@ -39,6 +39,7 @@
     </li>
     <li><a href="#usage">Usage</a></li>
     <li><a href="#example-data">Example Data</a></li>
+    <li><a href="#citation">Citation</a></li>
     <li><a href="#license">License</a></li>
   </ol>
 </details>
@@ -164,6 +165,16 @@ The zip file contains 3 quantitative, anonymized maps.
     
 </h4>
 
+
+
+<!-- CITATION -->
+## Citation
+
+If you use this software, please indicate the following reference:
+```
+Peretti, L.; Donatelli, G.; Cencini, M.; Cecchi, P.; Buonincontri, G.; Cosottini, M.; Tosetti, M.; Costagli, M. Generating Synthetic Radiological Images with PySynthMRI: An Open-Source Cross-Platform Tool. Tomography 2023, 9, 1723-1733. https://doi.org/10.3390/tomography9050137
+```
+or use the bibetex file "cite-pysynthmri.bib" provided.
 <!-- LICENSE -->
 ## License
 
