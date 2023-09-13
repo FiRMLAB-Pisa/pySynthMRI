@@ -177,7 +177,8 @@ If you use this software, please indicate the following reference:
 ```
 Peretti, L.; Donatelli, G.; Cencini, M.; Cecchi, P.; Buonincontri, G.; Cosottini, M.; Tosetti, M.; Costagli, M. Generating Synthetic Radiological Images with PySynthMRI: An Open-Source Cross-Platform Tool. Tomography 2023, 9, 1723-1733. https://doi.org/10.3390/tomography9050137
 ```
-or use the bibetex file "cite-pysynthmri.bib" provided.
+or use the bibetex file <a href="https://raw.githubusercontent.com/FiRMLAB-Pisa/pySynthMRI/main/cite-pysynthmri.bib" download> cite-pysynthmri.bib </a> provided.
+
 <!-- LICENSE -->
 ## License
 
