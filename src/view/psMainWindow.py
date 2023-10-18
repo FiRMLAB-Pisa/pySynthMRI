@@ -25,7 +25,7 @@ class MainWindowCommunicate(QObject):
     signal_update_batch_qmap_path = pyqtSignal(str, str)
     signal_saving_smap = pyqtSignal(str, str)
     signal_batch_progress_path = pyqtSignal(str)  # TODO REMOVE
-    signal_batch_progress_launch = pyqtSignal(str, str, list, str)
+    signal_batch_progress_launch = pyqtSignal(str, str, str, list, str)
     signal_set_header_tag = pyqtSignal(str, str)
     # signal_custom_smap_added_to_navbar = pyqtSignal(str)
 
@@ -265,10 +265,12 @@ class PsMainWindow(QMainWindow):
     def open_batch_process_info_dialog(self):
         presets = self.model.get_preset_list()
         smaps = self.model.get_smap_list()
-        dlg = BatchProcessDialog(presets, smaps)
+        regex_str = self.model.get_batch_regex_str()
+        dlg = BatchProcessDialog(presets, smaps, regex_str)
         res = dlg.exec_()
         if res:
             self.c.signal_batch_progress_launch.emit(dlg.selected_input_dir,
+                                                     dlg.selected_regex_str,
                                                      dlg.selected_preset,
                                                      dlg.selected_smaps,
                                                      dlg.selected_output_type)  # path, preset, smaps, type

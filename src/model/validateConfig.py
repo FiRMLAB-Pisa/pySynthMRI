@@ -22,7 +22,10 @@ class ValidateConfig:
             self.validate_window_scale(self.synth_types[synth_type])
         # interpolation
         self.validate_interpolation(self.image_interpolation)
-
+        if "batch_subdirectory" in config:
+            self.batch_subdirectory = config["batch_subdirectory"]
+        else:
+            self.batch_subdirectory ="*"
     def _parse_synthetic_maps(self, config):
         # check all available presets
         synth_maps = dict()
