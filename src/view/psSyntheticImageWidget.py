@@ -8,6 +8,10 @@ from src.model.MRIImage import Interpolation, Orientation
 from src.view.psSyntheticCanvas import PsSyntheticCanvas
 
 
+def QPointFlt(x, y):
+    return QPoint(int(round(x)), int(round(y)))
+
+
 class PsSyntheticImageWidget(QWidget):
 
     def __init__(self, model):
@@ -43,11 +47,18 @@ class PsSyntheticImageWidget(QWidget):
             a_12 = scale * sin_theta
             a_22 = scale * cos_theta
 
-            a_13 = scale_center.x() * (1 - scale * cos_theta) - scale * sin_theta * scale_center.x() + translate.x()
-            a_23 = scale_center.y() * (1 - scale * cos_theta) + scale * sin_theta * scale_center.y() + translate.y()
+            a_13 = (
+                scale_center.x() * (1 - scale * cos_theta)
+                - scale * sin_theta * scale_center.x()
+                + translate.x()
+            )
+            a_23 = (
+                scale_center.y() * (1 - scale * cos_theta)
+                + scale * sin_theta * scale_center.y()
+                + translate.y()
+            )
 
-            return np.array([[a_11, a_12, a_13],
-                             [a_21, a_22, a_23]], dtype=float)
+            return np.array([[a_11, a_12, a_13], [a_21, a_22, a_23]], dtype=float)
 
         synthetic_image_2d = smap.get_matrix(dim=2)
         img_2d_cp = synthetic_image_2d.astype(np.uint16)
@@ -58,24 +69,40 @@ class PsSyntheticImageWidget(QWidget):
         orientation = smap.get_orientation()
 
         if interpolation == Interpolation.LINEAR:
-            img_2d_cp = cv2.resize(img_2d_cp,
-                                   dsize=(round(img_2d_cp.shape[0] * scale),
-                                          round(img_2d_cp.shape[1] * scale)),
-                                   interpolation=cv2.INTER_LINEAR)
+            img_2d_cp = cv2.resize(
+                img_2d_cp,
+                dsize=(
+                    round(img_2d_cp.shape[0] * scale),
+                    round(img_2d_cp.shape[1] * scale),
+                ),
+                interpolation=cv2.INTER_LINEAR,
+            )
         elif interpolation == Interpolation.NN:
-            img_2d_cp = cv2.resize(img_2d_cp,
-                                   dsize=(round(img_2d_cp.shape[0] * scale),
-                                          round(img_2d_cp.shape[1] * scale)),
-                                   interpolation=cv2.INTER_NEAREST)
+            img_2d_cp = cv2.resize(
+                img_2d_cp,
+                dsize=(
+                    round(img_2d_cp.shape[0] * scale),
+                    round(img_2d_cp.shape[1] * scale),
+                ),
+                interpolation=cv2.INTER_NEAREST,
+            )
         elif interpolation == Interpolation.BICUBIC:
-            img_2d_cp = cv2.resize(img_2d_cp,
-                                   dsize=(round(img_2d_cp.shape[0] * scale),
-                                          round(img_2d_cp.shape[1] * scale)),
-                                   interpolation=cv2.INTER_CUBIC)
+            img_2d_cp = cv2.resize(
+                img_2d_cp,
+                dsize=(
+                    round(img_2d_cp.shape[0] * scale),
+                    round(img_2d_cp.shape[1] * scale),
+                ),
+                interpolation=cv2.INTER_CUBIC,
+            )
         elif interpolation == Interpolation.NONE:
-            img_2d_cp = cv2.resize(img_2d_cp,
-                                   dsize=(round(img_2d_cp.shape[0] * scale),
-                                          round(img_2d_cp.shape[1] * scale)))
+            img_2d_cp = cv2.resize(
+                img_2d_cp,
+                dsize=(
+                    round(img_2d_cp.shape[0] * scale),
+                    round(img_2d_cp.shape[1] * scale),
+                ),
+            )
 
         # scale to windowWidth and windowCenter
         try:
@@ -90,8 +117,8 @@ class PsSyntheticImageWidget(QWidget):
             ww = self.model.get_smap().get_window_width()
             wc = self.model.get_smap().get_window_center()
 
-        v_min = (wc - 0.5 * ww)
-        v_max = (wc + 0.5 * ww)
+        v_min = wc - 0.5 * ww
+        v_max = wc + 0.5 * ww
         img_2d_cp[img_2d_cp > v_max] = v_max
         img_2d_cp[img_2d_cp < v_min] = v_min
 
@@ -101,10 +128,17 @@ class PsSyntheticImageWidget(QWidget):
         translation_point = self.model.get_translated_point()
 
         # convert to grayscale 16 bit
-        cv_image = (65535 * ((img_2d_cp - img_2d_cp.min()) / img_2d_cp.ptp())).astype(np.uint16)
+        cv_image = (65535 * ((img_2d_cp - img_2d_cp.min()) / img_2d_cp.ptp())).astype(
+            np.uint16
+        )
 
         # M = get_affine_cv(scale_center_point, 0, zoom, translation_point)
-        M = get_affine_cv(QPoint(cv_image.shape[0] / 2, cv_image.shape[1] / 2), 0, zoom, translation_point)
+        M = get_affine_cv(
+            QPointFlt(cv_image.shape[0] / 2, cv_image.shape[1] / 2),
+            0,
+            zoom,
+            translation_point,
+        )
         cv_image = cv2.warpAffine(cv_image, M, (cv_image.shape[0], cv_image.shape[1]))
 
         height, width = cv_image.shape
@@ -130,17 +164,17 @@ class PsSyntheticImageWidget(QWidget):
         if orientation == Orientation.AXIAL:
             positions["R"] = (0, image.height() / 2)
             positions["L"] = (image.width() - 15, image.height() / 2)
-            positions["A"] = (image.width() / 2 - 6,  15)
+            positions["A"] = (image.width() / 2 - 6, 15)
             positions["P"] = (image.width() / 2 - 6, image.height() - 15)
         elif orientation == Orientation.SAGITTAL:
             positions["A"] = (0, image.height() / 2)
             positions["P"] = (image.width() - 15, image.height() / 2)
-            positions["S"] = (image.width() / 2 - 6,  15)
+            positions["S"] = (image.width() / 2 - 6, 15)
             positions["I"] = (image.width() / 2 - 6, image.height() - 15)
         elif orientation == Orientation.CORONAL:
             positions["R"] = (0, image.height() / 2)
             positions["L"] = (image.width() - 15, image.height() / 2)
-            positions["S"] = (image.width() / 2 - 6,  15)
+            positions["S"] = (image.width() / 2 - 6, 15)
             positions["I"] = (image.width() / 2 - 6, image.height() - 15)
 
         qp = QPainter()
@@ -149,10 +183,10 @@ class PsSyntheticImageWidget(QWidget):
         pen.setWidth(2)
         qp.setPen(pen)
         font = QFont()
-        font.setFamily('Times')
+        font.setFamily("Times")
         font.setBold(False)
         font.setPointSize(14)
         qp.setFont(font)
         for p in positions:
-            qp.drawText(positions[p][0], positions[p][1], p)
+            qp.drawText(int(positions[p][0]), int(positions[p][1]), p)
         qp.end()
