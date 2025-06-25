@@ -5,3 +5,4 @@ pydicom
 PyQt5==5.15.10
 pyqtgraph
 matplotlib
+scipy==1.16.0
