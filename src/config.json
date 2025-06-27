@@ -1,0 +1,214 @@
+{
+    "synthetic_images": {
+        "3.0T": {
+            "GRE": {
+                "title": "T1w - Gradient Echo",
+                "equation": "PD*((1 - exp(-TR/T1))*exp(-TE/T2))",
+                "series_number": 9101,
+                "parameters": {
+                    "TR": {
+                        "label": "TR [ms]",
+                        "value": 113,
+                        "min": 0,
+                        "max": 10000,
+                        "step": 1
+                    },
+                    "TE": {
+                        "label": "TE [ms]",
+                        "value": 0,
+                        "min": 0,
+                        "max": 100,
+                        "step": 1
+                    }
+                },
+                "window_center": 2057,
+                "window_width": 2269
+            },
+            "MP2RAGE": {
+                "title": "T1w - Magnetization-Prepared 2 RApid Gradient Echoes",
+                "equation": "1-2*exp(-TI/T1)",
+                "series_number": 9102,
+                "parameters": {
+                    "TI": {
+                        "label": "TI [ms]",
+                        "value": 1816,
+                        "min": 1000,
+                        "max": 3500,
+                        "step": 10
+                    }
+                },
+                "window_center": 45778.0,
+                "window_width": 90000.0
+            },
+            "FSE": {
+                "title": "T2w - Fast Spin Echo",
+                "equation": "PD*((1 - exp(-TR/T1))*exp(-TE/T2))",
+                "series_number": 9103,
+                "parameters": {
+                    "TR": {
+                        "label": "TR [ms]",
+                        "value": 8000,
+                        "min": 0,
+                        "max": 10000,
+                        "step": 10
+                    },
+                    "TE": {
+                        "label": "TE [ms]",
+                        "value": 80,
+                        "min": 0,
+                        "max": 500,
+                        "step": 1
+                    }
+                },
+                "window_center": 2263,
+                "window_width": 3950
+            },
+            "FLAIR": {
+                "title": "T2w - Fluid Attenuated Inversion Recovery",
+                "equation": "abs(PD * exp(-TE / T2) * (1 - 2 * exp(-TI / T1) + exp(-TR / T1)))",
+                "series_number": 9104,
+                "parameters": {
+                    "TE": {
+                        "label": "TE [ms]",
+                        "value": 80,
+                        "min": 1,
+                        "max": 200,
+                        "step": 1
+                    },
+                    "TI": {
+                        "label": "TI [ms]",
+                        "value": 1750,
+                        "min": 1000,
+                        "max": 3500,
+                        "step": 5
+                    },
+                    "TR": {
+                        "label": "TR [ms]",
+                        "value": 6250,
+                        "min": 10,
+                        "max": 10000,
+                        "step": 1
+                    }
+                },
+                "window_center": 1800,
+                "window_width": 9200
+            },
+            "DIR": {
+                "title": "3D Double Inversion Revovery",
+                "equation": "abs((PD) * ( 1 - 2*exp(-TI_2/T1) + 2*exp(-(TI_1+TI_2)/T1) -  exp(-TR/T1) )) * (exp(-TE/T2))",
+                "series_number": 9105,
+                "parameters": {
+                    "TE": {
+                        "label": "TE [ms]",
+                        "value": 80,
+                        "min": 1,
+                        "max": 400,
+                        "step": 1
+                    },
+                    "TR": {
+                        "label": "TR [ms]",
+                        "value": 6670,
+                        "min": 10,
+                        "max": 10000,
+                        "step": 1
+                    },
+                    "TI_1": {
+                        "label": "TI_1 [ms]",
+                        "value": 2208,
+                        "min": 1000,
+                        "max": 3500,
+                        "step": 10
+                    },
+                    "TI_2": {
+                        "label": "TI_2 [ms]",
+                        "value": 545,
+                        "min": 1,
+                        "max": 600,
+                        "step": 5
+                    }
+                },
+                "window_center": -160,
+                "window_width": 2149
+            },
+            "TBE": {
+                "title": "Tissue Border Enhancement by inversion recovery",
+                "equation": "abs(PD * (1-2*exp(-TI/T1)) * (1-exp(-TR/T1)) * exp(-TE/T2))",
+                "series_number": 9106,
+                "parameters": {
+                    "TR": {
+                        "label": "TR [ms]",
+                        "value": 5020,
+                        "min": 1,
+                        "max": 10000,
+                        "step": 1
+                    },
+                    "TE": {
+                        "label": "TE [ms]",
+                        "value": 1,
+                        "min": 0,
+                        "max": 100,
+                        "step": 1
+                    },
+                    "TI": {
+                        "label": "TI [ms]",
+                        "value": 795,
+                        "min": 10,
+                        "max": 3500,
+                        "step": 10
+                    }
+                },
+                "window_center": 1240,
+                "window_width": 4096
+            },
+            "T1map": {
+                "title": "Quantitative T1 map",
+                "equation": "P * T1",
+                "series_number": 9201,
+                "parameters": {
+                    "P": {
+                        "label": "P [constant]",
+                        "value": 1,
+                        "min": 1,
+                        "max": 1,
+                        "step": 1
+                    }
+                },
+                "window_center": 1000.0,
+                "window_width": 2000.0
+            },
+            "T2map": {
+                "title": "Quantitative T2 map",
+                "equation": "P * T2",
+                "series_number": 9201,
+                "parameters": {
+                    "P": {
+                        "label": "P [constant]",
+                        "value": 1,
+                        "min": 1,
+                        "max": 1,
+                        "step": 1
+                    }
+                },
+                "window_center": 1000.0,
+                "window_width": 2000.0
+            }
+        },
+        "1.5T": {},
+        "7.0T": {}
+    },
+    "quantitative_maps": {
+        "T1": {
+            "file_name": "qmap_t1"
+        },
+        "T2": {
+            "file_name": "qmap_t2"
+        },
+        "PD": {
+            "file_name": "qmap_pd"
+        }
+    },
+    "image_interpolation": {
+        "interpolation_type": "linear",
+        "scale": 2
+    }
+}
